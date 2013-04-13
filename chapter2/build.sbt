@@ -7,7 +7,7 @@ name := "akka-minimal"
 
 version := "0.1-SNAPSHOT"
 
-organization := "minimal"
+organization := "com.goticks"
 
 scalaVersion := "2.10.0"
 
