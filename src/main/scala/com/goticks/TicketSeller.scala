@@ -14,7 +14,6 @@ class TicketSeller extends Actor with ActorLogging {
     case Tickets(newTickets) => tickets = tickets ++ newTickets
 
     case BuyTicket =>
-      log.info("getting buy ticket, sending back to "+sender)
       if (tickets.isEmpty) {
         sender ! SoldOut
         self ! PoisonPill
