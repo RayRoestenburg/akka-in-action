@@ -12,6 +12,7 @@ organization := "com.goticks"
 scalaVersion := "2.10.0"
 
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
+                  "Sonatype snapshots"  at "http://oss.sonatype.org/content/repositories/snapshots/",
                   "Spray Repository"    at "http://repo.spray.io",
                   "Spray Nightlies"     at "http://nightlies.spray.io/")
 

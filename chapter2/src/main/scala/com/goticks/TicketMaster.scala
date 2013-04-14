@@ -30,9 +30,8 @@ class TicketMaster extends Actor with ActorLogging {
       log.info(s"Getting a ticket for the ${name} event.")
 
       context.child(name) match {
-        case Some(ticketSeller) =>
-          ticketSeller.forward(BuyTicket)
-        case None => sender ! SoldOut
+        case Some(ticketSeller) => ticketSeller.forward(BuyTicket)
+        case None               => sender ! SoldOut
       }
 
     case Terminated(terminatedActor) =>
