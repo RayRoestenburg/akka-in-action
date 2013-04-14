@@ -12,7 +12,7 @@ class TicketMasterSpec extends TestKit(ActorSystem("testTickets"))
                        with StopSystemAfterAll {
   "The TicketMaster" must {
 
-    "Give out tickets until they are sold out" in {
+    "Create an event and get tickets from the correct Ticket Seller" in {
       import TicketProtocol._
 
       val ticketMaster = system.actorOf(Props[TicketMaster])
@@ -21,6 +21,9 @@ class TicketMasterSpec extends TestKit(ActorSystem("testTickets"))
 
       ticketMaster ! TicketRequest("RHCP")
       expectMsg(Ticket("RHCP", 1))
+
+      ticketMaster ! TicketRequest("DavidBowie")
+      expectMsg(SoldOut)
 
     }
   }

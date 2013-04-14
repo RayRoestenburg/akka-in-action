@@ -32,10 +32,6 @@ object TicketProtocol {
 
   case class Event(event:String, nrOfTickets:Int)
 
-  object Event extends DefaultJsonProtocol {
-    implicit val format = jsonFormat2(Event.apply)
-  }
-
   case object GetEvents
 
   case class Events(events:List[Event])
@@ -44,19 +40,30 @@ object TicketProtocol {
 
   case class TicketRequest(event:String)
 
+  case object SoldOut
+
+  case class Tickets(tickets:List[Ticket])
+
+  case object BuyTicket
+
+  case class Ticket(event:String, nr:Int)
+
+  //----------------------------------------------
+  // JSON
+  //----------------------------------------------
+
+  object Event extends DefaultJsonProtocol {
+    implicit val format = jsonFormat2(Event.apply)
+  }
+
   object TicketRequest extends DefaultJsonProtocol {
     implicit val format = jsonFormat1(TicketRequest.apply)
   }
-
-  case class Tickets(tickets:List[Ticket])
-  case object BuyTicket
-  case class Ticket(event:String, nr:Int)
 
   object Ticket extends DefaultJsonProtocol {
     implicit val format = jsonFormat2(Ticket.apply)
   }
 
-  case object SoldOut
 }
 
 
