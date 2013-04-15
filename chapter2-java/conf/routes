@@ -4,6 +4,9 @@
 
 # Home page
 GET     /                           controllers.Application.index()
+GET 	/ping					controllers.Application.ping()
+
+# events
 GET 	/events					controllers.Application.currentEvents()
 POST    /events                  controllers.Application.newEvent()
 
