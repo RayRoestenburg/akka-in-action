@@ -20,6 +20,7 @@ class TicketMaster extends Actor with ActorLogging {
       if(context.child(name).isEmpty) {
         val ticketSeller = context.actorOf(Props[TicketSeller], name)
         context.watch(ticketSeller)
+
         val tickets = Tickets((1 to nrOfTickets).map(nr=> Ticket(name, nr)).toList)
         ticketSeller ! tickets
       }
