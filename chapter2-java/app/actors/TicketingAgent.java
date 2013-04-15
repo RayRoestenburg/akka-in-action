@@ -11,9 +11,8 @@ public class TicketingAgent extends UntypedActor {
 	public void onReceive(Object message) throws Exception {
 		if (message instanceof String){
 			log.info("hello from inside TicketingAgent...");
-			getSender().tell("hi there..", getSelf());
+			getSender().tell("pong", getSelf());
 		} else {
-			log.info("message was not string...");
 			unhandled(message);
 		}
 	}

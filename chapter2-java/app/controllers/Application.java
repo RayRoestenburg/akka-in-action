@@ -16,6 +16,7 @@ import play.libs.Json;
 import org.codehaus.jackson.JsonNode;
 
 public class Application extends Controller {
+	static ActorRef myActor = Akka.system().actorOf(new Props(TicketingAgent.class));
 
 	public static Result index() {
 		return ok(index.render("Your new application is ready."));
@@ -40,9 +41,6 @@ public class Application extends Controller {
 	}
 
 	public static Result ping() {
-	
-		ActorRef myActor = Akka.system().actorOf(
-				new Props(TicketingAgent.class));
 
 		return async(Akka.asPromise(ask(myActor, "hello", 1000)).map(
 				new Function<Object, Result>() {
