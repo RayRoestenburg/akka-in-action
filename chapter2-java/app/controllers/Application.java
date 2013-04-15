@@ -9,10 +9,11 @@ import views.html.index;
 import models.Event;
 import java.util.List;
 import java.util.ArrayList;
-import com.google.gson.Gson;
 import actors.TicketingAgent;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import play.libs.Json;
+import org.codehaus.jackson.JsonNode;
 
 public class Application extends Controller {
 
@@ -34,12 +35,12 @@ public class Application extends Controller {
 		event.setName("test event 2");
 		event.setNumberOfTickets(100);
 		events.add(event);
-		Gson gson = new Gson();
-		String eventsJson = gson.toJson(events);
-		return ok(eventsJson).as("application/json");
+		JsonNode eventsJson = Json.toJson(events);
+		return ok(eventsJson.toString()).as("application/json");
 	}
 
 	public static Result ping() {
+	
 		ActorRef myActor = Akka.system().actorOf(
 				new Props(TicketingAgent.class));
 

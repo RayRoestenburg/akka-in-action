@@ -11,8 +11,7 @@ object ApplicationBuild extends Build {
     // Add your project dependencies here,
     javaCore,
     javaJdbc,
-    javaEbean,
-    "com.google.code.gson" % "gson" % "2.2.3"
+    javaEbean
   )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
