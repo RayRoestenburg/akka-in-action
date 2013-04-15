@@ -8,7 +8,7 @@ GET 	/ping					controllers.Application.ping()
 
 # events
 GET 	/events					controllers.Application.currentEvents()
-POST    /events                  controllers.Application.newEvent()
+GET    /newEvent/:name                  controllers.Application.newEvent(name)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

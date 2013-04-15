@@ -1,19 +1,23 @@
 package controllers;
 
 import static akka.pattern.Patterns.ask;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import models.Event;
+
+import org.codehaus.jackson.JsonNode;
+
 import play.libs.Akka;
 import play.libs.F.Function;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
-import models.Event;
-import java.util.List;
-import java.util.ArrayList;
 import actors.TicketingAgent;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-import play.libs.Json;
-import org.codehaus.jackson.JsonNode;
 
 public class Application extends Controller {
 	static ActorRef myActor = Akka.system().actorOf(new Props(TicketingAgent.class));
@@ -22,8 +26,8 @@ public class Application extends Controller {
 		return ok(index.render("Your new application is ready."));
 	}
 
-	public static Result newEvent() {
-		return ok(index.render("created new event"));
+	public static Result newEvent(String name) {
+		return ok("created new event: " + name + " with " + 100 + "seats.");
 	}
 
 	public static Result currentEvents() {
