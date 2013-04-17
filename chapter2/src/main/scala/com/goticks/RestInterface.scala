@@ -17,6 +17,7 @@ class RestInterface extends Actor
 
 trait RestApi extends HttpService with ActorLogging { actor: Actor =>
   import com.goticks.TicketProtocol._
+
   implicit val timeout = Timeout(10 seconds)
   import akka.pattern.ask
   import akka.pattern.pipe

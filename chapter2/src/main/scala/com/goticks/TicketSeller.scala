@@ -1,8 +1,8 @@
 package com.goticks
 
-import akka.actor.{PoisonPill, ActorLogging, Actor}
+import akka.actor.{PoisonPill, Actor}
 
-class TicketSeller extends Actor with ActorLogging {
+class TicketSeller extends Actor {
   import TicketProtocol._
 
   var tickets = Vector[Ticket]()

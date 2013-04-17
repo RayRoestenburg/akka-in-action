@@ -19,7 +19,6 @@ class TicketMaster extends Actor with ActorLogging {
 
       if(context.child(name).isEmpty) {
         val ticketSeller = context.actorOf(Props[TicketSeller], name)
-        context.watch(ticketSeller)
 
         val tickets = Tickets((1 to nrOfTickets).map(nr=> Ticket(name, nr)).toList)
         ticketSeller ! tickets
@@ -35,19 +34,20 @@ class TicketMaster extends Actor with ActorLogging {
         case None               => sender ! SoldOut
       }
 
-    case Terminated(terminatedActor) =>
-      log.info(s"Ticket seller ${terminatedActor} terminated.")
-
     case GetEvents =>
       import akka.pattern.ask
 
       val capturedSender = sender
 
-      Future.sequence(context.children.map { ticketSeller =>
-        ticketSeller.ask(GetEvents)
-          .mapTo[Int]
-          .map(nrOfTickets => Event(ticketSeller.actorRef.path.name, nrOfTickets))
-      }).map { events =>
+      def askAndMapToEvent(ticketSeller:ActorRef) =  {
+
+        val futureInt = ticketSeller.ask(GetEvents).mapTo[Int]
+
+        futureInt.map(nrOfTickets => Event(ticketSeller.actorRef.path.name, nrOfTickets))
+      }
+      val futures = context.children.map(ticketSeller => askAndMapToEvent(ticketSeller))
+
+      Future.sequence(futures).map { events =>
         capturedSender ! Events(events.toList)
       }
 
