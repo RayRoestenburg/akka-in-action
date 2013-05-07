@@ -5,7 +5,7 @@ import akka.actor.{Props, ActorSystem}
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
 
-class TicketMasterSpec extends TestKit(ActorSystem("testTickets"))
+class BoxOfficeSpec extends TestKit(ActorSystem("testTickets"))
                        with WordSpec
                        with MustMatchers
                        with ImplicitSender

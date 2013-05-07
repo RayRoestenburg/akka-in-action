@@ -9,57 +9,60 @@ import spray.routing.RequestContext
 import akka.util.Timeout
 import scala.concurrent.duration._
 
-class RestInterface extends Actor
-                    with HttpServiceActor
+class RestInterface extends HttpServiceActor
                     with RestApi {
   def receive = runRoute(routes)
 }
 
-trait RestApi extends HttpService with ActorLogging { actor: Actor =>
+trait RestApi extends HttpService with ActorLogging with BoxOfficeCreator { actor: Actor =>
   import com.goticks.TicketProtocol._
-
+  import context._
   implicit val timeout = Timeout(10 seconds)
   import akka.pattern.ask
   import akka.pattern.pipe
 
-  val ticketMaster = context.actorOf(Props[TicketMaster])
+  val boxOffice = createBoxOffice
 
   def routes: Route =
 
     path("events") {
       put {
         entity(as[Event]) { event => requestContext =>
+          log.info(s"Received new event $event, sending to $boxOffice")
           val responder = createResponder(requestContext)
-          ticketMaster.ask(event).pipeTo(responder)
+          boxOffice.ask(event).pipeTo(responder)
         }
       } ~
       get { requestContext =>
         val responder = createResponder(requestContext)
-        ticketMaster.ask(GetEvents).pipeTo(responder)
+        boxOffice.ask(GetEvents).pipeTo(responder)
       }
     } ~
     path("ticket") {
       get {
         entity(as[TicketRequest]) { ticketRequest => requestContext =>
           val responder = createResponder(requestContext)
-          ticketMaster.ask(ticketRequest).pipeTo(responder)
+          boxOffice.ask(ticketRequest).pipeTo(responder)
         }
       }
     } ~
     path("ticket" / PathElement) { eventName => requestContext =>
       val req = TicketRequest(eventName)
       val responder = createResponder(requestContext)
-      ticketMaster.ask(req).pipeTo(responder)
+      boxOffice.ask(req).pipeTo(responder)
     }
+
   def createResponder(requestContext:RequestContext) = {
-    context.actorOf(Props(new Responder(requestContext, ticketMaster)))
+    context.actorOf(Props(new Responder(requestContext, boxOffice)))
   }
 
 }
 
-class Responder(requestContext:RequestContext, ticketMaster:ActorRef) extends Actor with ActorLogging {
+class Responder(requestContext:RequestContext, boxOffice:ActorRef) extends Actor with ActorLogging {
   import TicketProtocol._
   import spray.httpx.SprayJsonSupport._
+
+  context.setReceiveTimeout(30 seconds)
 
   def receive = {
 
@@ -77,6 +80,10 @@ class Responder(requestContext:RequestContext, ticketMaster:ActorRef) extends Ac
 
     case Events(events) =>
       requestContext.complete(StatusCodes.OK, events)
+      self ! PoisonPill
+
+    case ReceiveTimeout =>
+      context.setReceiveTimeout(Duration.Undefined)
       self ! PoisonPill
 
   }
