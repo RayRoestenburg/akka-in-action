@@ -35,7 +35,6 @@ with STMultiNodeSpec with ImplicitSender {
       runOn(frontend) {
         enterBarrier("deployed")
         val restInterface = system.actorOf(Props(new RestInterfaceMock with TestRemoteBoxOfficeCreator))
-        Thread.sleep(1000)
 
         val path = node(backend) / "user" / "boxOffice"
         val actorSelection = system.actorSelection(path)
@@ -56,7 +55,7 @@ with STMultiNodeSpec with ImplicitSender {
       }
 
       runOn(backend) {
-        val boxOffice = system.actorOf(Props[BoxOffice], "boxOffice")
+        system.actorOf(Props[BoxOffice], "boxOffice")
         enterBarrier("deployed")
       }
 
