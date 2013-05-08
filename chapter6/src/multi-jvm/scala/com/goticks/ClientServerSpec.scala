@@ -17,9 +17,7 @@ with STMultiNodeSpec with ImplicitSender {
   trait TestRemoteBoxOfficeCreator extends RemoteBoxOfficeCreator { this:Actor =>
 
     override def createPath: String = {
-      val actorPath = node(backend) / "user" /"boxOffice"
-      println(actorPath.toString)
-      actorPath.toString
+      node(backend) / "user" /"boxOffice"
     }
   }
 
