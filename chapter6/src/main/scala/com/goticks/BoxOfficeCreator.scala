@@ -9,24 +9,34 @@ trait BoxOfficeCreator { this: Actor =>
   def createBoxOffice:ActorRef = context.actorOf(Props[BoxOffice],"boxOffice")
 }
 
-trait RemoteBoxOfficeCreator extends BoxOfficeCreator { this:Actor =>
+object RemoteBoxOfficeCreator {
+  val config = ConfigFactory.load("frontend").getConfig("backend")
+}
 
-  override def createBoxOffice = {
-    val config = ConfigFactory.load("frontend").getConfig("backend")
+trait RemoteBoxOfficeCreator extends BoxOfficeCreator { this:Actor =>
+  import RemoteBoxOfficeCreator._
+
+  def createPath:String = {
     val host = config.getString("host")
     val port = config.getInt("port")
     val protocol = config.getString("protocol")
     val systemName = config.getString("system")
     val actorName = config.getString("actor")
-    val path = s"$protocol://$systemName@$host:$port/$actorName"
-    val lookup = context.actorOf(Props(classOf[RemoteLookup],path), "lookupBoxOffice")
-    lookup
+
+    s"$protocol://$systemName@$host:$port/$actorName"
+  }
+
+  override def createBoxOffice:ActorRef = {
+    val path = createPath
+    context.actorOf(Props(classOf[RemoteLookup],path), "lookupBoxOffice")
   }
 }
 
 import scala.concurrent.duration._
 
-class RemoteLookup(path:String) extends Actor with ActorLogging {
+class RemoteLookup(path:String)
+  extends Actor with ActorLogging {
+
   context.setReceiveTimeout(3 seconds)
   sendIdentifyRequest()
 

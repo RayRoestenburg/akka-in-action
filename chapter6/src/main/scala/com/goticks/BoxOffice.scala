@@ -1,8 +1,6 @@
 package com.goticks
 
 import akka.actor._
-import akka.actor.Terminated
-import scala.Some
 import concurrent.Future
 import scala.concurrent.duration._
 import akka.util.Timeout
