@@ -11,18 +11,17 @@ trait BoxOfficeCreator { this: Actor =>
 
 object RemoteBoxOfficeCreator {
   val config = ConfigFactory.load("frontend").getConfig("backend")
+  val host = config.getString("host")
+  val port = config.getInt("port")
+  val protocol = config.getString("protocol")
+  val systemName = config.getString("system")
+  val actorName = config.getString("actor")
 }
 
 trait RemoteBoxOfficeCreator extends BoxOfficeCreator { this:Actor =>
   import RemoteBoxOfficeCreator._
 
   def createPath:String = {
-    val host = config.getString("host")
-    val port = config.getInt("port")
-    val protocol = config.getString("protocol")
-    val systemName = config.getString("system")
-    val actorName = config.getString("actor")
-
     s"$protocol://$systemName@$host:$port/$actorName"
   }
 
