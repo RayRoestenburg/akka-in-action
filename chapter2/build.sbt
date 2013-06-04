@@ -25,7 +25,9 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-slf4j"      % akkaVersion,
     "ch.qos.logback"    %  "logback-classic" % "1.0.10",
     "com.typesafe.akka" %%  "akka-testkit"   % akkaVersion   % "test",
-    "org.scalatest"     %% "scalatest"       % "1.9.1"       % "test"
+    "org.scalatest"     %% "scalatest"       % "1.9.1"       % "test",
+    // for java examples
+    "com.google.guava"  % "guava"            % "14.0"
   )
 }
 

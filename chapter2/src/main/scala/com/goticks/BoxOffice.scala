@@ -1,13 +1,11 @@
 package com.goticks
 
 import akka.actor._
-import akka.actor.Terminated
-import scala.Some
 import concurrent.Future
 import scala.concurrent.duration._
 import akka.util.Timeout
 
-class TicketMaster extends Actor with ActorLogging {
+class BoxOffice extends Actor with CreateTicketSellers with ActorLogging {
   import TicketProtocol._
   import context._
   implicit val timeout = Timeout(5 seconds)
@@ -18,7 +16,7 @@ class TicketMaster extends Actor with ActorLogging {
       log.info(s"Creating new event ${name} with ${nrOfTickets} tickets.")
 
       if(context.child(name).isEmpty) {
-        val ticketSeller = context.actorOf(Props[TicketSeller], name)
+        val ticketSeller = createTicketSeller(name)
 
         val tickets = Tickets((1 to nrOfTickets).map(nr=> Ticket(name, nr)).toList)
         ticketSeller ! tickets
@@ -53,4 +51,8 @@ class TicketMaster extends Actor with ActorLogging {
 
   }
 
+}
+
+trait CreateTicketSellers { self:Actor =>
+  def createTicketSeller(name:String) =  context.actorOf(Props[TicketSeller], name)
 }

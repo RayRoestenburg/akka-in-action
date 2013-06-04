@@ -22,7 +22,7 @@ trait RestApi extends HttpService with ActorLogging { actor: Actor =>
   import akka.pattern.ask
   import akka.pattern.pipe
 
-  val ticketMaster = context.actorOf(Props[TicketMaster])
+  val boxOffice = context.actorOf(Props[BoxOffice])
 
   def routes: Route =
 
@@ -30,29 +30,29 @@ trait RestApi extends HttpService with ActorLogging { actor: Actor =>
       put {
         entity(as[Event]) { event => requestContext =>
           val responder = createResponder(requestContext)
-          ticketMaster.ask(event).pipeTo(responder)
+          boxOffice.ask(event).pipeTo(responder)
         }
       } ~
       get { requestContext =>
         val responder = createResponder(requestContext)
-        ticketMaster.ask(GetEvents).pipeTo(responder)
+        boxOffice.ask(GetEvents).pipeTo(responder)
       }
     } ~
     path("ticket") {
       get {
         entity(as[TicketRequest]) { ticketRequest => requestContext =>
           val responder = createResponder(requestContext)
-          ticketMaster.ask(ticketRequest).pipeTo(responder)
+          boxOffice.ask(ticketRequest).pipeTo(responder)
         }
       }
     } ~
     path("ticket" / PathElement) { eventName => requestContext =>
       val req = TicketRequest(eventName)
       val responder = createResponder(requestContext)
-      ticketMaster.ask(req).pipeTo(responder)
+      boxOffice.ask(req).pipeTo(responder)
     }
   def createResponder(requestContext:RequestContext) = {
-    context.actorOf(Props(new Responder(requestContext, ticketMaster)))
+    context.actorOf(Props(new Responder(requestContext, boxOffice)))
   }
 
 }
