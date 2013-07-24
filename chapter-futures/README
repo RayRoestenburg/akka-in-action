@@ -1,0 +1,10 @@
+Future examples.
+
+- some fake services can be run using sbt run and choosing the services main app.
+
+(services app that runs a few REST services)
+
+tests that call spray client with futures.
+or even easier?
+
+examples using actors. Ask. pipe. etc.
