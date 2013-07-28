@@ -3,7 +3,7 @@ package com.goticks
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.WordSpec
 import scala.concurrent.{Future, Await}
-
+//TODO add more tests
 class GetTicketInfoSpec extends WordSpec with MustMatchers{
 
   object TicketInfoService extends TicketInfoService with MockWebServiceCalls
@@ -70,9 +70,9 @@ trait MockWebServiceCalls extends WebServiceCalls {
     }
   }
 
-  def callArtistCalendarService(artist: Artist, nearLocation:Location):Future[Seq[Event]] = {
+  def callArtistCalendarService(artist: Artist, nearLocation:Location):Future[Event] = {
     Future {
-      Seq(Event(artist.name,Location(1d,1d), DateTime.now))
+      Event(artist.name,Location(1d,1d), DateTime.now)
     }
   }
 }

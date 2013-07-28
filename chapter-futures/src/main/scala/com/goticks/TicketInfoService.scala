@@ -3,7 +3,8 @@ package com.goticks
 import scala.concurrent.Future
 import com.github.nscala_time.time.Imports._
 import scala.util.control.NonFatal
-
+//what about timeout? or at least termination condition?
+// future -> actors scheduling time
 trait TicketInfoService extends WebServiceCalls {
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -32,20 +33,24 @@ trait TicketInfoService extends WebServiceCalls {
         getTravelAdvice(info, event)
       }.getOrElse(eventInfo)
 
-      val infoWithTravelAndWeather = Future.fold(Seq(infoWithTravelAdvice, infoWithWeather))(info) { (acc, elem) =>
+
+      val suggestedEvents = info.event.map { event =>
+        getSuggestions(event)
+      }.getOrElse(Future.successful(Seq()))
+
+      val ticketInfos = Seq(infoWithTravelAdvice, infoWithWeather)
+
+      val infoWithTravelAndWeather = Future.fold(ticketInfos)(info) { (acc, elem) =>
         val (travelAdvice, weather) = (elem.travelAdvice, elem.weather)
 
         acc.copy(travelAdvice = travelAdvice.orElse(acc.travelAdvice),
                   weather = weather.orElse(acc.weather))
       }
 
-      infoWithTravelAndWeather.flatMap { info =>
-        info.event.map { event =>
-          getSuggestions(event).map { events =>
-            info.copy(suggestions = events)
-          }
-        }.getOrElse(Future.successful(info))
-      }
+
+      for(info <- infoWithTravelAndWeather;
+        suggestions <- suggestedEvents
+      ) yield info.copy(suggestions = suggestions)
     }
   }
 
@@ -98,13 +103,44 @@ trait TicketInfoService extends WebServiceCalls {
     }
   }
 
+
+  def getPlannedEventsWithTraverse(event:Event, artists:Seq[Artist]) = {
+    Future.traverse(artists) { artist=>
+      callArtistCalendarService(artist, event.location)
+    }
+  }
+
+  def getPlannedEvents(event:Event, artists:Seq[Artist]) = {
+    val events = artists.map(artist=> callArtistCalendarService(artist, event.location))
+    Future.sequence(events)
+  }
+
   def getSuggestions(event:Event):Future[Seq[Event]] = {
 
     val futureArtists = callSimilarArtistsService(event).recover(withEmptySeq)
 
-    for(artists <- futureArtists;
-        events <- Future.traverse(artists)(artist=> callArtistCalendarService(artist, event.location).recover(withEmptySeq))
-    ) yield events.flatten
+    for(artists <- futureArtists.recover(withEmptySeq);
+        events <- getPlannedEvents(event, artists).recover(withEmptySeq)
+    ) yield events
+  }
+
+  def getSuggestionsWithFlatMapAndMap(event:Event):Future[Seq[Event]] = {
+
+    val futureArtists = callSimilarArtistsService(event).recover(withEmptySeq)
+    futureArtists.flatMap { artists=>
+      Future.traverse(artists)(artist=> callArtistCalendarService(artist, event.location))
+    }.recover(withEmptySeq)
+  }
+
+  def getTravelAdviceUsingForComprehension(info:TicketInfo, event:Event):Future[TicketInfo] = {
+
+    val futureRoute = callTrafficService(info.userLocation, event.location, event.time).recover(withNone)
+
+    val futurePublicTransport = callPublicTransportService(info.userLocation, event.location, event.time).recover(withNone)
+
+    for((routeByCar, publicTransportAdvice) <- futureRoute.zip(futurePublicTransport);
+         travelAdvice = TravelAdvice(routeByCar, publicTransportAdvice)
+    ) yield info.copy(travelAdvice = Some(travelAdvice))
   }
 
 }
@@ -123,5 +159,5 @@ trait WebServiceCalls {
 
   def callSimilarArtistsService(event:Event):Future[Seq[Artist]]
 
-  def callArtistCalendarService(artist: Artist, nearLocation:Location):Future[Seq[Event]]
+  def callArtistCalendarService(artist: Artist, nearLocation:Location):Future[Event]
 }
