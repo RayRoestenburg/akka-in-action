@@ -1,8 +1,10 @@
 package com.goticks
 
-import scala.concurrent.Future
+import scala.concurrent._
 import com.github.nscala_time.time.Imports._
 import scala.util.control.NonFatal
+import scala.async.Async.{async, await}
+
 //what about timeout? or at least termination condition?
 // future -> actors scheduling time
 trait TicketInfoService extends WebServiceCalls {
@@ -19,6 +21,53 @@ trait TicketInfoService extends WebServiceCalls {
   // recover with the ticketInfo that was built in the previous step
   def withPrevious(previous:TicketInfo):Recovery[TicketInfo] = {
     case NonFatal(e) => previous
+  }
+
+  def getTicketInfoWithWeather(ticketNr:String, location:Location):Future[TicketInfo] = {
+
+    val eventInfo = getEvent(ticketNr, location)
+
+    eventInfo.flatMap { info =>
+      getWeather(info)
+    }
+  }
+
+  def asyncGetTicketInfoWithWeather(ticketNr:String, location:Location): Future[TicketInfo] = async {
+
+    def getFutureEvent = getEvent(ticketNr, location)
+
+    val ticketInfoWithEvent = await(getFutureEvent)
+
+    val futureWeather = getWeather(ticketInfoWithEvent)
+
+    val ticketInfoWithWeather = await(futureWeather)
+
+    ticketInfoWithEvent.copy(weather = ticketInfoWithWeather.weather)
+  }
+
+  def asyncGetTicketInfo(ticketNr:String, location:Location): Future[TicketInfo] = async {
+    val emptyTicketInfo = TicketInfo(ticketNr, location)
+
+    def getFutureEvent = getEvent(ticketNr, location)
+
+    val ticketInfoWithEvent = await(getFutureEvent.recover(withPrevious(emptyTicketInfo)))
+
+    val event = ticketInfoWithEvent.event
+
+    val nextTicketInfo = if(!event.isEmpty) {
+      val theEvent = event.get
+
+      val futureSuggestions = getSuggestions(theEvent)
+
+      val futureTravelAdvice = getTravelAdvice(ticketInfoWithEvent, theEvent)
+
+      val futureWeather = getWeather(ticketInfoWithEvent)
+
+      await(futureTravelAdvice).copy(weather = await(futureWeather).weather,
+                                     suggestions = await(futureSuggestions))
+    } else ticketInfoWithEvent
+
+    nextTicketInfo
   }
 
   def getTicketInfo(ticketNr:String, location:Location):Future[TicketInfo] = {
