@@ -4,6 +4,7 @@ import akka.testkit.{ImplicitSender, TestKit}
 import akka.actor.{Props, ActorSystem}
 import org.scalatest.WordSpec
 import org.scalatest.matchers.MustMatchers
+import com.manning.aa.words.StopSystemAfterAll
 
 class BoxOfficeSpec extends TestKit(ActorSystem("testTickets"))
                        with WordSpec

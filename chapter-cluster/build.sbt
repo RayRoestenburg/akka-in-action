@@ -1,10 +1,10 @@
 import AssemblyKeys._
 
-name := "goticks"
+name := "words-cluster"
 
 version := "0.1-SNAPSHOT"
 
-organization := "com.goticks"
+organization := "com.manning.aa"
 
 scalaVersion := "2.10.0"
 
@@ -33,8 +33,8 @@ libraryDependencies ++= {
 }
 
 // Assembly settings
-mainClass in Global := Some("com.goticks.Main")
+mainClass in Global := Some("com.manning.aa.words.Main")
 
-jarName in assembly := "goticks-server.jar"
+jarName in assembly := "words-node.jar"
 
 assemblySettings

@@ -1,4 +1,4 @@
-package com.goticks
+package com.manning.aa.words
 
 import org.scalatest.{Suite, BeforeAndAfterAll}
 import akka.testkit.TestKit
