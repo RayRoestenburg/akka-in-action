@@ -160,8 +160,7 @@ class JobMaster extends Actor
       receptionist ! WordCount(jobName, mergedMap)
 
     case Terminated(worker) =>
-      // this is expected
-      log.info(s"Job $jobName is finishing. Worker $worker is cleaned up.")
+      log.info(s"Job $jobName is finishing. Worker ${worker.path.name} is stopped.")
   }
 }
 
@@ -184,7 +183,7 @@ class JobReceptionist extends Actor
   import JobMaster.StartJob
   import context._
 
-  var jobs = Vector[Job]()
+  var jobs = Set[Job]()
   var retries = Map[String, Int]()
   val maxRetries = 10
 
@@ -193,23 +192,28 @@ class JobReceptionist extends Actor
       log.info(s"Received job $name")
 
       val masterName = "master-"+URLEncoder.encode(name, "UTF8")
+
       val jobMaster = context.actorOf(JobMaster.props, masterName)
 
       val job = Job(name, text, sender, jobMaster)
-      jobs = jobs :+ job
+      jobs = jobs + job
 
       jobMaster ! StartJob(name, text)
       watch(jobMaster)
 
     case WordCount(jobName, map) =>
       log.info(s"Job $jobName complete.")
-      jobs.find(_.name == jobName).foreach(job => job.respondTo ! JobSuccess(jobName, map))
-      jobs = jobs.filterNot(_.name == jobName)
+
+      jobs.find(_.name == jobName).foreach { job =>
+        job.respondTo ! JobSuccess(jobName, map)
+        stop(job.jobMaster)
+        jobs = jobs - job
+      }
 
     case Terminated(jobMaster) =>
-      log.error(s"Job Master $jobMaster terminated.")
-
       jobs.find(_.jobMaster == jobMaster).foreach { failedJob =>
+        log.error(s"Job Master $jobMaster terminated before finishing job.")
+
         val name = failedJob.name
         log.error(s"Job ${name} failed.")
         val nrOfRetries = retries.getOrElse(name, 0)
