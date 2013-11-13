@@ -1,8 +1,10 @@
 package com.manning.aa
 package words
 
+import java.net.URLEncoder
+
 import akka.testkit.{ImplicitSender, TestKit}
-import akka.actor.ActorSystem
+import akka.actor.{Actor, ActorRef, Props, ActorSystem}
 
 import org.scalatest._
 import org.scalatest.matchers.MustMatchers
@@ -10,12 +12,30 @@ import org.scalatest.matchers.MustMatchers
 import JobReceptionist._
 
 
+trait LocalBroadcastWork extends BroadcastWork { this: Actor =>
+  import JobWorker._
+
+  override def broadcastWork(jobName:String) = {
+
+    val workers = (0 to 4).map(i => context.actorOf(Props[JobWorker], URLEncoder.encode(s"$jobName-worker-$i", "UTF-8")))
+    workers.foreach { worker =>
+      worker ! StartWork(jobName, self)
+    }
+  }
+}
+
+class TestJobMaster extends JobMaster with LocalBroadcastWork
+
+class TestReceptionist extends JobReceptionist with CreateMaster {
+  override def createMaster(name: String): ActorRef = context.actorOf(Props[TestJobMaster], name)
+}
+
 class LocalWordsSpec extends TestKit(ActorSystem("test"))
                         with WordSpec
                         with MustMatchers
                         with StopSystemAfterAll
                         with ImplicitSender {
-  val receptionist = system.actorOf(JobReceptionist.props, JobReceptionist.name)
+  val receptionist = system.actorOf(Props[TestReceptionist], JobReceptionist.name)
 
   "the words" must {
     "finish a job" in {

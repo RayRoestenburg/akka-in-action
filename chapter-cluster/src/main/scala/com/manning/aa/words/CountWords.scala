@@ -6,6 +6,8 @@ import java.net.URLEncoder
 import scala.concurrent.duration._
 
 import akka.actor._
+import akka.cluster.routing.{ClusterRouterPoolSettings, ClusterRouterPool}
+import akka.routing.BroadcastPool
 
 
 object JobWorker {
@@ -32,7 +34,7 @@ class JobWorker extends Actor
       become(enlisted(jobName, master))
 
       log.info(s"Enlisted, will start requesting work for job '${jobName}'.")
-
+      master ! EnlistWorker(self)
       master ! GiveMeMoreWork
       watch(master)
 
@@ -83,6 +85,8 @@ object JobMaster {
   def props = Props[JobMaster]
 
   case class StartJob(name: String, text: List[String])
+  case class EnlistWorker(worker:ActorRef)
+
   case object GiveMeMoreWork
   case class PartialCount(map: Map[String, Int])
 
@@ -90,17 +94,35 @@ object JobMaster {
   case object MergeCounts
 }
 
+trait BroadcastWork { this: Actor =>
+  import JobWorker._
+
+  def broadcastWork(jobName:String) = {
+    val workerRouter = context.actorOf(
+      ClusterRouterPool(BroadcastPool(10), ClusterRouterPoolSettings(
+        totalInstances = 100, maxInstancesPerNode = 20,
+        allowLocalRoutees = false, useRole = Some("worker"))).props(Props[JobWorker]),
+      name = URLEncoder.encode(s"worker-router-$jobName", "UTF-8"))
+
+    //TODO solve this.
+    Thread.sleep(4000)
+    workerRouter ! StartWork(jobName, self)
+  }
+}
+
 class JobMaster extends Actor
-                   with ActorLogging {
+                   with ActorLogging
+                   with BroadcastWork {
   import JobReceptionist.WordCount
   import JobMaster._
-  import JobWorker.{StartWork, Work, WorkLoadDepleted, JobIsFinished}
+  import JobWorker.{Work, WorkLoadDepleted, JobIsFinished}
   import context._
 
   var textParts = Vector[List[String]]()
   var intermediateResult = Vector[Map[String, Int]]()
   var workGiven = 0
   var workReceived = 0
+  var workers = Set[ActorRef]()
 
   override def supervisorStrategy: SupervisorStrategy = SupervisorStrategy.stoppingStrategy
 
@@ -112,20 +134,20 @@ class JobMaster extends Actor
       self ! Start
   }
 
+
   def preparing(jobName:String, text:List[String], respondTo:ActorRef): Receive = {
     case Start =>
       // TODO work this out.
       // use cluster router, and watch them.
       textParts = text.grouped(10).toVector
-      val workers = (0 to 4).map(i=> context.actorOf(Props[JobWorker], URLEncoder.encode(s"$jobName-worker-$i", "UTF-8")))
-      become(working(jobName, respondTo, workers.toList))
-      workers.foreach{ worker=>
-        watch(worker)
-        worker ! StartWork(jobName, self)
-      }
+      broadcastWork(jobName)
+      become(working(jobName, respondTo))
   }
 
-  def working(jobName:String, receptionist:ActorRef, workers:List[ActorRef]): Receive = {
+  def working(jobName:String, receptionist:ActorRef): Receive = {
+    case EnlistWorker(worker) =>
+      watch(worker)
+      workers  = workers + worker
     case GiveMeMoreWork =>
       if(textParts.isEmpty) {
         sender ! WorkLoadDepleted
@@ -149,7 +171,7 @@ class JobMaster extends Actor
       stop(self)
   }
   
-  def finishing(jobName:String, receptionist:ActorRef, workers:List[ActorRef]): Receive = {
+  def finishing(jobName:String, receptionist:ActorRef, workers:Set[ActorRef]): Receive = {
     case MergeCounts =>
       val mergedMap = intermediateResult.foldLeft(Map[String, Int]()){ (el, acc) =>
         el.map { case (word, count) =>
@@ -177,8 +199,14 @@ object JobReceptionist {
   case class JobFailure(name:String) extends Response
 }
 
+trait CreateMaster {
+  def context:ActorContext
+  def createMaster(name:String) = context.actorOf(JobMaster.props, name)
+}
+
 class JobReceptionist extends Actor
-                         with ActorLogging {
+                         with ActorLogging
+                         with CreateMaster {
   import JobReceptionist._
   import JobMaster.StartJob
   import context._
@@ -187,13 +215,14 @@ class JobReceptionist extends Actor
   var retries = Map[String, Int]()
   val maxRetries = 10
 
+
   def receive = {
     case jr @ JobRequest(name, text) =>
       log.info(s"Received job $name")
 
       val masterName = "master-"+URLEncoder.encode(name, "UTF8")
 
-      val jobMaster = context.actorOf(JobMaster.props, masterName)
+      val jobMaster = createMaster(masterName)
 
       val job = Job(name, text, sender, jobMaster)
       jobs = jobs + job
