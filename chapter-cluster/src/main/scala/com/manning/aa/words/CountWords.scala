@@ -97,16 +97,16 @@ object JobMaster {
 trait BroadcastWork { this: Actor =>
   import JobWorker._
 
-  def broadcastWork(jobName:String) = {
+  def broadcastWork(jobName:String):Unit = {
     val workerRouter = context.actorOf(
       ClusterRouterPool(BroadcastPool(10), ClusterRouterPoolSettings(
         totalInstances = 100, maxInstancesPerNode = 20,
         allowLocalRoutees = false, useRole = Some("worker"))).props(Props[JobWorker]),
       name = URLEncoder.encode(s"worker-router-$jobName", "UTF-8"))
 
-    //TODO solve this.
-    Thread.sleep(4000)
-    workerRouter ! StartWork(jobName, self)
+    implicit val ec = context.dispatcher
+    //TODO stop sending startwork if job is finished.
+    context.system.scheduler.schedule(0 millis, 1000 millis, workerRouter, StartWork(jobName, self))
   }
 }
 
@@ -137,8 +137,6 @@ class JobMaster extends Actor
 
   def preparing(jobName:String, text:List[String], respondTo:ActorRef): Receive = {
     case Start =>
-      // TODO work this out.
-      // use cluster router, and watch them.
       textParts = text.grouped(10).toVector
       broadcastWork(jobName)
       become(working(jobName, respondTo))
@@ -232,7 +230,7 @@ class JobReceptionist extends Actor
 
     case WordCount(jobName, map) =>
       log.info(s"Job $jobName complete.")
-
+      log.info(s"result:${map}")
       jobs.find(_.name == jobName).foreach { job =>
         job.respondTo ! JobSuccess(jobName, map)
         stop(job.jobMaster)

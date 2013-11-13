@@ -15,7 +15,7 @@ import JobReceptionist._
 trait LocalBroadcastWork extends BroadcastWork { this: Actor =>
   import JobWorker._
 
-  override def broadcastWork(jobName:String) = {
+  override def broadcastWork(jobName:String):Unit = {
 
     val workers = (0 to 4).map(i => context.actorOf(Props[JobWorker], URLEncoder.encode(s"$jobName-worker-$i", "UTF-8")))
     workers.foreach { worker =>
