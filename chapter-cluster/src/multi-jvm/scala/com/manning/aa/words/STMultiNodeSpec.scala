@@ -1,4 +1,5 @@
-package com.goticks
+package com.manning.aa
+package words
 
 import akka.remote.testkit.MultiNodeSpecCallbacks
 import org.scalatest.{BeforeAndAfterAll, WordSpec}

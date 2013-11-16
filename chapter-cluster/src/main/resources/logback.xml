@@ -11,7 +11,7 @@
     <logger name="akka" level="INFO" />
     <logger name="spray" level="INFO" />
 
-    <logger name="com.goticks" level="INFO" />
+    <logger name="com.manning.aa.words" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>

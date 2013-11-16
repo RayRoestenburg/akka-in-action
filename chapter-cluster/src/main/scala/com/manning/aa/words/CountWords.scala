@@ -8,6 +8,7 @@ import scala.concurrent.duration._
 import akka.actor._
 import akka.cluster.routing.{ClusterRouterPoolSettings, ClusterRouterPool}
 import akka.routing.BroadcastPool
+import JobWorker.StartWork
 
 
 object JobWorker {
@@ -16,7 +17,6 @@ object JobWorker {
   case class StartWork(jobName:String, master:ActorRef)
   case class Work(input:List[String], master:ActorRef)
   case object WorkLoadDepleted
-  case object JobIsFinished
 }
 
 class JobWorker extends Actor
@@ -57,26 +57,20 @@ class JobWorker extends Actor
 
     case WorkLoadDepleted =>
       log.info(s"Work load ${jobName} is depleted, retiring...")
-      become(retired(jobName, master))
       setReceiveTimeout(Duration.Undefined)
-
-    case JobIsFinished =>
-      log.info(s"Job is finished, processed $processed parts, stopping self.")
-      stop(self)
+      become(retired(jobName))
 
     case Terminated(master) =>
+      setReceiveTimeout(Duration.Undefined)
       log.error(s"Master terminated that ran Job ${jobName}, stopping self.")
       stop(self)
   }
-  
-  def retired(jobName:String, master:ActorRef): Receive = {
-    case JobIsFinished =>
-      log.info(s"Job ${jobName} is finished, processed $processed parts, stopping self.")
-      stop(self)
 
+  def retired(jobName: String): Receive = {
     case Terminated(master) =>
       log.error(s"Master terminated that ran Job ${jobName}, stopping self.")
       stop(self)
+    case _ => log.error("I'm retired.")
   }
 }
 
@@ -95,18 +89,12 @@ object JobMaster {
 }
 
 trait BroadcastWork { this: Actor =>
-  import JobWorker._
-
-  def broadcastWork(jobName:String):Unit = {
-    val workerRouter = context.actorOf(
+  def createRouter: ActorRef = {
+    context.actorOf(
       ClusterRouterPool(BroadcastPool(10), ClusterRouterPoolSettings(
         totalInstances = 100, maxInstancesPerNode = 20,
-        allowLocalRoutees = false, useRole = Some("worker"))).props(Props[JobWorker]),
-      name = URLEncoder.encode(s"worker-router-$jobName", "UTF-8"))
-
-    implicit val ec = context.dispatcher
-    //TODO stop sending startwork if job is finished.
-    context.system.scheduler.schedule(0 millis, 1000 millis, workerRouter, StartWork(jobName, self))
+        allowLocalRoutees = false, useRole = None)).props(Props[JobWorker]),
+      name = "worker-router")
   }
 }
 
@@ -115,7 +103,7 @@ class JobMaster extends Actor
                    with BroadcastWork {
   import JobReceptionist.WordCount
   import JobMaster._
-  import JobWorker.{Work, WorkLoadDepleted, JobIsFinished}
+  import JobWorker.{Work, WorkLoadDepleted}
   import context._
 
   var textParts = Vector[List[String]]()
@@ -123,6 +111,8 @@ class JobMaster extends Actor
   var workGiven = 0
   var workReceived = 0
   var workers = Set[ActorRef]()
+
+  val router = createRouter
 
   override def supervisorStrategy: SupervisorStrategy = SupervisorStrategy.stoppingStrategy
 
@@ -138,11 +128,15 @@ class JobMaster extends Actor
   def preparing(jobName:String, text:List[String], respondTo:ActorRef): Receive = {
     case Start =>
       textParts = text.grouped(10).toVector
-      broadcastWork(jobName)
-      become(working(jobName, respondTo))
+
+      val cancellable = context.system.scheduler.schedule(0 millis, 1000 millis, router, StartWork(jobName, self))
+
+      become(working(jobName, respondTo, cancellable))
   }
 
-  def working(jobName:String, receptionist:ActorRef): Receive = {
+  def working(jobName:String,
+              receptionist:ActorRef,
+              cancellable:Cancellable): Receive = {
     case EnlistWorker(worker) =>
       watch(worker)
       workers  = workers + worker
@@ -160,6 +154,7 @@ class JobMaster extends Actor
       workReceived = workReceived + 1
 
       if(textParts.isEmpty && workGiven == workReceived) {
+        cancellable.cancel()
         become(finishing(jobName, receptionist, workers))
         self ! MergeCounts
       }
@@ -169,14 +164,16 @@ class JobMaster extends Actor
       stop(self)
   }
   
-  def finishing(jobName:String, receptionist:ActorRef, workers:Set[ActorRef]): Receive = {
+  def finishing(jobName: String,
+                receptionist: ActorRef,
+                workers: Set[ActorRef]): Receive = {
     case MergeCounts =>
       val mergedMap = intermediateResult.foldLeft(Map[String, Int]()){ (el, acc) =>
         el.map { case (word, count) =>
           acc.get(word).map( accCount => (word ->  (accCount + count))).getOrElse(word -> count)
         } ++ (acc -- el.keys)
       }
-      workers.foreach(_ ! JobIsFinished)
+      workers.foreach(stop(_))
       receptionist ! WordCount(jobName, mergedMap)
 
     case Terminated(worker) =>
@@ -249,8 +246,6 @@ class JobReceptionist extends Actor
           if(nrOfRetries == maxRetries -1) {
             // Simulating that the Job worker will work just before max retries
             val text = failedJob.text.filterNot(_.contains("FAIL"))
-            // TODO change this to send message to another receptionist in the cluster?
-            // TODO change this to remove failing worker node?
             self.tell(JobRequest(name, text), failedJob.respondTo)
           } else self.tell(JobRequest(name, failedJob.text), failedJob.respondTo)
 

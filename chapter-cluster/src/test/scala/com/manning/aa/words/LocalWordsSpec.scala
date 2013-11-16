@@ -4,24 +4,23 @@ package words
 import java.net.URLEncoder
 
 import akka.testkit.{ImplicitSender, TestKit}
-import akka.actor.{Actor, ActorRef, Props, ActorSystem}
+import akka.actor._
 
 import org.scalatest._
 import org.scalatest.matchers.MustMatchers
 
 import JobReceptionist._
+import akka.routing.BroadcastPool
 
 
 trait LocalBroadcastWork extends BroadcastWork { this: Actor =>
   import JobWorker._
 
-  override def broadcastWork(jobName:String):Unit = {
 
-    val workers = (0 to 4).map(i => context.actorOf(Props[JobWorker], URLEncoder.encode(s"$jobName-worker-$i", "UTF-8")))
-    workers.foreach { worker =>
-      worker ! StartWork(jobName, self)
-    }
+  override def createRouter: ActorRef = {
+    context.actorOf(BroadcastPool(5).props(Props[JobWorker]), "worker-router")
   }
+
 }
 
 class TestJobMaster extends JobMaster with LocalBroadcastWork
