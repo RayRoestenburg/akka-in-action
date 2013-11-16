@@ -34,7 +34,7 @@ with STMultiNodeSpec with ImplicitSender {
 
   "A Words cluster" must {
 
-    "be able to form with a the minimum number of node roles" in within(10 seconds) {
+    "form the cluster" in within(10 seconds) {
 
       Cluster(system).subscribe(testActor, classOf[MemberUp])
       expectMsgClass(classOf[CurrentClusterState])
@@ -49,7 +49,8 @@ with STMultiNodeSpec with ImplicitSender {
 
       enterBarrier("cluster-up")
     }
-    "be able to execute a words job once the cluster is running" in within(10 seconds) {
+
+    "execute a words job once the cluster is running" in within(10 seconds) {
 
       runOn(seed) {
         enterBarrier("ready")
@@ -72,10 +73,33 @@ with STMultiNodeSpec with ImplicitSender {
         receptionist ! JobRequest("job-1", List("some", "some very long text", "some long text"))
         expectMsg(JobSuccess("job-1", Map("some" -> 3, "very" -> 1, "long" -> 2, "text" -> 2)))
         enterBarrier("done")
-        Cluster(system).leave(node(master).address)
-        Cluster(system).leave(node(worker1).address)
-        Cluster(system).leave(node(worker2).address)
-        Cluster(system).leave(node(seed).address)
+      }
+      enterBarrier("job-done")
+    }
+
+    "continue to process a job when failures occur" in within(10 seconds) {
+
+      runOn(seed) {
+        enterBarrier("ready")
+        enterBarrier("done")
+      }
+
+      runOn(worker1) {
+        enterBarrier("ready")
+        enterBarrier("done")
+      }
+
+      runOn(worker2) {
+        enterBarrier("ready")
+        enterBarrier("done")
+      }
+
+      runOn(master) {
+        enterBarrier("ready")
+        val receptionist = system.actorSelection("/user/receptionist")
+        receptionist ! JobRequest("job-2", List("some", "FAIL", "some very long text", "some long text"))
+        expectMsg(JobSuccess("job-2", Map("some" -> 3, "very" -> 1, "long" -> 2, "text" -> 2)))
+        enterBarrier("done")
       }
       enterBarrier("job-done")
     }
