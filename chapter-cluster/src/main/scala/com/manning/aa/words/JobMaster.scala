@@ -23,7 +23,7 @@ object JobMaster {
 
 class JobMaster extends Actor
                    with ActorLogging
-                   with BroadcastWork {
+                   with CreateWorkerRouter {
   import JobReceptionist.WordCount
   import JobMaster._
   import JobWorker._
@@ -35,7 +35,7 @@ class JobMaster extends Actor
   var workReceived = 0
   var workers = Set[ActorRef]()
 
-  val router = createRouter
+  val router = createWorkerRouter
 
   override def supervisorStrategy: SupervisorStrategy = SupervisorStrategy.stoppingStrategy
 
@@ -97,8 +97,8 @@ class JobMaster extends Actor
 }
 
 
-trait BroadcastWork { this: Actor =>
-  def createRouter: ActorRef = {
+trait CreateWorkerRouter { this: Actor =>
+  def createWorkerRouter: ActorRef = {
     context.actorOf(
       ClusterRouterPool(BroadcastPool(10), ClusterRouterPoolSettings(
         totalInstances = 100, maxInstancesPerNode = 20,
