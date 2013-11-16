@@ -17,9 +17,11 @@ trait CreateLocalWorkerRouter extends CreateWorkerRouter { this: Actor =>
   }
 }
 
-class TestJobMaster extends JobMaster with CreateLocalWorkerRouter
+class TestJobMaster extends JobMaster
+                       with CreateLocalWorkerRouter
 
-class TestReceptionist extends JobReceptionist with CreateMaster {
+class TestReceptionist extends JobReceptionist
+                          with CreateMaster {
   override def createMaster(name: String): ActorRef = context.actorOf(Props[TestJobMaster], name)
 }
 
