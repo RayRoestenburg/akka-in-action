@@ -12,10 +12,7 @@ object WordsClusterSpecConfig extends MultiNodeConfig {
 
   commonConfig(ConfigFactory.parseString("""
     akka.actor.provider="akka.cluster.ClusterActorRefProvider"
-    #akka.remote.log-remote-lifecycle-events=off
     # don't use sigar for tests, native lib not in path
     akka.cluster.metrics.collector-class = akka.cluster.JmxMetricsCollector
-    #akka.log-dead-letters-during-shutdown = off
-    #akka.log-dead-letters = 0
                                          """))
 }
