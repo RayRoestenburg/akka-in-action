@@ -42,7 +42,7 @@ with STMultiNodeSpec with ImplicitSender {
 
       Cluster(system).join(seedAddress)
 
-      receiveN(4).collect { case MemberUp(m) => m.address }.toSet must be(
+      receiveN(4).map { case MemberUp(m) => m.address }.toSet must be(
         Set(seedAddress, masterAddress, worker1Address, worker2Address))
 
       Cluster(system).unsubscribe(testActor)
@@ -51,55 +51,19 @@ with STMultiNodeSpec with ImplicitSender {
     }
 
     "execute a words job once the cluster is running" in within(10 seconds) {
-
-      runOn(seed) {
-        enterBarrier("ready")
-        enterBarrier("done")
-      }
-
-      runOn(worker1) {
-        enterBarrier("ready")
-        enterBarrier("done")
-      }
-
-      runOn(worker2) {
-        enterBarrier("ready")
-        enterBarrier("done")
-      }
-
       runOn(master) {
-        enterBarrier("ready")
         val receptionist = system.actorOf(Props[JobReceptionist], "receptionist")
         receptionist ! JobRequest("job-1", List("some", "some very long text", "some long text"))
         expectMsg(JobSuccess("job-1", Map("some" -> 3, "very" -> 1, "long" -> 2, "text" -> 2)))
-        enterBarrier("done")
       }
       enterBarrier("job-done")
     }
 
     "continue to process a job when failures occur" in within(10 seconds) {
-
-      runOn(seed) {
-        enterBarrier("ready")
-        enterBarrier("done")
-      }
-
-      runOn(worker1) {
-        enterBarrier("ready")
-        enterBarrier("done")
-      }
-
-      runOn(worker2) {
-        enterBarrier("ready")
-        enterBarrier("done")
-      }
-
       runOn(master) {
-        enterBarrier("ready")
         val receptionist = system.actorSelection("/user/receptionist")
         receptionist ! JobRequest("job-2", List("some", "FAIL", "some very long text", "some long text"))
         expectMsg(JobSuccess("job-2", Map("some" -> 3, "very" -> 1, "long" -> 2, "text" -> 2)))
-        enterBarrier("done")
       }
       enterBarrier("job-done")
     }
