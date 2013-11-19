@@ -10,7 +10,6 @@ import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
 import akka.testkit.ImplicitSender
 import akka.remote.testkit.MultiNodeSpec
 import JobReceptionist._
-import scala.io.Source
 
 
 class WordsClusterSpecMultiJvmNode1 extends WordsClusterSpec

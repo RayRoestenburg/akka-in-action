@@ -45,7 +45,7 @@ class JobMaster extends Actor
     case StartJob(jobName, text) =>
       textParts = text.grouped(10).toVector
       val cancellable = context.system.scheduler.schedule(0 millis, 1000 millis, router, Work(jobName, self))
-
+      context.setReceiveTimeout(60 seconds)
       become(working(jobName, sender, cancellable))
   }
 
@@ -55,6 +55,7 @@ class JobMaster extends Actor
     case Enlist(worker) =>
       watch(worker)
       workers  = workers + worker
+
     case NextTask =>
       if(textParts.isEmpty) {
         sender ! WorkLoadDepleted
@@ -71,8 +72,15 @@ class JobMaster extends Actor
       if(textParts.isEmpty && workGiven == workReceived) {
         cancellable.cancel()
         become(finishing(jobName, receptionist, workers))
+        setReceiveTimeout(Duration.Undefined)
         self ! MergeResults
       }
+
+    case ReceiveTimeout =>
+      if(workers.isEmpty) {
+        log.info(s"No workers responded in time. Cancelling job $jobName.")
+        stop(self)
+      } else setReceiveTimeout(Duration.Undefined)
 
     case Terminated(worker) =>
       log.info(s"Worker $worker got terminated. Cancelling job $jobName.")

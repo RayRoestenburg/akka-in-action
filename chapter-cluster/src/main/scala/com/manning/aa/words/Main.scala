@@ -1,10 +1,11 @@
-package com.manning.aa.words
+package com.manning.aa
+package words
 
-import akka.actor.{Actor, Props, ActorSystem}
 import com.typesafe.config.ConfigFactory
+import akka.actor.{Props, ActorSystem}
 import akka.cluster.Cluster
-import com.manning.aa.words.JobReceptionist.JobRequest
-import akka.cluster.ClusterEvent.{CurrentClusterState, MemberUp}
+
+import JobReceptionist.JobRequest
 
 object Main extends App {
   val config = ConfigFactory.load()
@@ -13,25 +14,12 @@ object Main extends App {
   println(s"Starting node with roles: ${Cluster(system).selfRoles}")
 
   if(system.settings.config.getStringList("akka.cluster.roles").contains("master")) {
-    println("Starting job receptionist on master node..")
-    //TODO start spray with this receptionist
-    val receptionist = system.actorOf(Props[JobReceptionist], "receptionist")
+    Cluster(system).registerOnMemberUp {
+      val receptionist = system.actorOf(Props[JobReceptionist], "receptionist")
+      println("Master node is ready.")
 
-    //TODO remove
-    Cluster(system).subscribe( system.actorOf(Props(new Actor() {
-      def receive: Actor.Receive = {
-        case MemberUp(member) =>
-          if(member.address == Cluster(system).selfAddress) {
-            println("Master is up!")
-            val text = List("this is a test", "of some very naive word counting", "but what can you say", "it is what it is")
-
-            receptionist ! JobRequest("the first job", (1 to 100000).flatMap(i => text ++ text).toList)
-          }
-
-        case s:CurrentClusterState =>
-          println(s"cluster state $s")
-
-      }
-    })),classOf[MemberUp])
+      val text = List("this is a test", "of some very naive word counting", "but what can you say", "it is what it is")
+      receptionist ! JobRequest("the first job", (1 to 100000).flatMap(i => text ++ text).toList)
+    }
   }
 }
