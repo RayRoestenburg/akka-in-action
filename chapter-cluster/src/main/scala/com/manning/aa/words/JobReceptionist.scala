@@ -2,7 +2,9 @@ package com.manning.aa
 package words
 
 import java.net.URLEncoder
+
 import akka.actor._
+import akka.actor.Terminated
 
 
 object JobReceptionist {
@@ -26,6 +28,9 @@ class JobReceptionist extends Actor
   import JobReceptionist._
   import JobMaster.StartJob
   import context._
+
+  override def supervisorStrategy: SupervisorStrategy =
+    SupervisorStrategy.stoppingStrategy
 
   var jobs = Set[Job]()
   var retries = Map[String, Int]()

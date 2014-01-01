@@ -37,7 +37,8 @@ class JobMaster extends Actor
 
   val router = createWorkerRouter
 
-  override def supervisorStrategy: SupervisorStrategy = SupervisorStrategy.stoppingStrategy
+  override def supervisorStrategy: SupervisorStrategy =
+    SupervisorStrategy.stoppingStrategy
 
   def receive = idle
 
@@ -91,16 +92,22 @@ class JobMaster extends Actor
                 receptionist: ActorRef,
                 workers: Set[ActorRef]): Receive = {
     case MergeResults =>
-      val mergedMap = intermediateResult.foldLeft(Map[String, Int]()){ (el, acc) =>
-        el.map { case (word, count) =>
-          acc.get(word).map( accCount => (word ->  (accCount + count))).getOrElse(word -> count)
-        } ++ (acc -- el.keys)
-      }
+      val mergedMap = merge()
       workers.foreach(stop(_))
       receptionist ! WordCount(jobName, mergedMap)
 
     case Terminated(worker) =>
       log.info(s"Job $jobName is finishing. Worker ${worker.path.name} is stopped.")
+  }
+
+  def merge(): Map[String, Int] = {
+    intermediateResult.foldLeft(Map[String, Int]()) {
+      (el, acc) =>
+        el.map {
+          case (word, count) =>
+            acc.get(word).map(accCount => (word -> (accCount + count))).getOrElse(word -> count)
+        } ++ (acc -- el.keys)
+    }
   }
 }
 

@@ -41,11 +41,7 @@ class JobWorker extends Actor
       master ! NextTask
 
     case Task(textPart, master) =>
-      val countMap = textPart.flatMap(_.split("\\W+"))
-                             .foldLeft(Map.empty[String, Int]) { (count, word) =>
-                               if(word == "FAIL") throw new RuntimeException("SIMULATED FAILURE!")
-                               count + (word -> (count.getOrElse(word, 0) + 1))
-                             }
+      val countMap = processTask(textPart)
       processed = processed + 1
       master ! TaskResult(countMap)
       master ! NextTask
@@ -61,10 +57,20 @@ class JobWorker extends Actor
       stop(self)
   }
 
+
   def retired(jobName: String): Receive = {
     case Terminated(master) =>
       log.error(s"Master terminated that ran Job ${jobName}, stopping self.")
       stop(self)
     case _ => log.error("I'm retired.")
+  }
+
+  def processTask(textPart: List[String]): Map[String, Int] = {
+    textPart.flatMap(_.split("\\W+"))
+      .foldLeft(Map.empty[String, Int]) {
+      (count, word) =>
+        if (word == "FAIL") throw new RuntimeException("SIMULATED FAILURE!")
+        count + (word -> (count.getOrElse(word, 0) + 1))
+    }
   }
 }
