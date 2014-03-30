@@ -34,7 +34,7 @@ abstract class AkkaTestkitSpec(_system: ActorSystem) extends TestKit(_system) wi
   protected def afterTermination() {}
 }
 
-trait PersistenceSpec extends BeforeAndAfterEach with Cleanup { this: AkkaTestkitSpec =>
+trait PersistenceSpec extends BeforeAndAfterEach with Cleanup { this: AkkaTestkitSpec ⇒
   private var _name: String = _
 
   lazy val extension = Persistence(system)
@@ -75,7 +75,7 @@ object PersistenceSpec {
     """)
 }
 
-trait Cleanup { this: AkkaTestkitSpec =>
+trait Cleanup { this: AkkaTestkitSpec ⇒
   val storageLocations = List(
     "akka.persistence.journal.leveldb.dir",
     "akka.persistence.journal.leveldb-shared.store.dir",
@@ -94,7 +94,7 @@ abstract class NamedProcessor(name: String) extends Processor {
   override def processorId: String = name
 }
 
-trait TurnOffRecoverOnStart { this: Processor =>
+trait TurnOffRecoverOnStart { this: Processor ⇒
   override def preStart(): Unit = ()
 }
 

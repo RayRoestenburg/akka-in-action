@@ -1,5 +1,7 @@
 import AssemblyKeys._
 
+import scalariform.formatter.preferences._
+
 name := "tickets-persistence"
 
 version := "0.1-SNAPSHOT"
@@ -31,5 +33,13 @@ mainClass in Global := Some("com.manning.tickets.Main")
 jarName in assembly := "tickets-persistence.jar"
 
 assemblySettings
+
+scalariformSettings
+
+ScalariformKeys.preferences := ScalariformKeys.preferences.value
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentClassDeclaration, false)
+  .setPreference(PreserveDanglingCloseParenthesis, true)
+  .setPreference(RewriteArrowSymbols, true)
 
 fork := true

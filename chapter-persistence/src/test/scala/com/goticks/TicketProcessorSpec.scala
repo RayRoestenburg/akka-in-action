@@ -3,53 +3,46 @@ package com.goticks
 import akka.actor._
 import akka.testkit._
 import akka.persistence._
+import scala.concurrent.duration._
 
-import TicketProtocol._
+import TicketProcessor._
 
 class NamedTicketProcessor(name: String) extends TicketProcessor {
   override def processorId = name
 }
 
 class TicketProcessorSpec extends AkkaTestkitSpec(ActorSystem("ticketProcessor")) with PersistenceSpec with ImplicitSender {
-
-  override protected def beforeEach() {
-    super.beforeEach()
-    val processor = system.actorOf(Props(new NamedTicketProcessor(name)))
-
-    val list = (0 to 10).map( i=> Ticket("RHCP", i)).toList
-
-    processor ! Persistent(Tickets(list))
-
-    (0 to 10).foreach{ _ =>
-      processor ! Persistent(BuyTicket)
-      val cp = expectMsgType[ConfirmablePersistent]
-      cp.confirm()
-    }
-    processor ! GetEvents
-    expectMsg(0)
-  }
+  val probe = TestProbe()
+  val range = (0 to 99).toList
 
   "A processor" must {
     "automatically recover state" in {
-      val processor = system.actorOf(Props(new NamedTicketProcessor(name)))
-      // non-persistent messages are interleaved during recovery?
+      val probe = TestProbe()
+      val processor = system.actorOf(Props(new NamedTicketProcessor(name)), name)
 
-      // TODO need to check this deliver with Channels piece.
-      processor ! Persistent(BuyTicket)
-      val cp = expectMsgType[ConfirmablePersistent]
-      cp match {
-        case ConfirmablePersistent(SoldOut, _, _) => println("CPyay!")
-        case _ => fail("nope")
-      }
+      processor.tell(GetEvents, probe.testActor)
 
+      probe.expectMsg(0)
+      val newTickets = Tickets(List(Ticket("RHCP", 1), Ticket("RHCP", 2)))
+      processor ! Persistent(newTickets)
 
+      processor.tell(GetEvents, probe.testActor)
+      probe.expectMsg(2)
 
-    }
-    "recover state automatically on restart" in {
-      val processor = system.actorOf(Props(new NamedTicketProcessor(name)))
-      processor ! "boom"
-      processor ! GetEvents
-      expectMsg(1)
+      processor.tell(Persistent(BuyTicket), probe.testActor)
+      probe.expectMsg(Ticket("RHCP", 1))
+
+      watch(processor)
+      system.stop(processor)
+      expectMsgType[Terminated]
+
+      val processorResurrected = system.actorOf(Props(new NamedTicketProcessor(name)), name)
+
+      // You have to deal with repeated msgs on replay
+      val anotherProbe = TestProbe()
+      processorResurrected.tell(Persistent(BuyTicket), anotherProbe.testActor)
+
+      anotherProbe.expectMsg(Ticket("RHCP", 2))
     }
   }
 }

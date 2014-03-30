@@ -22,7 +22,6 @@ libraryDependencies ++= {
     "io.spray"                %  "spray-can"                       % sprayVersion,
     "io.spray"                %  "spray-routing"                   % sprayVersion,
     "io.spray"                %% "spray-json"                      % "1.2.3",
-    "com.typesafe.akka"       %% "akka-slf4j"                      % akkaVersion,
     "ch.qos.logback"          %  "logback-classic"                 % "1.0.10",
     "com.github.nscala-time"  %%  "nscala-time"                    % "0.2.0"
   )
