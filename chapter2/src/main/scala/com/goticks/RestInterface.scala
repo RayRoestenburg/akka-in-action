@@ -9,13 +9,13 @@ import spray.routing.RequestContext
 import akka.util.Timeout
 import scala.concurrent.duration._
 
-class RestInterface extends Actor
-                    with HttpServiceActor
+class RestInterface extends HttpServiceActor
                     with RestApi {
   def receive = runRoute(routes)
 }
 
 trait RestApi extends HttpService with ActorLogging { actor: Actor =>
+  import context.dispatcher
   import com.goticks.TicketProtocol._
 
   implicit val timeout = Timeout(10 seconds)
