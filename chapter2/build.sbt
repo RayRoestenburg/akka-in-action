@@ -1,5 +1,5 @@
 import AssemblyKeys._
-import com.typesafe.startscript.StartScriptPlugin
+import com.typesafe.sbt.SbtStartScript
 
 name := "goticks"
 
@@ -7,7 +7,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "com.goticks"
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.4"
 
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Sonatype snapshots"  at "http://oss.sonatype.org/content/repositories/snapshots/",
@@ -15,8 +15,8 @@ resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/re
                   "Spray Nightlies"     at "http://nightlies.spray.io/")
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.1.2"
-  val sprayVersion      = "1.1-20130123"
+  val akkaVersion       = "2.3.3"
+  val sprayVersion      = "1.3.1"
   Seq(
     "com.typesafe.akka" %% "akka-actor"      % akkaVersion,
     "io.spray"          %  "spray-can"       % sprayVersion,
@@ -39,4 +39,4 @@ jarName in assembly := "goticks-server.jar"
 assemblySettings
 
 // StartScript settings
-seq(StartScriptPlugin.startScriptForClassesSettings: _*)
+seq(SbtStartScript.startScriptForClassesSettings: _*)
