@@ -1,4 +1,4 @@
-package ch09
+package aia.routing
 
 import java.util.Date
 import com.typesafe.config.ConfigFactory
@@ -138,6 +138,7 @@ class PerfRoutingTest
       system.stop(creator)
 
     }
+
     "Use manage routees2" in {
       val endProbe = TestProbe()
       val deadProbe = TestProbe()
@@ -181,6 +182,7 @@ class PerfRoutingTest
       system.stop(router)
       system.stop(creator)
     }
+
     "Use recreated routees" in {
       val endProbe = TestProbe()
       val deadProbe = TestProbe()
