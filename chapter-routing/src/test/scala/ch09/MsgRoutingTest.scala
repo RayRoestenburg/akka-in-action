@@ -1,20 +1,15 @@
 package ch09
 
-import scala.concurrent.Await
 import scala.concurrent.duration._
 
 import akka.actor._
-import akka.routing._
-import akka.pattern.ask
 
 import org.scalatest._
-import org.scalatest.matchers.MustMatchers
 
 import akka.testkit.{ TestProbe, TestKit }
 
 class MsgRoutingTest
   extends TestKit(ActorSystem("MsgRoutingTest"))
-  with MustMatchers
   with WordSpecLike with BeforeAndAfterAll {
 
   override def afterAll() = {

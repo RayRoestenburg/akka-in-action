@@ -2,12 +2,10 @@ package ch09
 
 import akka.actor._
 import org.scalatest._
-import org.scalatest.matchers.MustMatchers
 import akka.testkit._
 
 class RouteSlipTest
   extends TestKit(ActorSystem("RouteSlipTest"))
-  with MustMatchers
   with WordSpecLike with BeforeAndAfterAll {
 
   override def afterAll() {

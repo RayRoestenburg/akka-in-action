@@ -3,7 +3,6 @@ package ch09
 import scala.concurrent.duration._
 
 import akka.actor._
-import org.scalatest.matchers.MustMatchers
 import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 import akka.routing._
 import akka.routing.ConsistentHashingRouter._
@@ -12,7 +11,6 @@ import akka.testkit.{TestProbe, TestKit}
 
 class HashRoutingTest
   extends TestKit(ActorSystem("PerfRoutingTest"))
-  with MustMatchers
   with WordSpecLike with BeforeAndAfterAll {
 
   override def afterAll() = {
