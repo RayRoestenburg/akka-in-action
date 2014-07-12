@@ -7,7 +7,7 @@ import akka.actor._
 
 
 object JobWorker {
-  def props = Props[JobWorker]
+  def props = Props(new JobWorker)
 
   case class Work(jobName:String, master:ActorRef)
   case class Task(input:List[String], master:ActorRef)

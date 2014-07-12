@@ -9,7 +9,7 @@ import akka.routing._
 
 
 object JobMaster {
-  def props = Props[JobMaster]
+  def props = Props(new JobMaster)
 
   case class StartJob(name: String, text: List[String])
   case class Enlist(worker:ActorRef)
