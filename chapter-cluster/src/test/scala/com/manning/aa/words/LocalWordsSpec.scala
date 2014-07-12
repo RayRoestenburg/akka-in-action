@@ -26,7 +26,7 @@ class TestReceptionist extends JobReceptionist
 }
 
 class LocalWordsSpec extends TestKit(ActorSystem("test"))
-                        with WordSpec
+                        with WordSpecLike
                         with MustMatchers
                         with StopSystemAfterAll
                         with ImplicitSender {
