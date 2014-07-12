@@ -1,4 +1,4 @@
-package ch09
+package aia.routing
 
 import akka.actor.{ Props, ActorRef, Actor }
 import scala.collection.mutable.ListBuffer

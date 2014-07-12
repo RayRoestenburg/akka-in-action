@@ -1,4 +1,4 @@
-package ch09
+package aia.routing
 
 import akka.actor.{ActorRef, Actor}
 import akka.routing.ConsistentHashingRouter.ConsistentHashable

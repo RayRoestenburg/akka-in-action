@@ -1,4 +1,4 @@
-package ch09
+package aia.structure
 
 import java.util.Date
 import scala.concurrent.duration._
