@@ -7,20 +7,17 @@ import scala.concurrent.duration._
 
 import akka.actor._
 import akka.pattern.ask
-import akka.util.Timeout
-
 import akka.routing._
 import scala.concurrent.Await
-import akka.remote.routing.RemoteRouterConfig
 
-import org.scalatest.{ BeforeAndAfterAll, WordSpecLike }
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.{MustMatchers, BeforeAndAfterAll, WordSpecLike}
 import akka.testkit._
 
 class PerfRoutingTest
   extends TestKit(ActorSystem("PerfRoutingTest"))
   with MustMatchers
-  with WordSpecLike with BeforeAndAfterAll {
+  with WordSpecLike
+  with BeforeAndAfterAll {
 
   override def afterAll() = {
     system.shutdown
@@ -251,8 +248,10 @@ class PerfRoutingTest
       )
       val router = system.actorOf(RoundRobinGroup(paths).props(), "groupRouter-test6")
 
+      deadProbe.expectNoMsg()
       router ! Broadcast(PoisonPill)
-      Thread.sleep(100)
+      deadProbe.expectNoMsg()
+
       val msg = PerformanceRoutingMessage(
         ImageProcessing.createPhotoString(new Date(), 60, "123xyz"),
         None,
@@ -499,42 +498,6 @@ class PerfRoutingTest
       testSystem.shutdown()
       //<end id="ch09-routing-dispatch-test"/>
       system.stop(router)
-    }
-    "addroutee with BalancingPool doesn't work" in {
-      val testSystem = ActorSystem("balance",
-        ConfigFactory.load("balance"))
-      val endProbe = TestProbe()(testSystem)
-
-      val router = testSystem.actorOf(BalancingPool(0).props(Props(new GetLicense(endProbe.ref, 250 millis))), "BalancingPoolRouter3")
-
-      val actor1 = testSystem.actorOf(Props(new GetLicense(endProbe.ref, 250 millis)),"250")
-      val actor2 = testSystem.actorOf(Props(new GetLicense(endProbe.ref, 500 millis)),"500")
-      router ! AddRoutee(ActorRefRoutee(actor1))
-      router ! AddRoutee(ActorRefRoutee(actor2))
-
-      val future = router.ask(GetRoutees)(1 second)
-      val routeesMsg = Await.result(future, 1.second).asInstanceOf[Routees]
-      val routees = routeesMsg.getRoutees
-      routees.size must be (2)
-
-      val msg = PerformanceRoutingMessage(
-        ImageProcessing.createPhotoString(new Date(), 60, "123xyz"),
-        None,
-        None)
-
-      for (index <- 0 until 10) {
-        routees.get(0).send(msg, endProbe.ref)
-      }
-      val processedMessages = endProbe.receiveN(10, 5 seconds).collect { case m: PerformanceRoutingMessage => m }
-      processedMessages.size must be(10)
-      val grouped = processedMessages.groupBy(_.processedBy)
-      val msgProcessedByActor1 = grouped.get(Some("250"))
-        .getOrElse(Seq())
-      val msgProcessedByActor2 = grouped.get(Some("500"))
-        .getOrElse(Seq())
-      msgProcessedByActor1.size must be(7 plusOrMinus 1)
-      msgProcessedByActor2.size must be(3 plusOrMinus 1)
-      testSystem.shutdown()
     }
   }
 }
