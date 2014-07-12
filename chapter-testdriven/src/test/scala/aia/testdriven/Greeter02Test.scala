@@ -1,14 +1,13 @@
-package ch02
+package aia.testdriven
 
-import akka.testkit.{ EventFilter, CallingThreadDispatcher, TestKit }
-import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import akka.testkit.{ TestKit }
+import org.scalatest.{WordSpecLike, WordSpec}
 import akka.actor._
+
 
 //<start id="ch02-helloworld-test2"/>
 class Greeter02Test extends TestKit(ActorSystem("testsystem"))
-  with WordSpec
-  with MustMatchers
+  with WordSpecLike
   with StopSystemAfterAll {
 
   "The Greeter" must {

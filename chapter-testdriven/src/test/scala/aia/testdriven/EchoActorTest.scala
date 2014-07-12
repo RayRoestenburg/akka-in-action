@@ -1,8 +1,8 @@
-package ch02
+package aia.testdriven
 
 import akka.testkit.{ TestKit, ImplicitSender }
 import akka.actor.{ Props, Actor, ActorSystem }
-import org.scalatest.WordSpec
+import org.scalatest.{WordSpecLike, WordSpec}
 import org.scalatest.matchers.MustMatchers
 
 import akka.util.Timeout
@@ -11,8 +11,7 @@ import scala.util.{ Try, Success, Failure }
 
 //<start id="ch02-echoactor-test-start"/>
 class EchoActorTest extends TestKit(ActorSystem("testsystem"))
-  with WordSpec
-  with MustMatchers
+  with WordSpecLike
   with ImplicitSender //<co id="implicit-sender"/>
   with StopSystemAfterAll {
 //<end id="ch02-echoactor-test-start"/>

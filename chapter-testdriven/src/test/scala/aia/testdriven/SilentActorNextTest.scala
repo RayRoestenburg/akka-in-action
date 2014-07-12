@@ -1,13 +1,14 @@
-package ch02
+package aia.testdriven
 
-import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
-import akka.testkit.{ TestActorRef, CallingThreadDispatcher, TestKit }
+import org.scalatest.WordSpecLike
+import org.scalatest.MustMatchers
+import akka.testkit.{ TestActorRef, TestKit }
 import akka.actor._
 
 package silentactor02 {
-  class SilentActorTest extends TestKit(ActorSystem("testsystem"))
-    with WordSpec
+
+class SilentActorTest extends TestKit(ActorSystem("testsystem"))
+    with WordSpecLike
     with MustMatchers
     with StopSystemAfterAll {
 
@@ -46,7 +47,7 @@ package silentactor02 {
 package silentactor03 {
 
   class SilentActorTest extends TestKit(ActorSystem("testsystem"))
-    with WordSpec
+    with WordSpecLike
     with MustMatchers
     with StopSystemAfterAll {
 

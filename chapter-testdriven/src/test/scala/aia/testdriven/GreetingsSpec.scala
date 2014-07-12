@@ -1,4 +1,4 @@
-//package ch02
+//package aia.testdriven
 //
 //import org.scalatest.matchers.MustMatchers
 //import org.scalatest.{BeforeAndAfterAll, WordSpec}

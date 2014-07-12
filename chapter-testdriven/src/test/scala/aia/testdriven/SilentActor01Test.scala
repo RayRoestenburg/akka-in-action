@@ -1,13 +1,13 @@
-package ch02
+package aia.testdriven
 
-import org.scalatest.{ WordSpec }
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.{WordSpecLike, MustMatchers}
 import akka.testkit.TestKit
 import akka.actor._
+
 //This test is ignored in the BookBuild, it's added to the defaultExcludedNames
 //<start id="ch02-silentactor-test01"/>
 class SilentActor01Test extends TestKit(ActorSystem("testsystem")) //<co id="ch02-silentactor-test01-provide-system"/>
-  with WordSpec //<co id="ch02-silentactor-test01-wordspec"/>
+  with WordSpecLike //<co id="ch02-silentactor-test01-wordspec"/>
   with MustMatchers //<co id="ch02-silentactor-test01-mustmatchers"/>
   with StopSystemAfterAll { //<co id="ch02-silentactor-test01-stopsystem"/>
 

@@ -1,4 +1,4 @@
-package ch02
+package aia.testdriven
 //<start id="ch02-stopsystem"/>
 import org.scalatest.{ Suite, BeforeAndAfterAll }
 import akka.testkit.TestKit

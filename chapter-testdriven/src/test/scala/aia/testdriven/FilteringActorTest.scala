@@ -1,12 +1,11 @@
-package ch02
+package aia.testdriven
 
 import akka.testkit.TestKit
 import akka.actor.{ Actor, Props, ActorRef, ActorSystem }
-import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.{MustMatchers, WordSpecLike }
 
 class FilteringActorTest extends TestKit(ActorSystem("testsystem"))
-  with WordSpec
+  with WordSpecLike
   with MustMatchers
   with StopSystemAfterAll {
   "A Filtering Actor" must {

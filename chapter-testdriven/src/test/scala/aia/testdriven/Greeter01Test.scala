@@ -1,15 +1,14 @@
-package ch02
-import org.scalatest.WordSpec
-import org.scalatest.matchers.MustMatchers
+package aia.testdriven
 import akka.testkit.{ CallingThreadDispatcher, EventFilter, TestKit }
 import akka.actor.{ Props, ActorSystem }
 import com.typesafe.config.ConfigFactory
+import org.scalatest.WordSpecLike
+
 //<start id="ch02-helloworld-test"/>
 import Greeter01Test._
 
 class Greeter01Test extends TestKit(testSystem) //<co id="ch02-helloworld-use-system"/>
-  with WordSpec
-  with MustMatchers
+  with WordSpecLike
   with StopSystemAfterAll {
 
   "The Greeter" must {
@@ -28,7 +27,9 @@ class Greeter01Test extends TestKit(testSystem) //<co id="ch02-helloworld-use-sy
 object Greeter01Test {
   val testSystem = { //<co id="ch02-helloworld-test-create-system"/>
     val config = ConfigFactory.parseString(
-      """akka.event-handlers = ["akka.testkit.TestEventListener"]""")
+      """
+         akka.loggers = [akka.testkit.TestEventListener]
+      """)
     ActorSystem("testsystem", config)
   }
 }
