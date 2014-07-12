@@ -1,4 +1,4 @@
-package ch03
+package aia.faulttolerance
 
 import akka.actor._
 import java.io.File
