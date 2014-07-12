@@ -1,11 +1,11 @@
-package com.manning.aa
+package aia.cluster
 package words
 
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.actor._
 
 import org.scalatest._
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.MustMatchers
 
 import JobReceptionist._
 import akka.routing.BroadcastPool
