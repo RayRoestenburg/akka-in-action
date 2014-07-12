@@ -8,7 +8,7 @@ import akka.actor.Terminated
 
 
 object JobReceptionist {
-  def props = Props[JobReceptionist]
+  def props = Props(new JobReceptionist)
   def name = "receptionist"
 
   case class JobRequest(name: String, text: List[String])
