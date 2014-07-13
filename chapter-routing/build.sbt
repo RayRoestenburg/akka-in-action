@@ -8,7 +8,6 @@ scalaVersion := "2.11.1"
 
 libraryDependencies ++= {
   val akkaVersion       = "2.3.4"
-  val sprayVersion      = "1.2-20130710"
   Seq(
     "com.typesafe.akka"       %%  "akka-actor"                     % akkaVersion,
     "com.typesafe.akka"       %%  "akka-remote"                    % akkaVersion,
