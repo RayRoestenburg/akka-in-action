@@ -4,7 +4,7 @@ name := "words-cluster"
 
 version := "0.1-SNAPSHOT"
 
-organization := "com.manning.aa"
+organization := "com.manning"
 
 scalaVersion := "2.11.1"
 
@@ -33,7 +33,7 @@ libraryDependencies ++= {
 }
 
 // Assembly settings
-mainClass in Global := Some("com.manning.aa.words.Main")
+mainClass in Global := Some("aia.cluster.words.Main")
 
 jarName in assembly := "words-node.jar"
 

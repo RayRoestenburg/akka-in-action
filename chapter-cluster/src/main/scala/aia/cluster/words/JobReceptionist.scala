@@ -1,4 +1,4 @@
-package com.manning.aa
+package aia.cluster
 package words
 
 import java.net.URLEncoder

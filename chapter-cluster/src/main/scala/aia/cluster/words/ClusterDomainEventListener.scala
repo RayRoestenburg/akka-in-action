@@ -1,4 +1,4 @@
-package com.manning.aa.words
+package aia.cluster.words
 
 import akka.actor.{ActorLogging, Actor}
 
