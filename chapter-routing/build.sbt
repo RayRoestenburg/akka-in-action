@@ -2,7 +2,7 @@ name := "routing"
 
 version := "0.1-SNAPSHOT"
 
-organization := "manning"
+organization := "com.manning"
 
 scalaVersion := "2.11.1"
 
