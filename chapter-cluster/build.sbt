@@ -4,7 +4,7 @@ name := "words-cluster"
 
 version := "0.1-SNAPSHOT"
 
-organization := "aia.cluster"
+organization := "com.manning"
 
 scalaVersion := "2.11.1"
 
