@@ -23,7 +23,7 @@ libraryDependencies ++= {
     "io.spray"          %% "spray-routing"   % sprayVersion,
     "io.spray"          %% "spray-json"      % "1.2.6",
     "com.typesafe.akka" %% "akka-slf4j"      % akkaVersion,
-    "ch.qos.logback"    %  "logback-classic" % "1.0.10",
+    "ch.qos.logback"    %  "logback-classic" % "1.1.2",
     "com.typesafe.akka" %% "akka-testkit"    % akkaVersion   % "test",
     "org.scalatest"     %% "scalatest"       % "2.2.0"       % "test"
   )
