@@ -2,11 +2,11 @@ package com.goticks
 
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.actor.{Props, ActorSystem}
-import org.scalatest.WordSpec
+import org.scalatest.WordSpecLike
 import org.scalatest.matchers.MustMatchers
 
 class BoxOfficeSpec extends TestKit(ActorSystem("testTickets"))
-                       with WordSpec
+                       with WordSpecLike
                        with MustMatchers
                        with ImplicitSender
                        with StopSystemAfterAll {
