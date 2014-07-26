@@ -20,12 +20,16 @@ object GoTicksBuild extends Build {
     compile in MultiJvm <<= (compile in MultiJvm) triggeredBy (compile in Test),
     // disable parallel tests
     parallelExecution in Test := false,
-    // make sure that MultiJvm tests are executed by the default test target
-    executeTests in Test <<=
-      ((executeTests in Test), (executeTests in MultiJvm)) map {
-        case ((_, testResults), (_, multiJvmResults))  =>
-          val results = testResults ++ multiJvmResults
-          (Tests.overall(results.values), results)
+    // make sure that MultiJvm tests are executed by the default test target,
+    // and combine the results from ordinary test and multi-jvm tests
+    executeTests in Test <<= (executeTests in Test, executeTests in MultiJvm) map {
+        case (testResults, multiJvmResults) =>
+          val overall =
+            if (testResults.overall.id < multiJvmResults.overall.id) multiJvmResults.overall
+            else testResults.overall
+          Tests.Output(overall,
+            testResults.events ++ multiJvmResults.events,
+            testResults.summaries ++ multiJvmResults.summaries)
       }
   )
 }
