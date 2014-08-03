@@ -21,4 +21,9 @@ project/plugins/project/
 *.sublime-workspace
 /.env
 atlassian-ide-plugin.xml
+
+# Mac OSX specific
 .DS_Store
+
+#ActiveMQ specific
+*.data
