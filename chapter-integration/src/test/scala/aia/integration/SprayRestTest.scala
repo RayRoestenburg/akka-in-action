@@ -15,7 +15,7 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
   implicit val executor = system.dispatcher
 
   val orderSystem = system.actorOf(Props[ProcessOrders])
-  var orderHttp = new OrderHttpServer("localhost", 8181, orderSystem)
+  var orderHttp = new OrderHttpServer("localhost", 8182, orderSystem)
 
   override def beforeAll() {
     orderHttp.main(Array())
@@ -39,7 +39,7 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
                   <number>10</number>
                 </order>
 
-      val urlConnection = new URL("http://localhost:8181/orderTest") ///orderTest")
+      val urlConnection = new URL("http://localhost:8182/orderTest") ///orderTest")
       val conn = urlConnection.openConnection()
       conn.setDoOutput(true)
       conn.setRequestProperty(
@@ -72,7 +72,7 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
     "response when request status" in {
       //<start id="ch08-rest-spray-test-status"/>
       orderSystem ! "reset"
-      val url = "http://localhost:8181/orderTest"
+      val url = "http://localhost:8182/orderTest"
       val msg = new Order("me", "Akka in Action", 10)
       val xml = <order>
                   <customerId>{ msg.customerId }</customerId>
@@ -107,7 +107,7 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
       (confirm \\ "id").text must be("1")
       (confirm \\ "status").text must be("received")
 
-      val url2 = "http://localhost:8181/orderTest?id=1"
+      val url2 = "http://localhost:8182/orderTest?id=1"
       val urlConnection2 = new URL(url2) //<co id="ch08-rest-spray-test-status-4"/>
       val conn2 = urlConnection2.openConnection()
 
@@ -132,7 +132,7 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
     }
     "response when missing id" in {
       orderSystem ! "reset"
-      val url = "http://localhost:8181/orderTest"
+      val url = "http://localhost:8182/orderTest"
 
       val urlConnection = new URL(url)
       val conn = urlConnection.openConnection()
@@ -141,12 +141,12 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
       val ex = evaluating {
         conn.getInputStream
       } must produce[FileNotFoundException]
-      ex.getMessage must be("http://localhost:8181/orderTest")
+      ex.getMessage must be("http://localhost:8182/orderTest")
     }
     "response when parsing error" in {
       orderSystem ! "reset"
 
-      val url = "http://localhost:8181/orderTest"
+      val url = "http://localhost:8182/orderTest"
       val xml = """<order><customerId>customer1</customerId>""" +
         """<productId>Akka in action</productId>"""
 
@@ -165,7 +165,7 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
       } must produce[IOException]
       ex.getMessage must be(
         "Server returned HTTP response code: 500 for URL: " +
-          "http://localhost:8181/orderTest")
+          "http://localhost:8182/orderTest")
 
       writer.close()
 
