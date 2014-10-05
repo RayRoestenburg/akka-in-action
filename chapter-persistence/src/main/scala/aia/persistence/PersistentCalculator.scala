@@ -44,10 +44,10 @@ class PersistentCalculator extends PersistentActor {
     case Subtract(value) => persist(Subtracted(value))(updateState)
     case Divide(value)   => if(value != 0) persist(Divided(value))(updateState)
     case Multiply(value) => persist(Multiplied(value))(updateState)
-    case PrintResult       => println(s"the result is: ${state.result}")
+    case PrintResult     => println(s"the result is: ${state.result}")
   }
 
-  val updateState: Event =>Unit = {
+  val updateState: Event => Unit = {
     case Added(value) => state = state.add(value)
     case Subtracted(value) => state = state.subtract(value)
     case Divided(value) => state = state.divide(value)
