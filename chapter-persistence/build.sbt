@@ -19,6 +19,7 @@ libraryDependencies ++= {
     "com.typesafe.akka"       %%  "akka-persistence-experimental"  % akkaVersion exclude("org.iq80.leveldb", "leveldb"),
     "org.iq80.leveldb"        %   "leveldb"                        % "0.7",
     "com.typesafe.akka"       %%  "akka-testkit"                   % akkaVersion   % "test",
+    "commons-io"              %   "commons-io"                     % "2.4",
     "org.scalatest"           %%  "scalatest"                      % "2.2.0"       % "test",
     "ch.qos.logback"          %   "logback-classic"                % "1.0.10"
   )

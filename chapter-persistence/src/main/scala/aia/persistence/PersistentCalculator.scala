@@ -13,6 +13,7 @@ object PersistentCalculator {
   case class Divide(value: Double) extends Command
   case class Multiply(value: Double) extends Command
   case object PrintResult extends Command
+  case object GetResult extends Command
 
   sealed trait Event
   case class Added(value: Double) extends Event
@@ -45,6 +46,7 @@ class PersistentCalculator extends PersistentActor {
     case Divide(value)   => if(value != 0) persist(Divided(value))(updateState)
     case Multiply(value) => persist(Multiplied(value))(updateState)
     case PrintResult     => println(s"the result is: ${state.result}")
+    case GetResult     => sender() ! state.result
   }
 
   val updateState: Event => Unit = {
