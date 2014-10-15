@@ -3,8 +3,8 @@ package aia.persistence
 import akka.actor._
 import akka.persistence._
 
-object PersistentCalculator {
-  def props = Props(new PersistentCalculator)
+object Calculator {
+  def props = Props(new Calculator)
   def name = "calc"
 
   sealed trait Command
@@ -29,8 +29,8 @@ object PersistentCalculator {
   }
 }
 
-class PersistentCalculator extends PersistentActor {
-  import PersistentCalculator._
+class Calculator extends PersistentActor {
+  import Calculator._
 
   var state = CalculationResult()
 
@@ -47,6 +47,7 @@ class PersistentCalculator extends PersistentActor {
     case Multiply(value) => persist(Multiplied(value))(updateState)
     case PrintResult     => println(s"the result is: ${state.result}")
     case GetResult     => sender() ! state.result
+    //TODO snapshot whenever the result is requested?
   }
 
   val updateState: Event => Unit = {
