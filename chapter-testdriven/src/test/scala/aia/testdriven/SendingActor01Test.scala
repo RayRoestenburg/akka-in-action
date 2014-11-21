@@ -3,7 +3,6 @@ package aia.testdriven
 import akka.testkit.TestKit
 import akka.actor.{ Props, ActorRef, Actor, ActorSystem }
 import org.scalatest.{WordSpecLike, MustMatchers}
-import scala.concurrent.duration._
 
 class SendingActor01Test extends TestKit(ActorSystem("testsystem"))
   with WordSpecLike
