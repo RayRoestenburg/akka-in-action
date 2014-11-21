@@ -8,6 +8,8 @@ import akka.util.Timeout
 import scala.concurrent.Await
 import scala.util.{ Success, Failure }
 
+import scala.language.postfixOps
+
 //<start id="ch02-echoactor-test-start"/>
 class EchoActorTest extends TestKit(ActorSystem("testsystem"))
   with WordSpecLike
