@@ -2,12 +2,11 @@ package aia.testdriven
 
 import akka.testkit.{ TestKit, ImplicitSender }
 import akka.actor.{ Props, Actor, ActorSystem }
-import org.scalatest.{WordSpecLike, WordSpec}
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.WordSpecLike
 
 import akka.util.Timeout
 import scala.concurrent.Await
-import scala.util.{ Try, Success, Failure }
+import scala.util.{ Success, Failure }
 
 //<start id="ch02-echoactor-test-start"/>
 class EchoActorTest extends TestKit(ActorSystem("testsystem"))
