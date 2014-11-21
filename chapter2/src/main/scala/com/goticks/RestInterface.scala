@@ -46,7 +46,7 @@ trait RestApi extends HttpService with ActorLogging { actor: Actor =>
         }
       }
     } ~
-    path("ticket" / PathElement) { eventName => requestContext =>
+    path("ticket" / Segment) { eventName => requestContext =>
       val req = TicketRequest(eventName)
       val responder = createResponder(requestContext)
       boxOffice.ask(req).pipeTo(responder)
