@@ -8,6 +8,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 import akka.util.Timeout
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class RestInterface extends HttpServiceActor
                     with RestApi {
