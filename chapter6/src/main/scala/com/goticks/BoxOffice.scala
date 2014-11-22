@@ -4,6 +4,7 @@ import akka.actor._
 import concurrent.Future
 import scala.concurrent.duration._
 import akka.util.Timeout
+import scala.language.postfixOps
 
 class BoxOffice extends Actor with ActorLogging {
   import TicketProtocol._

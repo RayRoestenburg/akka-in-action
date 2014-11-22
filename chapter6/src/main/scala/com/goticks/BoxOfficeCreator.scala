@@ -4,6 +4,7 @@ import akka.actor._
 import com.typesafe.config.ConfigFactory
 import akka.actor.ActorIdentity
 import akka.actor.Identify
+import scala.language.postfixOps
 
 trait BoxOfficeCreator { this: Actor =>
   def createBoxOffice:ActorRef = context.actorOf(Props[BoxOffice],"boxOffice")
