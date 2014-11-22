@@ -1,7 +1,7 @@
 package com.goticks
 
 import com.typesafe.config.ConfigFactory
-import akka.actor.{Props, ActorSystem}
+import akka.actor.ActorSystem
 
 object BackendRemoteDeployMain extends App {
 
