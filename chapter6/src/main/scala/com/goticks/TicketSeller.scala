@@ -28,7 +28,6 @@ class TicketSeller extends Actor {
 
 object TicketProtocol {
   import spray.json._
-  import DefaultJsonProtocol._
 
   case class Event(event:String, nrOfTickets:Int)
 
