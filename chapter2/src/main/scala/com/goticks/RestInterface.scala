@@ -8,6 +8,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 import akka.util.Timeout
 import scala.concurrent.duration._
+import scala.language.postfixOps
 
 class RestInterface extends HttpServiceActor
                     with RestApi {
@@ -46,7 +47,7 @@ trait RestApi extends HttpService with ActorLogging { actor: Actor =>
         }
       }
     } ~
-    path("ticket" / PathElement) { eventName => requestContext =>
+    path("ticket" / Segment) { eventName => requestContext =>
       val req = TicketRequest(eventName)
       val responder = createResponder(requestContext)
       boxOffice.ask(req).pipeTo(responder)

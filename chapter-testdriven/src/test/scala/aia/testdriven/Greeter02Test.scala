@@ -1,7 +1,7 @@
 package aia.testdriven
 
 import akka.testkit.{ TestKit }
-import org.scalatest.{WordSpecLike, WordSpec}
+import org.scalatest.WordSpecLike
 import akka.actor._
 
 
