@@ -3,7 +3,7 @@ package com.goticks
 import akka.testkit.{ImplicitSender, TestKit}
 import akka.actor.{Props, ActorSystem}
 import org.scalatest.WordSpecLike
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.MustMatchers
 
 class BoxOfficeSpec extends TestKit(ActorSystem("testTickets"))
                        with WordSpecLike
