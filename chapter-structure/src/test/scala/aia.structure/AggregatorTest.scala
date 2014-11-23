@@ -7,6 +7,7 @@ import akka.testkit._
 import akka.actor._
 
 import org.scalatest._
+import scala.language.postfixOps
 
 class AggregatorTest
   extends TestKit(ActorSystem("AggregatorTest"))

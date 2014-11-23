@@ -7,6 +7,7 @@ import akka.actor._
 
 import org.scalatest._
 import akka.testkit._
+import scala.language.postfixOps
 
 class ScatterGatherTest
   extends TestKit(ActorSystem("ScatterGatherTest"))
