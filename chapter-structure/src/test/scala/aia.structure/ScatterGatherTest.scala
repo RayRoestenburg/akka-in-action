@@ -7,6 +7,7 @@ import akka.actor._
 
 import org.scalatest._
 import akka.testkit._
+import scala.language.postfixOps
 
 class ScatterGatherTest
   extends TestKit(ActorSystem("ScatterGatherTest"))
@@ -31,15 +32,16 @@ class ScatterGatherTest
         Props(new RecipientList(Seq(speedRef, timeRef)))) //<co id="ch07-scatter-gather-test-4" />
 
       val photoDate = new Date()
+      val photoSpeed = 60
       val msg = PhotoMessage("id1",
-        ImageProcessing.createPhotoString(photoDate, 60))
+        ImageProcessing.createPhotoString(photoDate, photoSpeed))
 
       actorRef ! msg //<co id="ch07-scatter-gather-test-5" />
 
       val combinedMsg = PhotoMessage(msg.id,
         msg.photo,
         Some(photoDate),
-        Some(60))
+        Some(photoSpeed))
 
       endProbe.expectMsg(combinedMsg) //<co id="ch07-scatter-gather-test-6" />
 
