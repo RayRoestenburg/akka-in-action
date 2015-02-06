@@ -1,4 +1,5 @@
 package akka.testkit
+//<start id="persistence-persistence_spec"/>
 
 import java.io.File
 import com.typesafe.config._
@@ -38,8 +39,9 @@ trait PersistenceCleanup {
     storageLocations.foreach(dir ⇒ Try(FileUtils.deleteDirectory(dir)))
   }
 }
+//<end id="persistence-persistence_spec"/>
 
-// taken from akka persistence
+// copied from akka persistence
 object PersistenceSpec {
   def config(plugin: String, test: String, native: String = "off", serialization: String = "on", extraConfig: Option[String] = None) =
     extraConfig.map(ConfigFactory.parseString(_)).getOrElse(ConfigFactory.empty()).withFallback(

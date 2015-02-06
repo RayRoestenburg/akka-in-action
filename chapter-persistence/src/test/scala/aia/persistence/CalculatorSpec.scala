@@ -4,8 +4,6 @@ import akka.actor._
 import akka.testkit._
 import org.scalatest._
 
-import PersistenceSpec._
-
 class CalculatorSpec extends PersistenceSpec(ActorSystem("test"))
     with WordSpecLike
     with PersistenceCleanup {
@@ -16,6 +14,7 @@ class CalculatorSpec extends PersistenceSpec(ActorSystem("test"))
       calc ! Calculator.Add(1d)
       calc ! Calculator.GetResult
       expectMsg(1d)
+
       calc ! Calculator.Subtract(0.5d)
       calc ! Calculator.GetResult
       expectMsg(0.5d)
@@ -25,6 +24,9 @@ class CalculatorSpec extends PersistenceSpec(ActorSystem("test"))
       expectTerminated(calc)
 
       val calcResurrected = system.actorOf(Calculator.props, Calculator.name)
+      calcResurrected ! Calculator.GetResult
+      expectMsg(0.5d)
+
       calcResurrected ! Calculator.Add(1d)
       calcResurrected ! Calculator.GetResult
       expectMsg(1.5d)

@@ -1,3 +1,4 @@
+//<start id="persistence-calc"/>
 package aia.persistence
 
 import akka.actor._
@@ -7,7 +8,8 @@ object Calculator {
   def props = Props(new Calculator)
   def name = "calc"
 
-  sealed trait Command
+  //<start id="persistence-calc_commands_events"/>
+  sealed trait Command //<co id="persistence-calc_command"/>
   case class Add(value: Double) extends Command
   case class Subtract(value: Double) extends Command
   case class Divide(value: Double) extends Command
@@ -15,31 +17,41 @@ object Calculator {
   case object PrintResult extends Command
   case object GetResult extends Command
 
-  sealed trait Event
+  sealed trait Event //<co id="persistence-calc_event"/>
   case class Added(value: Double) extends Event
   case class Subtracted(value: Double) extends Event
   case class Divided(value: Double) extends Event
   case class Multiplied(value: Double) extends Event
+  //<end id="persistence-calc_commands_events"/>
 
+  //<start id="persistence-calc_result"/>
   case class CalculationResult(result: Double = 0) {
     def add(value: Double) = copy(result = this.result + value)
     def subtract(value: Double) = copy(result = this.result - value)
     def divide(value: Double) = copy(result = this.result / value)
     def multiply(value: Double) = copy(result = this.result * value)
   }
+  //<end id="persistence-calc_result"/>
 }
 
+//<start id="persistence-extend_persistent_actor"/>
 class Calculator extends PersistentActor {
   import Calculator._
 
-  var state = CalculationResult()
-
   def persistenceId = "my-calculator"
 
+  var state = CalculationResult()
+  // more code to follow ..
+//<end id="persistence-extend_persistent_actor"/>
+
+
+  //<start id="persistence-receive_recover_calc"/>
   val receiveRecover: Receive = {
     case event: Event => updateState(event)
   }
+  //<end id="persistence-receive_recover_calc"/>
 
+  //<start id="persistence-receive_command_calc"/>
   val receiveCommand: Receive = {
     case Add(value)      => persist(Added(value))(updateState)
     case Subtract(value) => persist(Subtracted(value))(updateState)
@@ -47,13 +59,16 @@ class Calculator extends PersistentActor {
     case Multiply(value) => persist(Multiplied(value))(updateState)
     case PrintResult     => println(s"the result is: ${state.result}")
     case GetResult     => sender() ! state.result
-    //TODO snapshot whenever the result is requested?
   }
+  //<end id="persistence-receive_command_calc"/>
 
+  //<start id="persistence-update_state_calc"/>
   val updateState: Event => Unit = {
     case Added(value) => state = state.add(value)
     case Subtracted(value) => state = state.subtract(value)
     case Divided(value) => state = state.divide(value)
     case Multiplied(value) => state = state.multiply(value)
   }
+  //<end id="persistence-update_state_calc"/>
 }
+//<end id="persistence-calc"/>
