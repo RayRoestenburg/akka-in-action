@@ -11,7 +11,8 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class RestInterface extends HttpServiceActor
-                    with RestApi {
+  with RestApi {
+
   def receive = runRoute(routes)
 }
 
@@ -79,6 +80,5 @@ class Responder(requestContext:RequestContext, ticketMaster:ActorRef) extends Ac
     case Events(events) =>
       requestContext.complete(StatusCodes.OK, events)
       self ! PoisonPill
-
   }
 }
