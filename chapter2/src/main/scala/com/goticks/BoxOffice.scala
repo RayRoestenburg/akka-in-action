@@ -42,9 +42,11 @@ class BoxOffice extends Actor with CreateTicketSellers with ActorLogging {
 
         val futureInt = ticketSeller.ask(GetEvents).mapTo[Int]
 
-        futureInt.map(nrOfTickets => Event(ticketSeller.actorRef.path.name, nrOfTickets))
+        futureInt.map(nrOfTickets =>
+          Event(ticketSeller.actorRef.path.name, nrOfTickets))
       }
-      val futures = context.children.map(ticketSeller => askAndMapToEvent(ticketSeller))
+      val futures = context.children.map(ticketSeller =>
+        askAndMapToEvent(ticketSeller))
 
       Future.sequence(futures).map { events =>
         capturedSender ! Events(events.toList)

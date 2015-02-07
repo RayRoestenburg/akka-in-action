@@ -54,12 +54,12 @@ trait RestApi extends HttpService with ActorLogging { actor: Actor =>
       boxOffice.ask(req).pipeTo(responder)
     }
   def createResponder(requestContext:RequestContext) = {
-    context.actorOf(Props(new Responder(requestContext, boxOffice)))
+    context.actorOf(Props(new Responder(requestContext)))
   }
 
 }
 
-class Responder(requestContext:RequestContext, ticketMaster:ActorRef) extends Actor with ActorLogging {
+class Responder(requestContext:RequestContext) extends Actor with ActorLogging {
   import TicketProtocol._
   import spray.httpx.SprayJsonSupport._
 
