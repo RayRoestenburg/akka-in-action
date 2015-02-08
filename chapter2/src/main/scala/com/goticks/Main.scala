@@ -27,9 +27,11 @@ object Main extends App {
   IO(Http).ask(Http.Bind(listener = api, interface = host, port = port))
     .mapTo[Http.Event]
     .map {
-      case Http.Bound(address) => println(s"REST interface bound to $address")
+      case Http.Bound(address) =>
+        println(s"REST interface bound to $address")
       case Http.CommandFailed(cmd) =>
-        println(s"REST interface could not bind to $host:$port, ${cmd.failureMessage}")
+        println("REST interface could not bind to " +
+          s"$host:$port, ${cmd.failureMessage}")
         system.shutdown()
     }
 }
