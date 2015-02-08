@@ -1,13 +1,12 @@
-import AssemblyKeys._
-import com.typesafe.sbt.SbtStartScript
+enablePlugins(JavaServerAppPackaging)
 
 name := "goticks"
 
-version := "0.1-SNAPSHOT"
+version := "1.0"
 
 organization := "com.goticks"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.5"
 
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Spray Repository"    at "http://repo.spray.io")
@@ -31,8 +30,3 @@ libraryDependencies ++= {
 mainClass in Global := Some("com.goticks.Main")
 
 jarName in assembly := "goticks-server.jar"
-
-assemblySettings
-
-// StartScript settings
-seq(SbtStartScript.startScriptForClassesSettings: _*)
