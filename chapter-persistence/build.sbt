@@ -1,8 +1,6 @@
-import AssemblyKeys._
-
 name := "persistence"
 
-version := "0.1-SNAPSHOT"
+version := "1.0"
 
 organization := "com.manning"
 
@@ -20,8 +18,8 @@ libraryDependencies ++= {
     "org.iq80.leveldb"        %   "leveldb"                        % "0.7",
     "com.typesafe.akka"       %%  "akka-testkit"                   % akkaVersion   % "test",
     "commons-io"              %   "commons-io"                     % "2.4",
-    "org.scalatest"           %%  "scalatest"                      % "2.2.0"       % "test",
-    "ch.qos.logback"          %   "logback-classic"                % "1.0.10"
+    "org.scalatest"           %%  "scalatest"                      % "2.2.4"       % "test",
+    "ch.qos.logback"          %   "logback-classic"                % "1.1.2"
   )
 }
 
@@ -29,5 +27,3 @@ libraryDependencies ++= {
 mainClass in Global := Some("aia.persistence.Main")
 
 jarName in assembly := "calculator.jar"
-
-assemblySettings
