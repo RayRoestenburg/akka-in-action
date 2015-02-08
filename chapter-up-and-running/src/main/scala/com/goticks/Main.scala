@@ -20,10 +20,15 @@ object Main extends App {
 
   implicit val system = ActorSystem("goticks")
 
-  val api = system.actorOf(Props(new RestInterface()), "httpInterface")
 
   implicit val executionContext = system.dispatcher
-  implicit val timeout = Timeout(10 seconds)
+
+  implicit val requestTimeout: Timeout = {
+    val d = Duration(system.settings.config.getString("spray.can.server.request-timeout"))
+    FiniteDuration(d.length, d.unit) - 1.second
+  }
+
+  val api = system.actorOf(Props(new RestApi()), "httpInterface")
 
   IO(Http).ask(Http.Bind(listener = api, interface = host, port = port))
     .mapTo[Http.Event]

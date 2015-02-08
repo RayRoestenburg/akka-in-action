@@ -1,7 +1,8 @@
 package com.goticks
 
-import org.scalatest.{Suite, BeforeAndAfterAll}
 import akka.testkit.TestKit
+
+import org.scalatest.{Suite, BeforeAndAfterAll}
 
 trait StopSystemAfterAll extends BeforeAndAfterAll {
   this: TestKit with Suite =>
