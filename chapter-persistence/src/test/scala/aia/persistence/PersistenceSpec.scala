@@ -25,6 +25,14 @@ abstract class PersistenceSpec(system: ActorSystem) extends TestKit(system)
     deleteStorageLocations()
     TestKit.shutdownActorSystem(system)
   }
+
+  def killActors(actors: ActorRef*) = {
+    actors.foreach { actor =>
+      watch(actor)
+      system.stop(actor)
+      expectTerminated(actor)
+    }
+  }
 }
 
 trait PersistenceCleanup {
