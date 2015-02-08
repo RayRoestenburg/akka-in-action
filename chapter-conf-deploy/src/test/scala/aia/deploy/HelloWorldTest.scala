@@ -17,7 +17,7 @@ class HelloWorldTest extends TestKit(ActorSystem("HelloWorldTest"))
     system.shutdown
   }
   "HelloWorld" must {
-    "must reply when sending a string" in {
+    "reply when sending a string" in {
       actor ! "everybody"
       expectMsg("Hello everybody")
     }
