@@ -17,6 +17,8 @@ libraryDependencies ++= {
     "com.typesafe.akka"       %%  "akka-actor"                     % akkaVersion,
     "com.typesafe.akka"       %%  "akka-slf4j"                     % akkaVersion,
     "com.typesafe.akka"       %%  "akka-persistence-experimental"  % akkaVersion exclude("org.iq80.leveldb", "leveldb"),
+    "com.typesafe.akka"       %%  "akka-cluster"                   % akkaVersion,
+    "com.typesafe.akka"       %%  "akka-contrib"                   % akkaVersion,
     "org.iq80.leveldb"        %   "leveldb"                        % "0.7",
     "com.typesafe.akka"       %%  "akka-testkit"                   % akkaVersion   % "test",
     "commons-io"              %   "commons-io"                     % "2.4",

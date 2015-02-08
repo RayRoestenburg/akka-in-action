@@ -2,7 +2,7 @@ package aia.persistence
 
 import akka.actor._
 
-object Main extends App {
+object CalculatorMain extends App {
   val system = ActorSystem("calc")
   val calc = system.actorOf(Calculator.props, Calculator.name)
 
