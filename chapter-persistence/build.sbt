@@ -9,6 +9,8 @@ scalaVersion := "2.11.5"
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Sonatype snapshots"  at "http://oss.sonatype.org/content/repositories/snapshots/")
 
+parallelExecution in Test := false
+
 libraryDependencies ++= {
   val akkaVersion       = "2.3.9"
   Seq(
