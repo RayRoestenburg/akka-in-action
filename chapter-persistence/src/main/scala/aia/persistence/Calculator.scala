@@ -6,10 +6,11 @@ import akka.persistence._
 
 object Calculator {
   def props = Props(new Calculator)
-  def name = "calc"
+  def name = "my-calculator"
 
   //<start id="persistence-calc_commands_events"/>
   sealed trait Command //<co id="persistence-calc_command"/>
+  case object Clear extends Command
   case class Add(value: Double) extends Command
   case class Subtract(value: Double) extends Command
   case class Divide(value: Double) extends Command
@@ -18,6 +19,7 @@ object Calculator {
   case object GetResult extends Command
 
   sealed trait Event //<co id="persistence-calc_event"/>
+  case object Reset extends Event
   case class Added(value: Double) extends Event
   case class Subtracted(value: Double) extends Event
   case class Divided(value: Double) extends Event
@@ -26,6 +28,7 @@ object Calculator {
 
   //<start id="persistence-calc_result"/>
   case class CalculationResult(result: Double = 0) {
+    def reset = copy(result = 0)
     def add(value: Double) = copy(result = this.result + value)
     def subtract(value: Double) = copy(result = this.result - value)
     def divide(value: Double) = copy(result = this.result / value)
@@ -38,7 +41,7 @@ object Calculator {
 class Calculator extends PersistentActor {
   import Calculator._
 
-  def persistenceId = "my-calculator"
+  def persistenceId = Calculator.name
 
   var state = CalculationResult()
   // more code to follow ..
@@ -59,11 +62,13 @@ class Calculator extends PersistentActor {
     case Multiply(value) => persist(Multiplied(value))(updateState)
     case PrintResult     => println(s"the result is: ${state.result}")
     case GetResult     => sender() ! state.result
+    case Clear => persist(Reset)(updateState)
   }
   //<end id="persistence-receive_command_calc"/>
 
   //<start id="persistence-update_state_calc"/>
   val updateState: Event => Unit = {
+    case Reset => state = state.reset
     case Added(value) => state = state.add(value)
     case Subtracted(value) => state = state.subtract(value)
     case Divided(value) => state = state.divide(value)
