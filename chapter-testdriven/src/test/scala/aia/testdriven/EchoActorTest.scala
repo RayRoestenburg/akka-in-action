@@ -48,7 +48,7 @@ class EchoActorTest extends TestKit(ActorSystem("testsystem"))
 class EchoActor extends Actor {
   def receive = {
     case msg =>
-      sender ! msg
+      sender() ! msg
   }
 }
 //<end id="ch02-echoactor-imp"/>
