@@ -37,7 +37,9 @@ class Wallet(shopperId: Long) extends PersistentActor
           sender() ! paidItems
           context.system.eventStream.publish(paidItems)
         }
-      } else context.system.eventStream.publish(NotEnoughCash(cash - amountSpent))
+      } else {
+        context.system.eventStream.publish(NotEnoughCash(cash - amountSpent))
+      }
     case CheckPocket => sender() ! Cash(cash - amountSpent)
     case SpentHowMuch => sender() ! AmountSpent(amountSpent)
   }
@@ -47,12 +49,11 @@ class Wallet(shopperId: Long) extends PersistentActor
   }
 
   private val updateState: (Event ⇒ Unit) = {
-    case paidItems @ Paid(items) =>
-      amountSpent = addSpending(items)
+    case paidItems @ Paid(items) => amountSpent = addSpending(items)
   }
 
   private def addSpending(items: Basket.Items) =
-    amountSpent + items.foldLeft(BigDecimal(0)){ (acc, item) =>
-      acc + (item.price * item.number)
+    amountSpent + items.foldLeft(BigDecimal(0)){ (total, item) =>
+      total + (item.price * item.number)
     }
 }

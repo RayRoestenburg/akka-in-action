@@ -14,9 +14,12 @@ object ShardedShopper {
   sealed trait Command {
     def shopperId: Long
   }
+
   case class ForwardToBasket(shopperId: Long,
     basketCommand: Basket.Command) extends Command
 
+  case class ForwardToWallet(shopperId: Long,
+    walletCommand: Wallet.Command) extends Command
 
   case object Stop
 
