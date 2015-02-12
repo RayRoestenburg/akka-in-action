@@ -15,6 +15,7 @@ import org.apache.commons.io.FileUtils
 abstract class PersistenceSpec(system: ActorSystem) extends TestKit(system)
   with ImplicitSender
   with WordSpecLike
+  with Matchers
   with BeforeAndAfterAll
   with PersistenceCleanup {
 

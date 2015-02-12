@@ -7,7 +7,6 @@ import akka.testkit._
 import org.scalatest._
 
 class CalculatorHistorySpec extends PersistenceSpec(ActorSystem("test"))
-    with WordSpecLike
     with PersistenceCleanup {
 
   "The CalculatorHistory" should {

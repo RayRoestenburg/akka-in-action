@@ -1,5 +1,7 @@
 package aia.persistence
 
+import scala.collection.SeqLike
+
 import akka.actor._
 import akka.persistence._
 
@@ -7,11 +9,40 @@ object Basket {
   def props(shopperId: Long) = Props(new Basket(shopperId))
   def name(shopperId: Long) = s"basket_${shopperId}"
 
-  case class Item(productId:String, number: Int)
-  case class Items(items: List[Item] = Nil) {
+  case class Item(productId:String, number: Int, price: BigDecimal)
+
+  object Items {
+    def apply(items: Item*):Items = Items(items.toList)
+  }
+
+  case class Items(items: List[Item] = Nil) extends SeqLike[Item, Items] {
     def add(item: Item) = copy(items = items :+ item)
     def remove(item: Item) = copy(items = items.filterNot(_ == item))
     def clear = Items()
+
+    override def equals(that:Any) = {
+      that match {
+        case otherItems: Items =>
+          items.equals(otherItems.items)
+        case _ => false
+      }
+    }
+
+    override def apply(idx: Int): Item = items(idx)
+    override def iterator = items.iterator
+    override def length = items.length
+    override def seq = items.seq
+    override protected[this] def newBuilder = {
+      new scala.collection.mutable.Builder[Item, Items] {
+        val l = scala.collection.mutable.ListBuffer[Item]()
+        override def result() = Items(l.toList)
+        override def clear() = l.clear()
+        override def +=(elem: Item) = {
+          l.append(elem)
+          this
+        }
+      }
+    }
   }
 
   sealed trait Command
