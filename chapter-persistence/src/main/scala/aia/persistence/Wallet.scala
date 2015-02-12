@@ -9,6 +9,12 @@ object Wallet {
 
   sealed trait Command
   case class Pay(items: Basket.Items) extends Command
+  case object CheckPocket extends Command
+  case object SpentHowMuch extends Command
+
+  case class AmountSpent(amount: BigDecimal)
+  case class NotEnoughCash(left: BigDecimal)
+  case class Cash(left: BigDecimal)
 
   sealed trait Event
   case class Paid(items: Basket.Items) extends Event
@@ -17,13 +23,23 @@ object Wallet {
 class Wallet(shopperId: Long) extends PersistentActor
     with ActorLogging {
       import Wallet._
-
+  var cash: BigDecimal = 40000
   var amountSpent: BigDecimal = 0
 
   def persistenceId = s"${self.path.name}"
 
   def receiveCommand = {
-    case Pay(items) => persist(Paid(items))(updateState)
+    case Pay(items) =>
+      val totalSpent = addSpending(items)
+      if(cash - totalSpent > 0) {
+        persist(Paid(items)) { paidItems =>
+          updateState(paidItems)
+          sender() ! paidItems
+          context.system.eventStream.publish(paidItems)
+        }
+      } else context.system.eventStream.publish(NotEnoughCash(cash - amountSpent))
+    case CheckPocket => sender() ! Cash(cash - amountSpent)
+    case SpentHowMuch => sender() ! AmountSpent(amountSpent)
   }
 
   def receiveRecover = {
@@ -32,7 +48,11 @@ class Wallet(shopperId: Long) extends PersistentActor
 
   private val updateState: (Event ⇒ Unit) = {
     case paidItems @ Paid(items) =>
-      amountSpent = amountSpent + items.map(_.price).foldLeft(BigDecimal(0)){ _ + _ }
-      context.system.eventStream.publish(paidItems)
+      amountSpent = addSpending(items)
   }
+
+  private def addSpending(items: Basket.Items) =
+    amountSpent + items.foldLeft(BigDecimal(0)){ (acc, item) =>
+      acc + (item.price * item.number)
+    }
 }

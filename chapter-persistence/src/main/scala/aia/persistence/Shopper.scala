@@ -20,10 +20,9 @@ class Shopper(shopperId: Long) extends Actor {
 
   def receive = {
     case cmd: Basket.Command => basket forward cmd
-    case PayBasket =>
-      basket ! Basket.GetItems
-    case items: Basket.Items =>
-      basket ! Basket.Clear
-      wallet ! Wallet.Pay(items)
+    case cmd: Wallet.Command => wallet forward cmd
+    case PayBasket => basket ! Basket.GetItems
+    case items: Basket.Items => wallet ! Wallet.Pay(items)
+    case paid: Wallet.Paid => basket ! Basket.Clear
   }
 }
