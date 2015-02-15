@@ -25,13 +25,13 @@ class MonitorActorTest extends TestKit(ActorSystem("MonitorActorTest"))
 
       val stat = statProbe.expectMsgType[ActorStatistics]
       println(stat)
-      stat.exitTime - stat.entryTime must be(1000L plusOrMinus 10)
+      stat.exitTime - stat.entryTime must be(1000L +- 20)
       val stat2 = statProbe.expectMsgType[ActorStatistics]
       println(stat2)
-      stat2.exitTime - stat2.entryTime must be(1000L plusOrMinus 10)
+      stat2.exitTime - stat2.entryTime must be(1000L +- 20)
       val stat3 = statProbe.expectMsgType[ActorStatistics]
       println(stat3)
-      stat3.exitTime - stat3.entryTime must be(1000L plusOrMinus 10)
+      stat3.exitTime - stat3.entryTime must be(1000L +- 20)
 
       Thread.sleep(2000)
       system.stop(testActor)
