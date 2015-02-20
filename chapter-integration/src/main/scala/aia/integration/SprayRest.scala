@@ -113,8 +113,20 @@ class OrderHttpServer(host: String, portNr: Int, orderSystem: ActorRef)
     new OrderServiceActor(orderSystem)), "my-service")
 
   //create a new HttpServer using our handler tell it where to bind to
+  implicit val executionContext = system.dispatcher
+  implicit val timeout = Timeout(10 seconds)
   val httpServer = IO(Http)(system) //<co id="ch08-rest-spray-boot-2"/>
-  httpServer ! Http.Bind(listener = service, interface = host, port = portNr) //<co id="ch08-rest-spray-boot-3"/>
+  httpServer.ask(Http.Bind(listener = service,
+    interface = host, port = portNr)) //<co id="ch08-rest-spray-boot-3"/>
+    .mapTo[Http.Event]
+    .map {
+    case Http.Bound(address) =>
+      println(s"REST interface bound to $address")
+    case Http.CommandFailed(cmd) =>
+      println("REST interface could not bind to " +
+        s"$host:$portNr, ${cmd.failureMessage}")
+      system.shutdown()
+  }
 
   def stop() { //<co id="ch08-rest-spray-boot-4"/>
     httpServer ! Http.ClosedAll
