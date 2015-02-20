@@ -19,7 +19,8 @@ class BoxOffice extends Actor with CreateTicketSellers with ActorLogging {
       if(context.child(name).isEmpty) {
         val ticketSeller = createTicketSeller(name)
 
-        val tickets = Tickets((1 to nrOfTickets).map(nr=> Ticket(name, nr)).toList)
+        val tickets = Tickets((1 to nrOfTickets).map(
+          nr=> Ticket(name, nr)).toList)
         ticketSeller ! tickets
       }
 

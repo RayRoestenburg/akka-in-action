@@ -52,7 +52,7 @@
 //
 //class GreetingActor(val name: String) extends Actor {
 //  def receive = {
-//    case msg: Greeting => sender ! Greeting(name, "Hello %s" format (msg.name))
+//    case msg: Greeting => sender() ! Greeting(name, "Hello %s" format (msg.name))
 //  }
 //}
 //
@@ -80,7 +80,7 @@
 //      log.info("Hello %s" format msg.name)
 //      receivedGreetings = receivedGreetings :+ msg
 //    case msg: GetGreetings =>
-//      sender ! receivedGreetings
+//      sender() ! receivedGreetings
 //  }
 //}
 //

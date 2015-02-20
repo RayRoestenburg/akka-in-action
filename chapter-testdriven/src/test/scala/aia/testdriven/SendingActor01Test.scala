@@ -12,9 +12,9 @@ class SendingActor01Test extends TestKit(ActorSystem("testsystem"))
   //<start id="ch02-sendingactor01-test"/>
   "A Sending Actor" must {
     "send a message to an actor when it has finished" in {
-      import Kiosk01Protocol._
-      val props = Props(new Kiosk01(testActor)) //<co id="ch02-sendingactor01-constructor"/>
-      val sendingActor = system.actorOf(props, "kiosk1")
+      import Agent01Protocol._
+      val props = Props(new Agent01(testActor)) //<co id="ch02-sendingactor01-constructor"/>
+      val sendingActor = system.actorOf(props, "Agent1")
       val tickets = Vector(Ticket(1), Ticket(2), Ticket(3))
       val game = Game("Lakers vs Bulls", tickets) //<co id="ch02-sendingactor01-game"/>
       sendingActor ! game
@@ -28,16 +28,16 @@ class SendingActor01Test extends TestKit(ActorSystem("testsystem"))
   //<end id="ch02-sendingactor01-test"/>
 }
 //<start id="ch02-sendingactor01-imp"/>
-object Kiosk01Protocol {
+object Agent01Protocol {
   case class Ticket(seat: Int) //<co id="ch02-sendingactor01-protocol-ticket"/>
   case class Game(name: String, tickets: Seq[Ticket]) //<co id="ch02-sendingactor01-protocol-game"/>
 }
 
-class Kiosk01(nextKiosk: ActorRef) extends Actor {
-  import Kiosk01Protocol._
+class Agent01(nextAgent: ActorRef) extends Actor {
+  import Agent01Protocol._
   def receive = {
     case game @ Game(_, tickets) =>
-      nextKiosk ! game.copy(tickets = tickets.tail) //<co id="ch02-sendingactor01-receive"/>
+      nextAgent ! game.copy(tickets = tickets.tail) //<co id="ch02-sendingactor01-receive"/>
   }
 }
 //<end id="ch02-sendingactor01-imp"/>
