@@ -10,8 +10,8 @@ object PaymentHistory {
   case object GetHistory
 
   case class History(items: List[Basket.Item] = Nil) {
-    def paid(paidItems: Basket.Items) = {
-      History(paidItems ++: items)
+    def paid(paidItems: List[Basket.Item]) = {
+      History(paidItems ++ items)
     }
   }
 }
@@ -28,7 +28,7 @@ class PaymentHistory(shopperId: Long) extends PersistentView
   var history = History()
 
   def receive = {
-    case Wallet.Paid(items) => history = history.paid(items)
+    case Wallet.Paid(items, _) => history = history.paid(items)
     case GetHistory => sender() ! history
   }
 }

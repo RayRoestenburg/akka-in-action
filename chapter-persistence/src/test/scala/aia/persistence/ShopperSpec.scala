@@ -9,7 +9,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
     with PersistenceCleanup {
 
   val shopperId = 1L
-  val shopperName = s"shopper-$shopperId"
+  val shopperName = s"$shopperId"
   val macbookPro = Basket.Item("Apple Macbook Pro 15 inch", 1, BigDecimal(2499.99))
   val macPro = Basket.Item("Apple Mac Pro", 1, BigDecimal(10499.99))
   val displays = Basket.Item("4K Display", 3, BigDecimal(2499.99))
@@ -28,17 +28,17 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
   "The shopper" should {
     "be able to put items in the shopping basket and view the basket" in {
       val shopper = system.actorOf(Shopper.props(shopperId), shopperName)
-      shopper ! Basket.Add(macbookPro)
-      shopper ! Basket.Add(displays)
-      shopper ! Basket.Add(macPro)
-      shopper ! Basket.Remove(macbookPro)
-      shopper ! Basket.GetItems
+      shopper ! Basket.Add(macbookPro, shopperId)
+      shopper ! Basket.Add(displays, shopperId)
+      shopper ! Basket.Add(macPro, shopperId)
+      shopper ! Basket.Remove(macbookPro, shopperId)
+      shopper ! Basket.GetItems(shopperId)
       expectMsg(Basket.Items(displays, macPro))
       killActors(shopper)
 
       val shopperResurrected = system.actorOf(Shopper.props(shopperId),
         shopperName)
-      shopperResurrected ! Basket.GetItems
+      shopperResurrected ! Basket.GetItems(shopperId)
       expectMsg(Basket.Items(displays, macPro))
 
       killActors(shopperResurrected)
@@ -49,15 +49,15 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       system.eventStream.subscribe(probe.ref, classOf[Wallet.Paid])
 
       val shopper = system.actorOf(Shopper.props(shopperId), shopperName)
-      shopper ! Basket.Add(appleMouse)
-      shopper ! Basket.GetItems
+      shopper ! Basket.Add(appleMouse,shopperId)
+      shopper ! Basket.GetItems(shopperId)
       expectMsg(Basket.Items(displays, macPro, appleMouse))
-      shopper ! Shopper.PayBasket
-      probe.expectMsg(Wallet.Paid(Basket.Items(displays, macPro, appleMouse)))
+      shopper ! Shopper.PayBasket(shopperId)
+      probe.expectMsg(Wallet.Paid(List(displays, macPro, appleMouse), shopperId))
 
-      shopper ! Basket.Add(appleKeyboard)
-      shopper ! Shopper.PayBasket
-      probe.expectMsg(Wallet.Paid(Basket.Items(appleKeyboard)))
+      shopper ! Basket.Add(appleKeyboard, shopperId)
+      shopper ! Shopper.PayBasket(shopperId)
+      probe.expectMsg(Wallet.Paid(List(appleKeyboard), shopperId))
 
       val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
         PaymentHistory.name(shopperId))
@@ -73,7 +73,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
     "start with an empty basket after payment, wallet and history intact" in {
       val shopperResurrected = system.actorOf(Shopper.props(shopperId),
         shopperName)
-      shopperResurrected ! Basket.GetItems
+      shopperResurrected ! Basket.GetItems(shopperId)
       expectMsg(Basket.Items())
 
       val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
@@ -84,7 +84,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
         List(appleKeyboard, displays, macPro, appleMouse)
       ))
 
-      shopperResurrected ! Wallet.SpentHowMuch
+      shopperResurrected ! Wallet.SpentHowMuch(shopperId)
 
       expectMsg(expectedTotalSpend)
       killActors(shopperResurrected, paymentHistory)
@@ -96,11 +96,11 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
 
       val shopperResurrected = system.actorOf(Shopper.props(shopperId),
         shopperName)
-      shopperResurrected ! Basket.Add(dWave)
-      shopperResurrected ! Shopper.PayBasket
+      shopperResurrected ! Basket.Add(dWave, shopperId)
+      shopperResurrected ! Shopper.PayBasket(shopperId)
       probe.expectMsg(Wallet.NotEnoughCash(40000 - expectedTotalSpend.amount))
 
-      shopperResurrected ! Wallet.CheckPocket
+      shopperResurrected ! Wallet.CheckPocket(shopperId)
       expectMsg(Wallet.Cash(left = 40000 - expectedTotalSpend.amount))
 
       val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),

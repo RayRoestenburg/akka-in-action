@@ -10,7 +10,7 @@ class CalculatorHistorySpec extends PersistenceSpec(ActorSystem("test"))
     with PersistenceCleanup {
 
   "The CalculatorHistory" should {
-    "Show the number of times every operation is used after starting" in {
+    "show the number of times every operation is used after starting" in {
       val calc = system.actorOf(Calculator.props, Calculator.name)
       calc ! Calculator.Add(1d)
       calc ! Calculator.GetResult
@@ -38,7 +38,7 @@ class CalculatorHistorySpec extends PersistenceSpec(ActorSystem("test"))
       killActors(calc, calcHistory)
     }
 
-    "Show the number of times every operation is used after it is forced to update" in {
+    "show the number of times every operation is used after it is forced to update" in {
       val calc = system.actorOf(Calculator.props, Calculator.name)
       val calcHistory = system.actorOf(CalculatorHistory.props, CalculatorHistory.name+"test")
 

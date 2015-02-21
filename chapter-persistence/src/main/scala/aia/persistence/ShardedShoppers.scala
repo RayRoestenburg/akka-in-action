@@ -17,7 +17,7 @@ class ShardedShoppers extends Actor {
   def shardedShopper = ClusterSharding(context.system).shardRegion(ShardedShopper.shardName)
 
   def receive = {
-    case ShardedShopper.ForwardToBasket(_, basketCommand) =>
-      shardedShopper forward basketCommand
+    case cmd: Shopper.Command =>
+      shardedShopper forward cmd
   }
 }

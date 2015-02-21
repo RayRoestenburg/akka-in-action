@@ -8,7 +8,7 @@ class CalculatorSpec extends PersistenceSpec(ActorSystem("test"))
     with PersistenceCleanup {
 
   "The Calculator" should {
-    "Recover last known result after crash" in {
+    "recover last known result after crash" in {
       val calc = system.actorOf(Calculator.props, Calculator.name)
       calc ! Calculator.Add(1d)
       calc ! Calculator.GetResult

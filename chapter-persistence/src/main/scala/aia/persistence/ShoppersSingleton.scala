@@ -41,6 +41,9 @@ object Shoppers {
   }
   case class ForwardToBasket(shopperId: Long,
     basketCommand: Basket.Command) extends Command
+  case class ForwardToWallet(shopperId: Long,
+    walletCommand: Wallet.Command) extends Command
+
   sealed trait Event
   case class ShopperCreated(shopperId: Long)
 }
@@ -50,20 +53,25 @@ class Shoppers extends PersistentActor {
 
   def persistenceId = "shoppers"
 
+
   def receiveCommand = {
     case ForwardToBasket(shopperId, basketCommand) =>
-      def forwardCommand(actor: ActorRef) = actor forward basketCommand
-      def createAndForward() = {
-        persistAsync(ShopperCreated(shopperId)) { event =>
-          val ShopperCreated(shopperId) = event
-          val shopper = context.actorOf(Shopper.props(shopperId),
-            Shopper.name(shopperId))
-          shopper forward basketCommand
-        }
-      }
-
       context.child(Shopper.name(shopperId))
-        .fold(createAndForward())(forwardCommand)
+        .fold(createAndForward(basketCommand, shopperId))(forwardCommand(basketCommand))
+    case ForwardToWallet(shopperId, walletCommand) =>
+      context.child(Shopper.name(shopperId))
+        .fold(createAndForward(walletCommand, shopperId))(forwardCommand(walletCommand))
+  }
+
+  def forwardCommand(cmd: AnyRef)(actor: ActorRef) = actor forward cmd
+
+  def createAndForward(cmd: AnyRef, shopperId: Long) = {
+    val shopper = context.actorOf(Shopper.props(shopperId),
+      Shopper.name(shopperId))
+    persistAsync(ShopperCreated(shopperId)) { event =>
+      val ShopperCreated(shopperId) = event
+      shopper forward cmd
+    }
   }
 
   def receiveRecover = {

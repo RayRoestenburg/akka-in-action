@@ -45,7 +45,7 @@ class Calculator extends PersistentActor {
 
   var state = CalculationResult()
   // more code to follow ..
-//<end id="persistence-extend_persistent_actor"/>
+  //<end id="persistence-extend_persistent_actor"/>
 
 
   //<start id="persistence-receive_recover_calc"/>

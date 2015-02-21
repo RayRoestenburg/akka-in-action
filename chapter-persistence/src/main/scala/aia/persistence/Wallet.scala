@@ -4,44 +4,43 @@ import akka.actor._
 import akka.persistence._
 
 object Wallet {
-  def props(shopperId: Long) = Props(new Wallet(shopperId))
+  def props(shopperId: Long) = Props(new Wallet(shopperId, 40000))
   def name(shopperId: Long) = s"wallet_${shopperId}"
 
-  sealed trait Command
-  case class Pay(items: Basket.Items) extends Command
-  case object CheckPocket extends Command
-  case object SpentHowMuch extends Command
+  sealed trait Command extends Shopper.Command
+  case class Pay(items: List[Basket.Item], shopperId: Long) extends Command
+  case class CheckPocket(shopperId: Long) extends Command
+  case class SpentHowMuch(shopperId: Long) extends Command
 
   case class AmountSpent(amount: BigDecimal)
   case class NotEnoughCash(left: BigDecimal)
   case class Cash(left: BigDecimal)
 
   sealed trait Event
-  case class Paid(items: Basket.Items) extends Event
+  case class Paid(list: List[Basket.Item], shopperId: Long) extends Event
 }
 
-class Wallet(shopperId: Long) extends PersistentActor
+class Wallet(shopperId: Long, cash: BigDecimal) extends PersistentActor
     with ActorLogging {
       import Wallet._
-  var cash: BigDecimal = 40000
   var amountSpent: BigDecimal = 0
 
   def persistenceId = s"${self.path.name}"
 
   def receiveCommand = {
-    case Pay(items) =>
+    case Pay(items, _) =>
       val totalSpent = addSpending(items)
       if(cash - totalSpent > 0) {
-        persist(Paid(items)) { paidItems =>
-          updateState(paidItems)
-          sender() ! paidItems
-          context.system.eventStream.publish(paidItems)
+        persist(Paid(items, shopperId)) { paid =>
+          updateState(paid)
+          sender() ! paid
+          context.system.eventStream.publish(paid)
         }
       } else {
         context.system.eventStream.publish(NotEnoughCash(cash - amountSpent))
       }
-    case CheckPocket => sender() ! Cash(cash - amountSpent)
-    case SpentHowMuch => sender() ! AmountSpent(amountSpent)
+    case CheckPocket(_) => sender() ! Cash(cash - amountSpent)
+    case SpentHowMuch(_) => sender() ! AmountSpent(amountSpent)
   }
 
   def receiveRecover = {
@@ -49,10 +48,10 @@ class Wallet(shopperId: Long) extends PersistentActor
   }
 
   private val updateState: (Event ⇒ Unit) = {
-    case paidItems @ Paid(items) => amountSpent = addSpending(items)
+    case paidItems @ Paid(items, _) => amountSpent = addSpending(items)
   }
 
-  private def addSpending(items: Basket.Items) =
+  private def addSpending(items: List[Basket.Item]) =
     amountSpent + items.foldLeft(BigDecimal(0)){ (total, item) =>
       total + (item.price * item.number)
     }

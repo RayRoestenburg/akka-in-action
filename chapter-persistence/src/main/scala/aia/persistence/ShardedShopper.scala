@@ -11,43 +11,28 @@ object ShardedShopper {
   def props = Props(new ShardedShopper)
   def name(shopperId: Long) = shopperId.toString
 
-  sealed trait Command {
-    def shopperId: Long
-  }
 
-  case class ForwardToBasket(shopperId: Long,
-    basketCommand: Basket.Command) extends Command
-
-  case class ForwardToWallet(shopperId: Long,
-    walletCommand: Wallet.Command) extends Command
-
-  case object Stop
+  case object StopShopping
 
   val shardName: String = "shoppers"
 
   val idExtractor: ShardRegion.IdExtractor = {
-    case cmd: Command ⇒ (cmd.shopperId.toString, cmd)
+    case cmd: Shopper.Command ⇒ (cmd.shopperId.toString, cmd)
   }
 
   val shardResolver: ShardRegion.ShardResolver = {
-    case cmd: Command ⇒ (cmd.shopperId % 12).toString
+    case cmd: Shopper.Command ⇒ (cmd.shopperId % 12).toString
   }
 }
 
-class ShardedShopper extends Actor {
+class ShardedShopper extends Shopper {
   import ShardedShopper._
 
   context.setReceiveTimeout(Settings(context.system).passivateTimeout)
 
-  def shopperId = self.path.name.toLong
-
-  val basket = context.actorOf(Basket.props(shopperId),
-    Basket.name(shopperId))
-
-  def receive = {
-    case cmd: Basket.Command => basket forward cmd
+  override def unhandled(msg: Any) = msg match {
     case ReceiveTimeout =>
-      context.parent ! Passivate(stopMessage = ShardedShopper.Stop)
-    case ShardedShopper.Stop => context.stop(self)
+      context.parent ! Passivate(stopMessage = ShardedShopper.StopShopping)
+    case StopShopping => context.stop(self)
   }
 }

@@ -3,16 +3,22 @@ package aia.persistence
 import akka.actor._
 
 object Shopper {
-  def props(shopperId: Long) = Props(new Shopper(shopperId))
+  def props(shopperId: Long) = Props(new Shopper)
   def name(shopperId: Long) = shopperId.toString
-  sealed trait Command
-  case object PayBasket
+
+  trait Command {
+    def shopperId: Long
+  }
+
+  case class PayBasket(shopperId: Long) extends Command
 }
 
-class Shopper(shopperId: Long) extends Actor {
+class Shopper extends Actor {
   import Shopper._
 
-  val basket = context.actorOf(Basket.props(shopperId),
+  def shopperId = self.path.name.toLong
+
+  val basket = context.actorOf(Basket.props,
     Basket.name(shopperId))
 
   val wallet = context.actorOf(Wallet.props(shopperId),
@@ -21,8 +27,8 @@ class Shopper(shopperId: Long) extends Actor {
   def receive = {
     case cmd: Basket.Command => basket forward cmd
     case cmd: Wallet.Command => wallet forward cmd
-    case PayBasket => basket ! Basket.GetItems
-    case items: Basket.Items => wallet ! Wallet.Pay(items)
-    case paid: Wallet.Paid => basket ! Basket.Clear
+    case PayBasket(shopperId) => basket ! Basket.GetItems(shopperId)
+    case Basket.Items(list) => wallet ! Wallet.Pay(list, shopperId)
+    case Wallet.Paid(_, shopperId) => basket ! Basket.Clear(shopperId)
   }
 }
