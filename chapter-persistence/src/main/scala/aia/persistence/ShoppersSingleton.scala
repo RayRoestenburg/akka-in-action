@@ -6,7 +6,6 @@ import akka.persistence._
 import akka.contrib.pattern.ClusterSingletonManager
 import akka.contrib.pattern.ClusterSingletonProxy
 
-
 class ShoppersSingleton extends Actor {
   val singletonManager = context.system.actorOf(
     ClusterSingletonManager.props(
@@ -27,7 +26,7 @@ class ShoppersSingleton extends Actor {
   )
 
   def receive = {
-    case command: Shoppers.Command =>
+    case command: Shopper.Command =>
       shoppers forward command
   }
 }
@@ -36,41 +35,22 @@ object Shoppers {
   def props = Props(new Shoppers)
   def name = "shoppers"
 
-  sealed trait Command {
-    def shopperId: Long
-  }
-  case class ForwardToBasket(shopperId: Long,
-    basketCommand: Basket.Command) extends Command
-  case class ForwardToWallet(shopperId: Long,
-    walletCommand: Wallet.Command) extends Command
-
   sealed trait Event
   case class ShopperCreated(shopperId: Long)
 }
 
-class Shoppers extends PersistentActor {
+class Shoppers extends PersistentActor
+    with ShopperLookup {
   import Shoppers._
 
   def persistenceId = "shoppers"
 
+  def receiveCommand = forwardToShopper
 
-  def receiveCommand = {
-    case ForwardToBasket(shopperId, basketCommand) =>
-      context.child(Shopper.name(shopperId))
-        .fold(createAndForward(basketCommand, shopperId))(forwardCommand(basketCommand))
-    case ForwardToWallet(shopperId, walletCommand) =>
-      context.child(Shopper.name(shopperId))
-        .fold(createAndForward(walletCommand, shopperId))(forwardCommand(walletCommand))
-  }
-
-  def forwardCommand(cmd: AnyRef)(actor: ActorRef) = actor forward cmd
-
-  def createAndForward(cmd: AnyRef, shopperId: Long) = {
-    val shopper = context.actorOf(Shopper.props(shopperId),
-      Shopper.name(shopperId))
-    persistAsync(ShopperCreated(shopperId)) { event =>
-      val ShopperCreated(shopperId) = event
-      shopper forward cmd
+  override def createAndForward(cmd: Shopper.Command, shopperId: Long) = {
+    val shopper = createShopper(shopperId)
+    persistAsync(ShopperCreated(shopperId)) { _ =>
+      forwardCommand(cmd)(shopper)
     }
   }
 
