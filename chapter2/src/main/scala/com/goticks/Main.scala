@@ -8,7 +8,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import spray.can.Http
-import spray.can.Http.Bound
 
 import com.typesafe.config.ConfigFactory
 
