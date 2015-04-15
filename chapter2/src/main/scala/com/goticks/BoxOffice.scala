@@ -37,7 +37,7 @@ class BoxOffice extends Actor with CreateTicketSellers with ActorLogging {
     case GetEvents =>
       import akka.pattern.ask
 
-      val capturedSender = sender
+      val capturedSender = sender()
 
       def askAndMapToEvent(ticketSeller:ActorRef) =  {
 
