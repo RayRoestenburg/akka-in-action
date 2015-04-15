@@ -11,6 +11,8 @@ import spray.can.Http
 
 import com.typesafe.config.ConfigFactory
 
+import scala.language.postfixOps
+
 object Main extends App {
   val config = ConfigFactory.load()
   val host = config.getString("http.host")
