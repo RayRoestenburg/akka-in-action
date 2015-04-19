@@ -8,7 +8,7 @@ object TicketSeller {
   case class Add(tickets:Vector[Ticket])
   case class Buy(tickets: Int)
   case class Ticket(id:Int)
-  case class Tickets(bought: Vector[Ticket] = Vector.empty[Ticket])
+  case class Tickets(event: String, entries: Vector[Ticket] = Vector.empty[Ticket])
   case object GetEvent
 }
 
@@ -21,10 +21,10 @@ class TicketSeller(event: String) extends Actor {
     case Count => sender() ! tickets.size
     case Add(newTickets) => tickets = tickets ++ newTickets
     case Buy(nrOfTickets) =>
-      val bought = tickets.take(nrOfTickets).toVector
-      if(bought.size < nrOfTickets) sender() ! Tickets()
+      val entries = tickets.take(nrOfTickets).toVector
+      if(entries.size < nrOfTickets) sender() ! Tickets(event)
       else {
-        sender() ! Tickets(bought)
+        sender() ! Tickets(event, entries)
         tickets = tickets.drop(nrOfTickets)
       }
     case GetEvent => sender() ! Some(BoxOffice.Event(event, tickets.size))

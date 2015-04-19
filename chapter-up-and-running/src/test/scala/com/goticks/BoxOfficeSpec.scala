@@ -23,10 +23,10 @@ class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
       expectMsg(EventCreated)
 
       boxOffice ! GetTickets("RHCP", 1)
-      expectMsg(Tickets(Vector(Ticket(1))))
+      expectMsg(Tickets("RHCP", Vector(Ticket(1))))
 
       boxOffice ! GetTickets("DavidBowie", 1)
-      expectMsg(Tickets())
+      expectMsg(Tickets("DavidBowie"))
     }
 
     "Create a child actor when an event is created and send it a Tickets message" in {

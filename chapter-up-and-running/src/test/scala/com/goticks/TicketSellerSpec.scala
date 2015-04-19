@@ -16,22 +16,22 @@ class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
       import TicketSeller._
 
       def mkTickets = (1 to 10).map(i=>Ticket(i)).toVector
-
-      val ticketingActor = system.actorOf(TicketSeller.props("RHCP"))
+      val event = "RHCP"
+      val ticketingActor = system.actorOf(TicketSeller.props(event))
 
       ticketingActor ! Add(mkTickets)
       ticketingActor ! Buy(1)
 
-      expectMsg(Tickets(Vector(Ticket(1))))
+      expectMsg(Tickets(event, Vector(Ticket(1))))
 
       val nrs = (2 to 10)
       nrs.foreach(_ => ticketingActor ! Buy(1))
 
       val tickets = receiveN(9)
-      tickets.zip(nrs).foreach { case (Tickets(Vector(Ticket(id))), ix) => id must be(ix) }
+      tickets.zip(nrs).foreach { case (Tickets(event, Vector(Ticket(id))), ix) => id must be(ix) }
 
       ticketingActor ! Buy(1)
-      expectMsg(Tickets())
+      expectMsg(Tickets(event))
     }
 
     "Sell tickets in batches until they sold out" in {
@@ -41,13 +41,14 @@ class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
 
       def mkTickets = (1 to (10 * firstBatchSize)).map(i=>Ticket(i)).toVector
 
-      val ticketingActor = system.actorOf(TicketSeller.props("Madlib"))
+      val event = "Madlib"
+      val ticketingActor = system.actorOf(TicketSeller.props(event))
 
       ticketingActor ! Add(mkTickets)
       ticketingActor ! Buy(firstBatchSize)
       val bought = (1 to firstBatchSize).map(Ticket).toVector
 
-      expectMsg(Tickets(bought))
+      expectMsg(Tickets(event, bought))
 
       val secondBatchSize = 5
       val nrBatches = 18
@@ -58,7 +59,7 @@ class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
       val tickets = receiveN(nrBatches)
 
       tickets.zip(batches).foreach {
-        case (Tickets(bought), ix) =>
+        case (Tickets(event, bought), ix) =>
           bought.size must equal(secondBatchSize)
           val last = ix * secondBatchSize + firstBatchSize
           val first = ix * secondBatchSize + firstBatchSize - (secondBatchSize - 1)
@@ -66,10 +67,10 @@ class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
       }
 
       ticketingActor ! Buy(1)
-      expectMsg(Tickets())
+      expectMsg(Tickets(event))
 
       ticketingActor ! Buy(10)
-      expectMsg(Tickets())
+      expectMsg(Tickets(event))
     }
   }
 }

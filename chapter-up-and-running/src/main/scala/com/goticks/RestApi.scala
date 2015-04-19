@@ -70,8 +70,8 @@ trait RestRoutes extends HttpService
           // POST /events/:event/tickets
           entity(as[TicketRequest]) { request =>
             onSuccess(requestTickets(event, request.tickets)) { tickets =>
-              if(tickets.bought.isEmpty) complete(NotFound)
-              else complete(Created, tickets.bought)
+              if(tickets.entries.isEmpty) complete(NotFound)
+              else complete(Created, tickets)
             }
           }
         }
