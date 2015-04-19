@@ -6,13 +6,11 @@ import scala.concurrent.Future
 
 import akka.actor._
 import akka.pattern.ask
-import akka.pattern.pipe
 import akka.util.Timeout
 
 import spray.http.StatusCodes
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
-import spray.routing.RequestContext
 
 class RestApi(implicit val requestTimeout: Timeout) extends HttpServiceActor
     with RestRoutes {
