@@ -64,6 +64,7 @@ class BoxOffice(implicit timeout: Timeout) extends Actor {
       pipe(convertToEvents(Future.sequence(getEvents))) to sender()
   }
 
-  def createTicketSeller(name:String) = context.actorOf(TicketSeller.props(name), name)
+  def createTicketSeller(name:String) =
+    context.actorOf(TicketSeller.props(name), name)
 }
 
