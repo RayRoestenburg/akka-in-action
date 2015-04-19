@@ -16,16 +16,17 @@ class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
 
     "Create an event and get tickets from the correct Ticket Seller" in {
       import BoxOffice._
+      import TicketSeller._
 
       val boxOffice = system.actorOf(BoxOffice.props)
       boxOffice ! CreateEvent("RHCP", 10)
       expectMsg(EventCreated)
 
-      boxOffice ! GetTicket("RHCP")
-      expectMsg(Some(TicketSeller.Ticket(1)))
+      boxOffice ! GetTickets("RHCP", 1)
+      expectMsg(Tickets(Vector(Ticket(1))))
 
-      boxOffice ! GetTicket("DavidBowie")
-      expectMsg(None)
+      boxOffice ! GetTickets("DavidBowie", 1)
+      expectMsg(Tickets())
     }
 
     "Create a child actor when an event is created and send it a Tickets message" in {

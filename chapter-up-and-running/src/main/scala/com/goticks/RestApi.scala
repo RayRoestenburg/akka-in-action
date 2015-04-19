@@ -26,7 +26,7 @@ trait RestRoutes extends HttpService
     with EventMarshalling {
   import StatusCodes._
 
-  def routes: Route = eventsRoute ~ eventRoute ~ ticketRoute
+  def routes: Route = eventsRoute ~ eventRoute ~ ticketsRoute
 
   def eventsRoute =
     pathPrefix("events") {
@@ -63,13 +63,16 @@ trait RestRoutes extends HttpService
       }
     }
 
-  def ticketRoute =
+  def ticketsRoute =
     pathPrefix("events" / Segment / "tickets") { event =>
       post {
         pathEndOrSingleSlash {
           // POST /events/:event/tickets
-          onSuccess(requestTicket(event)) {
-            _.fold(complete(NotFound))(t => complete(Created, t))
+          entity(as[TicketRequest]) { request =>
+            onSuccess(requestTickets(event, request.tickets)) { tickets =>
+              if(tickets.bought.isEmpty) complete(NotFound)
+              else complete(Created, tickets.bought)
+            }
           }
         }
       }
@@ -97,7 +100,7 @@ trait BoxOfficeApi {
     boxOffice.ask(GetEvent(event))
       .mapTo[Option[Event]]
 
-  def requestTicket(event: String) =
-    boxOffice.ask(GetTicket(event))
-      .mapTo[Option[TicketSeller.Ticket]]
+  def requestTickets(event: String, tickets: Int) =
+    boxOffice.ask(GetTickets(event, tickets))
+      .mapTo[TicketSeller.Tickets]
 }

@@ -13,7 +13,7 @@ object BoxOffice {
   case class CreateEvent(name: String, tickets: Int)
   case class GetEvent(name: String)
   case object GetEvents
-  case class GetTicket(event: String)
+  case class GetTickets(event: String, tickets:Int)
 
   case class Event(name: String, tickets: Int)
   case class Events(events:Vector[Event])
@@ -39,15 +39,15 @@ class BoxOffice(implicit timeout: Timeout) extends Actor {
       }
       context.child(name).fold(create())(_ => sender() ! EventExists)
 
-    case GetTicket(event) =>
-      def notFound() = sender() ! None
-      def buy(child: ActorRef) = {
-        child.forward(TicketSeller.Buy)
-      }
+    case GetTickets(event, tickets) =>
+      def notFound() = sender() ! TicketSeller.Tickets()
+      def buy(child: ActorRef) =
+        child.forward(TicketSeller.Buy(tickets))
+
       context.child(event).fold(notFound())(buy)
 
     case GetEvent(event) =>
-      def notFound() = sender() ! None
+      def notFound() = sender() ! TicketSeller.Tickets()
       def getEvent(child: ActorRef) = child.forward(TicketSeller.GetEvent)
       context.child(event).fold(notFound())(getEvent)
 
