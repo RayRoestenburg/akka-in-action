@@ -4,6 +4,8 @@ import akka.actor._
 import akka.contrib.pattern.ClusterSharding
 
 object ShardedShoppers {
+  def props= Props(new ShardedShoppers)
+  def name = "sharded-shoppers"
 }
 
 class ShardedShoppers extends Actor {

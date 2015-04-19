@@ -6,6 +6,11 @@ import akka.persistence._
 import akka.contrib.pattern.ClusterSingletonManager
 import akka.contrib.pattern.ClusterSingletonProxy
 
+object ShoppersSingleton {
+  def props = Props(new ShoppersSingleton)
+  def name = "shoppers-singleton"
+}
+
 class ShoppersSingleton extends Actor {
   val singletonManager = context.system.actorOf(
     ClusterSingletonManager.props(
@@ -55,7 +60,6 @@ class Shoppers extends PersistentActor
 
   def receiveRecover = {
     case ShopperCreated(shopperId) =>
-      context.actorOf(Shopper.props(shopperId),
-          Shopper.name(shopperId))
+      context.child(Shopper.name(shopperId)).getOrElse(createShopper(shopperId))
   }
 }
