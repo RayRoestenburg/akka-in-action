@@ -15,7 +15,7 @@ object TicketSeller {
 class TicketSeller(event: String) extends Actor {
   import TicketSeller._
 
-  var tickets = Vector[Ticket]()
+  var tickets = Vector.empty[Ticket]
 
   def receive = {
     case Count => sender() ! tickets.size
