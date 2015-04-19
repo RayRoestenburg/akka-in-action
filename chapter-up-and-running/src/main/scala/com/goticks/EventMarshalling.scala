@@ -2,8 +2,13 @@ package com.goticks
 
 import spray.json._
 
-case class EventDescription(tickets:Int)
-case class TicketRequest(tickets:Int)
+case class EventDescription(tickets:Int) {
+  require(tickets > 0)
+}
+
+case class TicketRequest(tickets:Int) {
+  require(tickets > 0)
+}
 
 case class Error(message: String)
 
