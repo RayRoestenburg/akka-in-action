@@ -18,7 +18,6 @@ object Main extends App {
 
   implicit val system = ActorSystem("goticks")
 
-
   implicit val executionContext = system.dispatcher
 
   implicit val requestTimeout: Timeout = {
