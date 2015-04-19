@@ -14,7 +14,7 @@ class BoxOffice extends Actor with CreateTicketSellers with ActorLogging {
   def receive = {
 
     case Event(name, nrOfTickets) =>
-      log.info(s"Creating new event ${name} with ${nrOfTickets} tickets.")
+      log.info(s"Creating new event $name with $nrOfTickets tickets.")
 
       if(context.child(name).isEmpty) {
         val ticketSeller = createTicketSeller(name)
@@ -27,7 +27,7 @@ class BoxOffice extends Actor with CreateTicketSellers with ActorLogging {
       sender ! EventCreated
 
     case TicketRequest(name) =>
-      log.info(s"Getting a ticket for the ${name} event.")
+      log.info(s"Getting a ticket for the $name event.")
 
       context.child(name) match {
         case Some(ticketSeller) => ticketSeller.forward(BuyTicket)
@@ -37,7 +37,7 @@ class BoxOffice extends Actor with CreateTicketSellers with ActorLogging {
     case GetEvents =>
       import akka.pattern.ask
 
-      val capturedSender = sender
+      val capturedSender = sender()
 
       def askAndMapToEvent(ticketSeller:ActorRef) =  {
 
