@@ -6,16 +6,6 @@ version := "1.0"
 
 organization := "com.goticks"
 
-scalaVersion := "2.11.6"
-
-scalacOptions ++= Seq(
-  "-target:jvm-1.7",
-  "-deprecation",
-  "-unchecked",
-  "-feature",
-  "-language:_"
-)
-
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Spray Repository"    at "http://repo.spray.io")
 
