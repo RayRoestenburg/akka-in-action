@@ -4,7 +4,7 @@ version := "1.0"
 
 organization := "com.manning"
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Sonatype snapshots"  at "http://oss.sonatype.org/content/repositories/snapshots/")
@@ -13,7 +13,7 @@ parallelExecution in Test := false
 
 libraryDependencies ++= {
   val akkaVersion       = "2.3.9"
-  val sprayVersion      = "1.3.2"
+  val sprayVersion      = "1.3.3"
   Seq(
     "com.typesafe.akka"       %%  "akka-actor"                     % akkaVersion,
     "com.typesafe.akka"       %%  "akka-slf4j"                     % akkaVersion,
