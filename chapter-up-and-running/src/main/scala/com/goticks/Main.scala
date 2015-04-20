@@ -12,26 +12,26 @@ import spray.can.Http
 import com.typesafe.config.ConfigFactory
 
 object Main extends App {
-  val config = ConfigFactory.load()
-  val host = config.getString("http.host")
+  val config = ConfigFactory.load() //<co id="configure"/>
+  val host = config.getString("http.host") //<co id="gethttppars"/>
   val port = config.getInt("http.port")
 
   implicit val system = ActorSystem("goticks")
 
-  implicit val requestTimeout: Timeout = {
+  implicit val requestTimeout: Timeout = { // <co id="timeout_spray_can"/>
     val t = system.settings
       .config
       .getString("spray.can.server.request-timeout")
     val d = Duration(t)
-    FiniteDuration(d.length, d.unit) - 1.second
+    FiniteDuration(d.length, d.unit)
   }
 
-  val api = system.actorOf(Props(new RestApi()), "httpInterface")
+  val api = system.actorOf(Props(new RestApi()), "httpInterface") //<co id="toplevelactor"/>
 
   implicit val executionContext = system.dispatcher
 
-  IO(Http).ask(Http.Bind(listener = api, interface = host, port = port))
-    .mapTo[Http.Event]
+  IO(Http).ask(Http.Bind(listener = api, interface = host, port = port)) //<co id="startServer"/>
+    .mapTo[Http.Event] //<co id="response"/>
     .map {
       case Http.Bound(address) =>
         println(s"REST interface bound to $address")
