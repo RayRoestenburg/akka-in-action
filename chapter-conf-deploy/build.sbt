@@ -15,7 +15,7 @@ packageArchetype.java_application
 scriptClasspath +="../conf"
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.4"
+  val akkaVersion       = "2.3.10"
   Seq(
     "com.typesafe.akka" %%  "akka-actor"      % akkaVersion,
     "com.typesafe.akka" %%  "akka-slf4j"      % akkaVersion,

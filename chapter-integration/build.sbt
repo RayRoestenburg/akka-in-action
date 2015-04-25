@@ -7,7 +7,7 @@ organization := "manning"
 scalaVersion := "2.11.1"
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.4"
+  val akkaVersion       = "2.3.10"
   val sprayVersion      = "1.3.1"
   val camelVersion      = "2.13.2"
   val activeMQVersion   = "5.4.1"
