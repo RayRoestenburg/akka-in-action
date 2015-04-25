@@ -11,7 +11,7 @@ resolvers ++=
       "Spray Repository"    at "http://repo.spray.io") //<co id="example-resolvers"/>
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.9" //<co id="akkaVersion"/>
+  val akkaVersion       = "2.3.10" //<co id="akkaVersion"/>
   val sprayVersion      = "1.3.3"
   Seq(
     "com.typesafe.akka" %% "akka-actor"      % akkaVersion, //<co id="actorDep"/>
