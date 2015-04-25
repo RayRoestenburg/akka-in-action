@@ -3,8 +3,6 @@ package com.goticks
 import spray.routing._
 import spray.http.StatusCodes
 
-
-
 class TicketInfoServiceActor extends HttpServiceActor with TicketInfoService with SprayClientWebServiceCalls{
   implicit val ec = context.system.dispatcher
 
@@ -22,5 +20,4 @@ class TicketInfoServiceActor extends HttpServiceActor with TicketInfoService wit
         }
       }
     }
-
 }
