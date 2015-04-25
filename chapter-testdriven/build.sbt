@@ -4,7 +4,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "com.manning"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.6"
 
 libraryDependencies ++= {
   val akkaVersion       = "2.3.10"

@@ -8,7 +8,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "manning"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.6"
 
 packageArchetype.java_application
 

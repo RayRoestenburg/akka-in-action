@@ -4,7 +4,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "com.goticks"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.11.6"
 
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Sonatype snapshots"  at "http://oss.sonatype.org/content/repositories/snapshots/",

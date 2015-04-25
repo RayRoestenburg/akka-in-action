@@ -9,7 +9,7 @@ version := "0.1-SNAPSHOT"
 
 organization := "com.goticks"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.6"
 
 resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
                   "Sonatype snapshots"  at "http://oss.sonatype.org/content/repositories/snapshots/",
@@ -18,7 +18,7 @@ resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/re
 
 libraryDependencies ++= {
   val akkaVersion       = "2.3.10"
-  val sprayVersion      = "1.3.1"
+  val sprayVersion      = "1.3.3"
   Seq(
     "com.typesafe.akka"       %%  "akka-actor"                     % akkaVersion,
     "com.typesafe.akka"       %%  "akka-slf4j"                     % akkaVersion,
@@ -28,7 +28,7 @@ libraryDependencies ++= {
     "org.scalatest"           %% "scalatest"                       % "2.2.0"       % "test",
     "io.spray"                %% "spray-can"                       % sprayVersion,
     "io.spray"                %% "spray-routing"                   % sprayVersion,
-    "io.spray"                %% "spray-json"                      % "1.2.6",
+    "io.spray"                %% "spray-json"                      % "1.3.1",
     "ch.qos.logback"          %  "logback-classic"                 % "1.1.2"
   )
 }
