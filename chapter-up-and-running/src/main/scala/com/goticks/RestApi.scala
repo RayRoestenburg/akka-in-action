@@ -12,10 +12,14 @@ import spray.http.StatusCodes
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
 
-class RestApi(implicit val requestTimeout: Timeout) extends HttpServiceActor
+class RestApi(timeout: Timeout) extends HttpServiceActor
     with RestRoutes {
+  implicit val requestTimeout = timeout
+
   def receive = runRoute(routes)
+
   implicit def executionContext = context.dispatcher
+
   def createBoxOffice = context.actorOf(BoxOffice.props, BoxOffice.name)
 }
 

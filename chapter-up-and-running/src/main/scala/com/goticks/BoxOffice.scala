@@ -6,6 +6,7 @@ import scala.concurrent.Future
 import akka.actor._
 import akka.util.Timeout
 
+// <start id="ch02-support-traits"/>
 object BoxOffice {
   def props(implicit timeout: Timeout) = Props(new BoxOffice)
   def name = "box-office"
@@ -22,6 +23,7 @@ object BoxOffice {
   case object EventCreated extends EventResponse
   case object EventExists extends EventResponse
 }
+// <start id="ch02-support-traits"/>
 
 class BoxOffice(implicit timeout: Timeout) extends Actor {
   import BoxOffice._
