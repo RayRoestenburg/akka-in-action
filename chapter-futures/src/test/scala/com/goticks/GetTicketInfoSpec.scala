@@ -3,8 +3,8 @@ package com.goticks
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.WordSpec
 import scala.concurrent.{Future, Await}
-//TODO add more tests
-class GetTicketInfoSpec extends WordSpec with MustMatchers{
+
+class GetTicketInfoSpec extends WordSpec with MustMatchers {
 
   object TicketInfoService extends TicketInfoService with MockWebServiceCalls
   import TicketInfoService._
@@ -12,8 +12,6 @@ class GetTicketInfoSpec extends WordSpec with MustMatchers{
 
   "getTicketInfo" must {
     "return a complete ticket info when all futures are successful" in {
-
-
       val ticketInfo = Await.result(getTicketInfo("1234", Location(1d,2d)), 10.seconds)
 
       ticketInfo.event.isEmpty must be(false)
@@ -22,7 +20,6 @@ class GetTicketInfoSpec extends WordSpec with MustMatchers{
       ticketInfo.suggestions.map(_.name) must be (Seq("Madlib", "OhNo", "Flying Lotus"))
     }
     "return an incomplete ticket info when getEvent fails" in {
-
       val ticketInfo = Await.result(getTicketInfo("4321", Location(1d,2d)), 10.seconds)
 
       ticketInfo.event.isEmpty must be(true)

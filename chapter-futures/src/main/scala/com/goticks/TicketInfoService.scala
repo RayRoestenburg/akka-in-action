@@ -11,17 +11,17 @@ trait TicketInfoService extends WebServiceCalls {
   type Recovery[T] = PartialFunction[Throwable,T]
 
   // recover with None
-  def withNone[T]:Recovery[Option[T]] = { case NonFatal(e) => None }
+  def withNone[T]: Recovery[Option[T]] = { case NonFatal(e) => None }
 
   // recover with empty sequence
-  def withEmptySeq[T]:Recovery[Seq[T]] = { case NonFatal(e) => Seq() }
+  def withEmptySeq[T]: Recovery[Seq[T]] = { case NonFatal(e) => Seq() }
 
   // recover with the ticketInfo that was built in the previous step
-  def withPrevious(previous:TicketInfo):Recovery[TicketInfo] = {
+  def withPrevious(previous: TicketInfo): Recovery[TicketInfo] = {
     case NonFatal(e) => previous
   }
 
-  def getTicketInfo(ticketNr:String, location:Location):Future[TicketInfo] = {
+  def getTicketInfo(ticketNr: String, location: Location): Future[TicketInfo] = {
     val emptyTicketInfo = TicketInfo(ticketNr, location)
     val eventInfo = getEvent(ticketNr, location).recover(withPrevious(emptyTicketInfo))
 
@@ -40,13 +40,12 @@ trait TicketInfoService extends WebServiceCalls {
 
       val ticketInfos = Seq(infoWithTravelAdvice, infoWithWeather)
 
-      val infoWithTravelAndWeather = Future.fold(ticketInfos)(info) { (acc, elem) =>
+      val infoWithTravelAndWeather: Future[TicketInfo] = Future.fold(ticketInfos)(info) { (acc, elem) =>
         val (travelAdvice, weather) = (elem.travelAdvice, elem.weather)
 
         acc.copy(travelAdvice = travelAdvice.orElse(acc.travelAdvice),
                   weather = weather.orElse(acc.weather))
       }
-
 
       for(info <- infoWithTravelAndWeather;
         suggestions <- suggestedEvents
@@ -54,7 +53,7 @@ trait TicketInfoService extends WebServiceCalls {
     }
   }
 
-  def getTraffic(ticketInfo:TicketInfo):Future[TicketInfo] = {
+  def getTraffic(ticketInfo: TicketInfo): Future[TicketInfo] = {
     ticketInfo.event.map { event =>
       callTrafficService(ticketInfo.userLocation, event.location, event.time).map{ routeResponse =>
         ticketInfo.copy(travelAdvice = Some(TravelAdvice(routeByCar = routeResponse)))
@@ -62,7 +61,7 @@ trait TicketInfoService extends WebServiceCalls {
     }.getOrElse(Future.successful(ticketInfo))
   }
 
-  def getCarRoute(ticketInfo:TicketInfo):Future[TicketInfo] = {
+  def getCarRoute(ticketInfo: TicketInfo): Future[TicketInfo] = {
     ticketInfo.event.map { event =>
       callTrafficService(ticketInfo.userLocation, event.location, event.time).map{ routeResponse =>
         val newTravelAdvice = ticketInfo.travelAdvice.map(_.copy(routeByCar = routeResponse))
@@ -71,7 +70,7 @@ trait TicketInfoService extends WebServiceCalls {
     }.getOrElse(Future.successful(ticketInfo))
   }
 
-  def getPublicTransportAdvice(ticketInfo:TicketInfo):Future[TicketInfo] = {
+  def getPublicTransportAdvice(ticketInfo: TicketInfo): Future[TicketInfo] = {
     ticketInfo.event.map { event =>
       callPublicTransportService(ticketInfo.userLocation, event.location, event.time).map{ publicTransportResponse =>
         val newTravelAdvice = ticketInfo.travelAdvice.map(_.copy(publicTransportAdvice = publicTransportResponse))
@@ -80,7 +79,7 @@ trait TicketInfoService extends WebServiceCalls {
     }.getOrElse(Future.successful(ticketInfo))
   }
 
-  def getTravelAdvice(info:TicketInfo, event:Event):Future[TicketInfo] = {
+  def getTravelAdvice(info: TicketInfo, event: Event): Future[TicketInfo] = {
 
     val futureRoute = callTrafficService(info.userLocation, event.location, event.time).recover(withNone)
 
@@ -92,30 +91,30 @@ trait TicketInfoService extends WebServiceCalls {
     }
   }
 
-  def getWeather(ticketInfo:TicketInfo):Future[TicketInfo] = {
+  def getWeather(ticketInfo: TicketInfo): Future[TicketInfo] = {
 
     val futureWeatherX = callWeatherXService(ticketInfo).recover(withNone)
 
     val futureWeatherY = callWeatherYService(ticketInfo).recover(withNone)
 
-    Future.firstCompletedOf(Seq(futureWeatherX, futureWeatherY)).map{ weatherResponse =>
+    Future.firstCompletedOf(Seq(futureWeatherX, futureWeatherY)).map { weatherResponse =>
       ticketInfo.copy(weather = weatherResponse)
     }
   }
 
 
-  def getPlannedEventsWithTraverse(event:Event, artists:Seq[Artist]) = {
+  def getPlannedEventsWithTraverse(event: Event, artists: Seq[Artist]): Future[Seq[Event]] = {
     Future.traverse(artists) { artist=>
       callArtistCalendarService(artist, event.location)
     }
   }
 
-  def getPlannedEvents(event:Event, artists:Seq[Artist]) = {
+  def getPlannedEvents(event: Event, artists: Seq[Artist]): Future[Seq[Event]] = {
     val events = artists.map(artist=> callArtistCalendarService(artist, event.location))
     Future.sequence(events)
   }
 
-  def getSuggestions(event:Event):Future[Seq[Event]] = {
+  def getSuggestions(event: Event): Future[Seq[Event]] = {
 
     val futureArtists = callSimilarArtistsService(event).recover(withEmptySeq)
 
@@ -124,7 +123,7 @@ trait TicketInfoService extends WebServiceCalls {
     ) yield events
   }
 
-  def getSuggestionsWithFlatMapAndMap(event:Event):Future[Seq[Event]] = {
+  def getSuggestionsWithFlatMapAndMap(event: Event): Future[Seq[Event]] = {
 
     val futureArtists = callSimilarArtistsService(event).recover(withEmptySeq)
     futureArtists.flatMap { artists=>
@@ -132,7 +131,7 @@ trait TicketInfoService extends WebServiceCalls {
     }.recover(withEmptySeq)
   }
 
-  def getTravelAdviceUsingForComprehension(info:TicketInfo, event:Event):Future[TicketInfo] = {
+  def getTravelAdviceUsingForComprehension(info: TicketInfo, event: Event): Future[TicketInfo] = {
 
     val futureRoute = callTrafficService(info.userLocation, event.location, event.time).recover(withNone)
 
@@ -142,22 +141,20 @@ trait TicketInfoService extends WebServiceCalls {
          travelAdvice = TravelAdvice(routeByCar, publicTransportAdvice)
     ) yield info.copy(travelAdvice = Some(travelAdvice))
   }
-
 }
 
 trait WebServiceCalls {
+  def getEvent(ticketNr: String, location: Location): Future[TicketInfo]
 
-  def getEvent(ticketNr:String, location:Location):Future[TicketInfo]
+  def callWeatherXService(ticketInfo: TicketInfo): Future[Option[Weather]]
 
-  def callWeatherXService(ticketInfo:TicketInfo):Future[Option[Weather]]
+  def callWeatherYService(ticketInfo: TicketInfo): Future[Option[Weather]]
 
-  def callWeatherYService(ticketInfo:TicketInfo):Future[Option[Weather]]
+  def callTrafficService(origin: Location, destination: Location, time: DateTime):Future[Option[RouteByCar]]
 
-  def callTrafficService(origin:Location, destination:Location, time:DateTime):Future[Option[RouteByCar]]
+  def callPublicTransportService(origin: Location, destination: Location, time: DateTime):Future[Option[PublicTransportAdvice]]
 
-  def callPublicTransportService(origin:Location, destination:Location, time:DateTime):Future[Option[PublicTransportAdvice]]
+  def callSimilarArtistsService(event: Event): Future[Seq[Artist]]
 
-  def callSimilarArtistsService(event:Event):Future[Seq[Artist]]
-
-  def callArtistCalendarService(artist: Artist, nearLocation:Location):Future[Event]
+  def callArtistCalendarService(artist: Artist, nearLocation: Location): Future[Event]
 }
