@@ -7,7 +7,6 @@ import monitor.StatisticsSummary
 case class SystemMessage(start: Long = 0, duration: Long = 0, id: String = "")
 
 class ProcessRequest(serviceTime: Duration, next: ActorRef) extends Actor {
-
   def receive = {
     case msg: SystemMessage => {
       //simulate processing
@@ -19,7 +18,6 @@ class ProcessRequest(serviceTime: Duration, next: ActorRef) extends Actor {
 }
 
 class ProcessCPURequest(serviceTime: Duration, next: ActorRef) extends Actor {
-
   def receive = {
     case msg: SystemMessage => {
       //simulate processing by doing some calculations
@@ -61,6 +59,5 @@ class PrintMsg extends Actor {
       println("Received %s".format(msg.toString))
     }
   }
-
 }
 

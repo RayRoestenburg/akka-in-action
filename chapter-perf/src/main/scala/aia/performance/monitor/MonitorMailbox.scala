@@ -65,9 +65,8 @@ trait MonitorMailbox extends MessageQueue {
 }
 
 //<start id="ch14-mailboxType"/>
-class MonitorMailboxType extends akka.dispatch.MailboxType {
-
-  def this(settings: ActorSystem.Settings, config: Config) = this() //<co id="ch14-mailboxType-1" />
+class MonitorMailboxType(settings: ActorSystem.Settings, config: Config)
+    extends akka.dispatch.MailboxType { //<co id="ch14-mailboxType-1" />
 
   final override def create(owner: Option[ActorRef],
                             system: Option[ActorSystem]): MessageQueue = {
