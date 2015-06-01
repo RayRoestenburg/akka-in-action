@@ -18,7 +18,12 @@ import spray.routing.directives._
 class ShoppersService(val shoppers: ActorRef) extends HttpServiceActor
     with ShoppersRoutes {
   def receive = runRoute(routes)
-  val timeout = Timeout(Duration(context.system.settings.config.getString("spray.can.server.request-timeout")).toMillis)
+  val timeoutConfigValue = context
+    .system
+    .settings
+    .config
+    .getString("spray.can.server.request-timeout")
+  val timeout = Timeout(Duration(timeoutConfigValue).toMillis, MILLISECONDS)
   val executionContext = context.dispatcher
 }
 
@@ -88,5 +93,5 @@ trait ShoppersRoutes extends HttpService {
   import spray.json.DefaultJsonProtocol._
 
   implicit val basketItemFormat: RootJsonFormat[Basket.Item] = jsonFormat3(Basket.Item)
-  implicit val basketFormat: RootJsonFormat[Basket.Items] = jsonFormat((list:List[Basket.Item]) => Basket.Items(list), "items")
+  implicit val basketFormat: RootJsonFormat[Basket.Items] = jsonFormat((list:List[Basket.Item]) => Basket.Items.aggregate(list), "items")
 }
