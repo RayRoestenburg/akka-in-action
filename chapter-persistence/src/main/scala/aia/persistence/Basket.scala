@@ -10,30 +10,57 @@ object Basket {
   def name(shopperId: Long) = s"basket_${shopperId}"
 
   case class Item(productId:String, number: Int, price: BigDecimal) {
-    def +(item: Item) =
-      copy(number = number + item.number, price = price + item.price)
+    /*
+     * Adds up the number of items and price from this item
+     * if productId of the item argument is equal to this item's productId
+     */
+    def aggregate(item: Item): Option[Item] = {
+     if(item.productId == productId) {
+        Some(copy(number = number + item.number, price = price + item.price))
+      } else {
+        None
+      }
+    }
+
+    /*
+     * Subtracts the number of items and price from this item
+     * if productId of the item argument is equal to this item's productId
+     */
+    def remove(item: Item): Option[Item] = {
+     if(item.productId == productId) {
+        Some(copy(number = number - item.number, price = price - item.price))
+      } else {
+        None
+      }
+    }
     def unary_- = copy(number = number * -1, price = price * -1)
   }
 
   object Items {
     def apply(args: Item*): Items = Items(add(args.toList))
+    def aggregate(list: List[Item]): Items = Items(add(list))
 
-    private def add(list: List[Item]) = addIndexed(indexed(list))
-
+    private def add(list: List[Item]) = aggregateIndexed(indexed(list))
     private def add(args: Item*): List[Item] = add(args.toList)
-
     private def indexed(list:List[Item]) = list.zipWithIndex
 
-    private def addIndexed(indexed: List[(Item, Int)]) = {
+    private def aggregateIndexed(indexed: List[(Item, Int)]) = {
       def grouped = indexed.groupBy {
         case (item, _) => item.productId
       }
       def reduced = grouped.flatMap { case (_, groupedIndexed) =>
-        val (item, ix) = groupedIndexed.reduce[(Item, Int)] {
-          case ((i1, ix1), (i2, ix2)) => i1 + i2 -> math.min(ix1, ix2)
+        val init = (Option.empty[Item],Int.MaxValue)
+        val (item, ix) = groupedIndexed.foldLeft(init) {
+          case ((accItem, accIx), (item, ix)) =>
+            def aggregateProduct =
+              accItem.map(i => item.aggregate(i))
+                     .getOrElse(Some(item))
+
+            (aggregateProduct, Math.min(accIx, ix))
         }
-        if(item.number > 0) Some(item -> ix)
-        else None
+
+        item.filter(_.number > 0)
+            .map(i => (i, ix))
       }
       def sorted = reduced.toList
        .sortBy { case (_, index) => index}
@@ -42,19 +69,15 @@ object Basket {
     }
   }
 
-  case class Items(list: List[Item] = Nil) {
+  case class Items private(list: List[Item] = Nil) {
     import Items._
-
-    def +(newItem: Item) = Items(add(list:+newItem))
+    def +(newItem: Item) = Items(add(list :+ newItem))
     def ++(items: Items) = Items(add(list ++ items.list))
 
-    def -(removeItem: Item) =
-      Items(
-        add(list :+ -removeItem)
-      )
+    def -(removeItem: Item) = Items(add(list :+ -removeItem))
 
     def clear = Items()
-    /* returns an Items with every item added together for the same product */
+    /* returns an Items with every item aggregated for the same product */
     def aggregated = Items(add(list))
   }
 
@@ -86,11 +109,11 @@ class Basket extends PersistentActor
   }
 
   def receiveCommand = {
-    case Add(item, _)     => persist(Added(item))(updateState)
-    case Remove(item, _)  => persist(Removed(item))(updateState)
+    case Add(item, _)      => persist(Added(item))(updateState)
+    case Remove(item, _)   => persist(Removed(item))(updateState)
     case Replace(items, _) => persist(Replaced(items))(updateState)
-    case Clear(_)         => persist(Cleared)(updateState)
-    case GetItems(_)      => sender() ! items
+    case Clear(_)          => persist(Cleared)(updateState)
+    case GetItems(_)       => sender() ! items
   }
 
   private val updateState: (Event ⇒ Unit) = {
