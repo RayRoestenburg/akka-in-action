@@ -10,7 +10,7 @@ import akka.util.Timeout
 import spray.can._
 import spray.http._
 
-import aia.persistence._
+import aia.persistence.rest.ShoppersServiceSupport
 
 object ShardedMain extends App with ShoppersServiceSupport {
   implicit val system = ActorSystem("shoppers")

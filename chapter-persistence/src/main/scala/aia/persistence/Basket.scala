@@ -1,7 +1,5 @@
 package aia.persistence
 
-import scala.collection.SeqLike
-
 import akka.actor._
 import akka.persistence._
 
@@ -9,35 +7,41 @@ object Basket {
   def props = Props(new Basket)
   def name(shopperId: Long) = s"basket_${shopperId}"
 
-  case class Item(productId:String, number: Int, price: BigDecimal) {
+  sealed trait Command extends Shopper.Command
+  case class Add(item: Item, shopperId: Long) extends Command
+  case class RemoveItem(productId: String, shopperId: Long) extends Command
+  case class UpdateItem(productId: String,
+                        number: Int,
+                        shopperId: Long) extends Command
+  case class Clear(shopperId: Long) extends Command
+  case class Replace(items: Items, shopperId: Long) extends Command
+  case class GetItems(shopperId: Long) extends Command
+
+  sealed trait Event
+  case class Added(item: Item) extends Event
+  case class ItemRemoved(productId: String) extends Event
+  case class ItemUpdated(productId: String, number: Int) extends Event
+  case class Replaced(items: Items) extends Event
+  case object Cleared extends Event
+
+  case class Item(productId:String, number: Int, unitPrice: BigDecimal) {
     /*
-     * Adds up the number of items and price from this item
+     * Adds the number of items
      * if productId of the item argument is equal to this item's productId
      */
     def aggregate(item: Item): Option[Item] = {
      if(item.productId == productId) {
-        Some(copy(number = number + item.number, price = price + item.price))
+        Some(copy(number = number + item.number))
       } else {
         None
       }
     }
 
-    /*
-     * Subtracts the number of items and price from this item
-     * if productId of the item argument is equal to this item's productId
-     */
-    def remove(item: Item): Option[Item] = {
-     if(item.productId == productId) {
-        Some(copy(number = number - item.number, price = price - item.price))
-      } else {
-        None
-      }
-    }
-    def unary_- = copy(number = number * -1, price = price * -1)
+    def update(number: Int): Item = copy(number = number)
   }
 
   object Items {
-    def apply(args: Item*): Items = Items(add(args.toList))
+    def apply(args: Item*): Items = Items.aggregate(args.toList)
     def aggregate(list: List[Item]): Items = Items(add(list))
 
     private def add(list: List[Item]) = aggregateIndexed(indexed(list))
@@ -52,11 +56,11 @@ object Basket {
         val init = (Option.empty[Item],Int.MaxValue)
         val (item, ix) = groupedIndexed.foldLeft(init) {
           case ((accItem, accIx), (item, ix)) =>
-            def aggregateProduct =
+            val aggregated =
               accItem.map(i => item.aggregate(i))
                      .getOrElse(Some(item))
 
-            (aggregateProduct, Math.min(accIx, ix))
+            (aggregated, Math.min(accIx, ix))
         }
 
         item.filter(_.number > 0)
@@ -71,28 +75,23 @@ object Basket {
 
   case class Items private(list: List[Item] = Nil) {
     import Items._
-    def +(newItem: Item) = Items(add(list :+ newItem))
-    def ++(items: Items) = Items(add(list ++ items.list))
+    def add(newItem: Item) = Items.aggregate(list :+ newItem)
+    def add(items: Items) = Items.aggregate(list ++ items.list)
 
-    def -(removeItem: Item) = Items(add(list :+ -removeItem))
+    def containsProduct(productId: String) =
+      list.exists(_.productId == productId)
 
+    def removeItem(productId: String) =
+      Items.aggregate(list.filterNot(_.productId == productId))
+
+    def updateItem(productId: String, number: Int) = {
+      val newList = list.find(_.productId == productId).map { item =>
+        list.filterNot(_.productId == productId) :+ item.update(number)
+      }.getOrElse(list)
+      Items.aggregate(newList)
+    }
     def clear = Items()
-    /* returns an Items with every item aggregated for the same product */
-    def aggregated = Items(add(list))
   }
-
-  sealed trait Command extends Shopper.Command
-  case class Add(item: Item, shopperId: Long) extends Command
-  case class Remove(item: Item, shopperId: Long) extends Command
-  case class Clear(shopperId: Long) extends Command
-  case class Replace(items: Items, shopperId: Long) extends Command
-  case class GetItems(shopperId: Long) extends Command
-
-  sealed trait Event
-  case class Added(item: Item) extends Event
-  case class Removed(item: Item) extends Event
-  case class Replaced(items: Items) extends Event
-  case object Cleared extends Event
 }
 
 class Basket extends PersistentActor
@@ -109,17 +108,44 @@ class Basket extends PersistentActor
   }
 
   def receiveCommand = {
-    case Add(item, _)      => persist(Added(item))(updateState)
-    case Remove(item, _)   => persist(Removed(item))(updateState)
-    case Replace(items, _) => persist(Replaced(items))(updateState)
-    case Clear(_)          => persist(Cleared)(updateState)
-    case GetItems(_)       => sender() ! items
+    case Add(item, _) =>
+      persist(Added(item))(updateState)
+
+    case RemoveItem(id, _) =>
+      if(items.containsProduct(id)) {
+        persist(ItemRemoved(id)){ removed =>
+          updateState(removed)
+          sender() ! Some(removed)
+        }
+      } else {
+        sender() ! None
+      }
+
+    case UpdateItem(id, number, _) =>
+      if(items.containsProduct(id)) {
+        persist(ItemUpdated(id, number)){ updated =>
+          updateState(updated)
+          sender() ! Some(updated)
+        }
+      } else {
+        sender() ! None
+      }
+
+    case Replace(items, _) =>
+      persist(Replaced(items))(updateState)
+
+    case Clear(_) =>
+      persist(Cleared)(updateState)
+
+    case GetItems(_) =>
+      sender() ! items
   }
 
   private val updateState: (Event ⇒ Unit) = {
-    case Added(item)      => items = items + item
-    case Removed(item)    => items = items - item
-    case Replaced(update) => items = update.aggregated
-    case Cleared          => items = items.clear
+    case Added(item)             => items = items.add(item)
+    case ItemRemoved(id)         => items = items.removeItem(id)
+    case ItemUpdated(id, number) => items = items.updateItem(id, number)
+    case Replaced(newItems)      => items = newItems
+    case Cleared                 => items = items.clear
   }
 }

@@ -21,6 +21,7 @@ libraryDependencies ++= {
     "com.typesafe.akka"       %%  "akka-cluster"                   % akkaVersion,
     "com.typesafe.akka"       %%  "akka-contrib"                   % akkaVersion,
     "com.typesafe.akka"       %%  "akka-testkit"                   % akkaVersion   % "test",
+    "com.typesafe.akka"       %%  "akka-multi-node-testkit"        % akkaVersion   % "test",
     "io.spray"                %%  "spray-can"                      % sprayVersion,
     "io.spray"                %%  "spray-client"                   % sprayVersion,
     "io.spray"                %%  "spray-json"                     % "1.3.2",

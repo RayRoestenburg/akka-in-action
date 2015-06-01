@@ -11,6 +11,8 @@ object Shopper {
   }
 
   case class PayBasket(shopperId: Long) extends Command
+  // for simplicity every shopper got 40k.
+  val cash = 40000
 }
 
 class Shopper extends Actor {
@@ -21,7 +23,8 @@ class Shopper extends Actor {
   val basket = context.actorOf(Basket.props,
     Basket.name(shopperId))
 
-  val wallet = context.actorOf(Wallet.props(shopperId),
+
+  val wallet = context.actorOf(Wallet.props(shopperId, cash),
     Wallet.name(shopperId))
 
   def receive = {

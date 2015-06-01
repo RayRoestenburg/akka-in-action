@@ -1,6 +1,7 @@
 package aia.persistence
 
 import scala.concurrent.duration._
+
 import akka.actor._
 import akka.testkit._
 import org.scalatest._
@@ -17,21 +18,22 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
   val appleKeyboard = Basket.Item("Apple Keyboard", 1, BigDecimal(79.99))
 
   val expectedTotalSpend = Wallet.AmountSpent(
-    (macPro.price * macPro.number) +
-    (displays.price * displays.number) +
-    (appleMouse.price * appleMouse.number) +
-    (appleKeyboard.price * appleKeyboard.number)
+    (macPro.unitPrice * macPro.number) +
+    (displays.unitPrice * displays.number) +
+    (appleMouse.unitPrice * appleMouse.number) +
+    (appleKeyboard.unitPrice * appleKeyboard.number)
   )
 
   val dWave = Basket.Item("D-Wave One", 1, BigDecimal(14999999.99))
 
   "The shopper" should {
-    "be able to put items in the shopping basket and view the basket" in {
+    "put items in the shopping basket and view the basket" in {
       val shopper = system.actorOf(Shopper.props(shopperId), shopperName)
       shopper ! Basket.Add(macbookPro, shopperId)
       shopper ! Basket.Add(displays, shopperId)
       shopper ! Basket.Add(macPro, shopperId)
-      shopper ! Basket.Remove(macbookPro, shopperId)
+      shopper ! Basket.RemoveItem(macbookPro.productId, shopperId)
+      expectMsg(Some(Basket.ItemRemoved(macbookPro.productId)))
       shopper ! Basket.GetItems(shopperId)
       expectMsg(Basket.Items(displays, macPro))
       killActors(shopper)
@@ -44,7 +46,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       killActors(shopperResurrected)
     }
 
-    "be able to pay for items in the shopping basket and view the payment history" in {
+    "pay for items in the shopping basket and view the payment history" in {
       val probe = TestProbe()
       system.eventStream.subscribe(probe.ref, classOf[Wallet.Paid])
 
@@ -98,10 +100,12 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
         shopperName)
       shopperResurrected ! Basket.Add(dWave, shopperId)
       shopperResurrected ! Shopper.PayBasket(shopperId)
-      probe.expectMsg(Wallet.NotEnoughCash(40000 - expectedTotalSpend.amount))
 
-      shopperResurrected ! Wallet.CheckPocket(shopperId)
-      expectMsg(Wallet.Cash(left = 40000 - expectedTotalSpend.amount))
+      val left = Shopper.cash - expectedTotalSpend.amount
+      probe.expectMsg(Wallet.NotEnoughCash(left))
+
+      shopperResurrected ! Wallet.Check(shopperId)
+      expectMsg(Wallet.Cash(left))
 
       val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
         PaymentHistory.name(shopperId))

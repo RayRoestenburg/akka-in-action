@@ -4,12 +4,13 @@ import akka.actor._
 import akka.persistence._
 
 object Wallet {
-  def props(shopperId: Long) = Props(new Wallet(shopperId, 40000))
+  def props(shopperId: Long, cash: BigDecimal) =
+    Props(new Wallet(shopperId, cash))
   def name(shopperId: Long) = s"wallet_${shopperId}"
 
   sealed trait Command extends Shopper.Command
   case class Pay(items: List[Basket.Item], shopperId: Long) extends Command
-  case class CheckPocket(shopperId: Long) extends Command
+  case class Check(shopperId: Long) extends Command
   case class SpentHowMuch(shopperId: Long) extends Command
 
   case class AmountSpent(amount: BigDecimal)
@@ -39,7 +40,7 @@ class Wallet(shopperId: Long, cash: BigDecimal) extends PersistentActor
       } else {
         context.system.eventStream.publish(NotEnoughCash(cash - amountSpent))
       }
-    case CheckPocket(_) => sender() ! Cash(cash - amountSpent)
+    case Check(_) => sender() ! Cash(cash - amountSpent)
     case SpentHowMuch(_) => sender() ! AmountSpent(amountSpent)
   }
 
@@ -53,6 +54,6 @@ class Wallet(shopperId: Long, cash: BigDecimal) extends PersistentActor
 
   private def addSpending(items: List[Basket.Item]) =
     amountSpent + items.foldLeft(BigDecimal(0)){ (total, item) =>
-      total + (item.price * item.number)
+      total + (item.unitPrice * item.number)
     }
 }
