@@ -1,4 +1,4 @@
-package aia.persistence
+package aia.persistence.calculator
 
 import akka.actor._
 import akka.testkit._

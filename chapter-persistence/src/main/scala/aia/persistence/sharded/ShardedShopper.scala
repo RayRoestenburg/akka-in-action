@@ -1,4 +1,4 @@
-package aia.persistence
+package aia.persistence.sharded
 
 import scala.concurrent.duration._
 
@@ -6,6 +6,8 @@ import akka.actor._
 
 import akka.contrib.pattern.ShardRegion
 import akka.contrib.pattern.ShardRegion.Passivate
+
+import aia.persistence._
 
 object ShardedShopper {
   def props = Props(new ShardedShopper)

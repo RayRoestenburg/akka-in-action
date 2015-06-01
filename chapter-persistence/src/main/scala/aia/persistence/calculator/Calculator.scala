@@ -1,5 +1,5 @@
 //<start id="persistence-calc"/>
-package aia.persistence
+package aia.persistence.calculator
 
 import akka.actor._
 import akka.persistence._

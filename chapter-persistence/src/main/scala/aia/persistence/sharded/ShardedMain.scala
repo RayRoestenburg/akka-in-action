@@ -1,4 +1,4 @@
-package aia.persistence
+package aia.persistence.sharded
 
 import scala.concurrent.duration._
 
@@ -9,6 +9,8 @@ import akka.util.Timeout
 
 import spray.can._
 import spray.http._
+
+import aia.persistence._
 
 object ShardedMain extends App with ShoppersServiceSupport {
   implicit val system = ActorSystem("shoppers")

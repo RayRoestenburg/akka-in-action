@@ -10,11 +10,11 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
 
   val shopperId = 1L
   val shopperName = s"$shopperId"
-  val macbookPro = Basket.Item("Apple Macbook Pro 15 inch", 1, BigDecimal(2499.99))
+  val macbookPro = Basket.Item("Apple Macbook Pro", 1, BigDecimal(2499.99))
   val macPro = Basket.Item("Apple Mac Pro", 1, BigDecimal(10499.99))
   val displays = Basket.Item("4K Display", 3, BigDecimal(2499.99))
   val appleMouse = Basket.Item("Apple Mouse", 1, BigDecimal(99.99))
-  val appleKeyboard = Basket.Item("Apple Bluetooth Keyboard", 1, BigDecimal(79.99))
+  val appleKeyboard = Basket.Item("Apple Keyboard", 1, BigDecimal(79.99))
 
   val expectedTotalSpend = Wallet.AmountSpent(
     (macPro.price * macPro.number) +
@@ -23,7 +23,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
     (appleKeyboard.price * appleKeyboard.number)
   )
 
-  val dWave = Basket.Item("D-Wave One Computer System", 1, BigDecimal(14999999.99))
+  val dWave = Basket.Item("D-Wave One", 1, BigDecimal(14999999.99))
 
   "The shopper" should {
     "be able to put items in the shopping basket and view the basket" in {

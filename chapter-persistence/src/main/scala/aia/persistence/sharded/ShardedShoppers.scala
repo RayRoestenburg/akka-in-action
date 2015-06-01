@@ -1,7 +1,9 @@
-package aia.persistence
+package aia.persistence.sharded
 
 import akka.actor._
 import akka.contrib.pattern.ClusterSharding
+
+import aia.persistence._
 
 object ShardedShoppers {
   def props= Props(new ShardedShoppers)
