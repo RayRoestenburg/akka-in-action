@@ -12,7 +12,7 @@ resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/re
 parallelExecution in Test := false
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.9"
+  val akkaVersion       = "2.3.11"
   val sprayVersion      = "1.3.3"
   Seq(
     "com.typesafe.akka"       %%  "akka-actor"                     % akkaVersion,
@@ -23,7 +23,7 @@ libraryDependencies ++= {
     "com.typesafe.akka"       %%  "akka-testkit"                   % akkaVersion   % "test",
     "io.spray"                %%  "spray-can"                      % sprayVersion,
     "io.spray"                %%  "spray-client"                   % sprayVersion,
-    "io.spray"                %%  "spray-json"                     % "1.3.1",
+    "io.spray"                %%  "spray-json"                     % "1.3.2",
     "io.spray"                %%  "spray-routing"                  % sprayVersion,
     "commons-io"              %   "commons-io"                     % "2.4",
     "org.scalatest"           %%  "scalatest"                      % "2.2.4"       % "test",
