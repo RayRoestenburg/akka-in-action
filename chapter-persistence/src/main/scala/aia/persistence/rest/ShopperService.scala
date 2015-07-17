@@ -34,7 +34,7 @@ trait ShoppersRoutes extends HttpService
   def routes =
     deleteItem ~
     updateItem ~
-    getBasket ~
+    //getBasket ~
     updateBasket ~
     deleteBasket ~
     pay
@@ -53,29 +53,28 @@ trait ShoppersRoutes extends HttpService
     }
   }
 
-  def getBasket = {
-    get {
-      pathPrefix("shopper" / ShopperIdSegment / "basket") { shopperId =>
-        pathEnd {
-          onSuccess(shoppers.ask(Basket.GetItems(shopperId))
-            .mapTo[Basket.Items]) {
-            case Basket.Items(Nil)   => complete(NotFound)
-            case items: Basket.Items => complete(OK, items)
-          }
-        }
-      }
-    }
-  }
+  // def getBasket = {
+  //   get {
+  //     pathPrefix("shopper" / ShopperIdSegment / "basket") { shopperId =>
+  //       pathEnd {
+  //         onSuccess(getBaskets) {
+  //           case Items(Nil)   => complete(NotFound)
+  //           case items: Items => complete(OK, items)
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   def updateBasket = {
     post {
       pathPrefix("shopper" / ShopperIdSegment / "basket") { shopperId =>
         pathEnd {
-          entity(as[Basket.Items]) { items =>
+          entity(as[Items]) { items =>
             shoppers ! Basket.Replace(items, shopperId)
             complete(OK)
           } ~
-          entity(as[Basket.Item]) { item =>
+          entity(as[Item]) { item =>
             shoppers ! Basket.Add(item, shopperId)
             complete(OK)
           }
@@ -121,7 +120,6 @@ trait ShoppersRoutes extends HttpService
         (shopperId, productId) =>
 
         pathEnd {
-
           val removeItem = Basket.RemoveItem(productId, shopperId)
           onSuccess(shoppers.ask(removeItem)
             .mapTo[Option[Basket.ItemRemoved]]) {

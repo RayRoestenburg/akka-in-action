@@ -18,9 +18,7 @@ class CalculatorSpec extends PersistenceSpec(ActorSystem("test"))
       calc ! Calculator.GetResult
       expectMsg(0.5d)
 
-      watch(calc)
-      system.stop(calc)
-      expectTerminated(calc)
+      killActors(calc)
 
       val calcResurrected = system.actorOf(Calculator.props, Calculator.name)
       calcResurrected ! Calculator.GetResult

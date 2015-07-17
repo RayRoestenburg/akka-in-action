@@ -19,11 +19,11 @@ object ShardedShopper {
   val shardName: String = "shoppers"
 
   val idExtractor: ShardRegion.IdExtractor = {
-    case cmd: Shopper.Command ⇒ (cmd.shopperId.toString, cmd)
+    case cmd: Shopper.Command => (cmd.shopperId.toString, cmd)
   }
 
   val shardResolver: ShardRegion.ShardResolver = {
-    case cmd: Shopper.Command ⇒ (cmd.shopperId % 12).toString
+    case cmd: Shopper.Command => (cmd.shopperId % 12).toString
   }
 }
 

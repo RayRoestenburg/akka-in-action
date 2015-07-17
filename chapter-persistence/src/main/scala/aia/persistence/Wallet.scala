@@ -9,7 +9,7 @@ object Wallet {
   def name(shopperId: Long) = s"wallet_${shopperId}"
 
   sealed trait Command extends Shopper.Command
-  case class Pay(items: List[Basket.Item], shopperId: Long) extends Command
+  case class Pay(items: List[Item], shopperId: Long) extends Command
   case class Check(shopperId: Long) extends Command
   case class SpentHowMuch(shopperId: Long) extends Command
 
@@ -18,7 +18,7 @@ object Wallet {
   case class Cash(left: BigDecimal)
 
   sealed trait Event
-  case class Paid(list: List[Basket.Item], shopperId: Long) extends Event
+  case class Paid(list: List[Item], shopperId: Long) extends Event
 }
 
 class Wallet(shopperId: Long, cash: BigDecimal) extends PersistentActor
@@ -48,11 +48,11 @@ class Wallet(shopperId: Long, cash: BigDecimal) extends PersistentActor
     case event: Event => updateState(event)
   }
 
-  private val updateState: (Event ⇒ Unit) = {
+  private val updateState: (Event => Unit) = {
     case paidItems @ Paid(items, _) => amountSpent = addSpending(items)
   }
 
-  private def addSpending(items: List[Basket.Item]) =
+  private def addSpending(items: List[Item]) =
     amountSpent + items.foldLeft(BigDecimal(0)){ (total, item) =>
       total + (item.unitPrice * item.number)
     }

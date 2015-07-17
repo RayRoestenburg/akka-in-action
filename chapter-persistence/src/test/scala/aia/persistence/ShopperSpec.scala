@@ -11,11 +11,11 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
 
   val shopperId = 1L
   val shopperName = s"$shopperId"
-  val macbookPro = Basket.Item("Apple Macbook Pro", 1, BigDecimal(2499.99))
-  val macPro = Basket.Item("Apple Mac Pro", 1, BigDecimal(10499.99))
-  val displays = Basket.Item("4K Display", 3, BigDecimal(2499.99))
-  val appleMouse = Basket.Item("Apple Mouse", 1, BigDecimal(99.99))
-  val appleKeyboard = Basket.Item("Apple Keyboard", 1, BigDecimal(79.99))
+  val macbookPro = Item("Apple Macbook Pro", 1, BigDecimal(2499.99))
+  val macPro = Item("Apple Mac Pro", 1, BigDecimal(10499.99))
+  val displays = Item("4K Display", 3, BigDecimal(2499.99))
+  val appleMouse = Item("Apple Mouse", 1, BigDecimal(99.99))
+  val appleKeyboard = Item("Apple Keyboard", 1, BigDecimal(79.99))
 
   val expectedTotalSpend = Wallet.AmountSpent(
     (macPro.unitPrice * macPro.number) +
@@ -24,7 +24,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
     (appleKeyboard.unitPrice * appleKeyboard.number)
   )
 
-  val dWave = Basket.Item("D-Wave One", 1, BigDecimal(14999999.99))
+  val dWave = Item("D-Wave One", 1, BigDecimal(14999999.99))
 
   "The shopper" should {
     "put items in the shopping basket and view the basket" in {
@@ -35,13 +35,13 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       shopper ! Basket.RemoveItem(macbookPro.productId, shopperId)
       expectMsg(Some(Basket.ItemRemoved(macbookPro.productId)))
       shopper ! Basket.GetItems(shopperId)
-      expectMsg(Basket.Items(displays, macPro))
+      expectMsg(Items(displays, macPro))
       killActors(shopper)
 
       val shopperResurrected = system.actorOf(Shopper.props(shopperId),
         shopperName)
       shopperResurrected ! Basket.GetItems(shopperId)
-      expectMsg(Basket.Items(displays, macPro))
+      expectMsg(Items(displays, macPro))
 
       killActors(shopperResurrected)
     }
@@ -53,7 +53,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       val shopper = system.actorOf(Shopper.props(shopperId), shopperName)
       shopper ! Basket.Add(appleMouse,shopperId)
       shopper ! Basket.GetItems(shopperId)
-      expectMsg(Basket.Items(displays, macPro, appleMouse))
+      expectMsg(Items(displays, macPro, appleMouse))
       shopper ! Shopper.PayBasket(shopperId)
       probe.expectMsg(Wallet.Paid(List(displays, macPro, appleMouse), shopperId))
 
@@ -76,7 +76,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       val shopperResurrected = system.actorOf(Shopper.props(shopperId),
         shopperName)
       shopperResurrected ! Basket.GetItems(shopperId)
-      expectMsg(Basket.Items())
+      expectMsg(Items())
 
       val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
         PaymentHistory.name(shopperId))

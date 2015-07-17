@@ -9,8 +9,8 @@ object PaymentHistory {
 
   case object GetHistory
 
-  case class History(items: List[Basket.Item] = Nil) {
-    def paid(paidItems: List[Basket.Item]) = {
+  case class History(items: List[Item] = Nil) {
+    def paid(paidItems: List[Item]) = {
       History(paidItems ++ items)
     }
   }

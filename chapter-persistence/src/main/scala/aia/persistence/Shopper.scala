@@ -32,12 +32,12 @@ class Shopper extends Actor {
     case cmd: Wallet.Command => wallet forward cmd
 
     case PayBasket(shopperId) => basket ! Basket.GetItems(shopperId)
-    case Basket.Items(list) => wallet ! Wallet.Pay(list, shopperId)
+    case Items(list) => wallet ! Wallet.Pay(list, shopperId)
     case Wallet.Paid(_, shopperId) => basket ! Basket.Clear(shopperId)
 
     // alternative:
     // issue: ask timeout
-    // benefit: report back to sender of final result.
+    // benefit: can report back to sender of final result.
     //
     // case PayBasket(shopperId) =>
     //   import scala.concurrent.duration._
@@ -45,7 +45,7 @@ class Shopper extends Actor {
     //   import akka.pattern.ask
     //   implicit val timeout = akka.util.Timeout(10 seconds)
     //   for {
-    //     items <- basket.ask(Basket.GetItems(shopperId)).mapTo[Basket.Items]
+    //     items <- basket.ask(Basket.GetItems(shopperId)).mapTo[Items]
     //     paid <- wallet.ask(Wallet.Pay(items.list, shopperId)).mapTo[Wallet.Paid]
     //   } yield {
     //     basket ! Basket.Clear(shopperId)

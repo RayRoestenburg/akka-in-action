@@ -10,11 +10,11 @@ import aia.persistence._
 case class ItemNumber(number: Int)
 
 trait ShopperMarshalling extends DefaultJsonProtocol {
-  implicit val basketItemFormat: RootJsonFormat[Basket.Item] =
-    jsonFormat3(Basket.Item)
-  implicit val basketFormat: RootJsonFormat[Basket.Items] =
+  implicit val basketItemFormat: RootJsonFormat[Item] =
+    jsonFormat3(Item)
+  implicit val basketFormat: RootJsonFormat[Items] =
     jsonFormat(
-      (list:List[Basket.Item]) => Basket.Items.aggregate(list), "items"
+      (list:List[Item]) => Items.aggregate(list), "items"
     )
   implicit val itemNumberFormat: RootJsonFormat[ItemNumber] =
     jsonFormat1(ItemNumber)

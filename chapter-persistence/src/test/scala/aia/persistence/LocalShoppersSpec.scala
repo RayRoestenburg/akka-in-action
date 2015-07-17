@@ -9,11 +9,11 @@ class LocalShoppersSpec extends PersistenceSpec(ActorSystem("test"))
     with PersistenceCleanup {
 
   val macbookPro =
-    Basket.Item("Apple Macbook Pro", 1, BigDecimal(2499.99))
-  val macPro = Basket.Item("Apple Mac Pro", 1, BigDecimal(10499.99))
-  val displays = Basket.Item("4K Display", 3, BigDecimal(2499.99))
-  val appleMouse = Basket.Item("Apple Mouse", 1, BigDecimal(99.99))
-  val appleKeyboard = Basket.Item("Apple Keyboard", 1, BigDecimal(79.99))
+    Item("Apple Macbook Pro", 1, BigDecimal(2499.99))
+  val macPro = Item("Apple Mac Pro", 1, BigDecimal(10499.99))
+  val displays = Item("4K Display", 3, BigDecimal(2499.99))
+  val appleMouse = Item("Apple Mouse", 1, BigDecimal(99.99))
+  val appleKeyboard = Item("Apple Keyboard", 1, BigDecimal(79.99))
 
   "The local shoppers" should {
     "forward to the specific shopper" in {
@@ -28,11 +28,11 @@ class LocalShoppersSpec extends PersistenceSpec(ActorSystem("test"))
       shoppers ! Basket.Add(appleMouse, shopperId1)
       shoppers ! Basket.Add(appleKeyboard, shopperId1)
       shoppers ! Basket.GetItems(shopperId1)
-      expectMsg(Basket.Items(appleMouse, appleKeyboard))
+      expectMsg(Items(appleMouse, appleKeyboard))
 
       shoppers ! Basket.Add(displays, shopperId2)
       shoppers ! Basket.GetItems(shopperId2)
-      expectMsg(Basket.Items(displays))
+      expectMsg(Items(displays))
 
       shoppers ! Shopper.PayBasket(shopperId1)
       probe.expectMsg(Wallet.Paid(List(appleMouse, appleKeyboard), shopperId1))
