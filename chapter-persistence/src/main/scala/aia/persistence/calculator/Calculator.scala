@@ -51,6 +51,7 @@ class Calculator extends PersistentActor {
   //<start id="persistence-receive_recover_calc"/>
   val receiveRecover: Receive = {
     case event: Event => updateState(event)
+    case RecoveryCompleted => log.info("Calculator recovery completed") //<co id="recovery_completed"/>
   }
   //<end id="persistence-receive_recover_calc"/>
 

@@ -28,7 +28,7 @@ class ShoppersService(val shoppers: ActorRef) extends HttpServiceActor
   val timeout = Timeout(Duration(timeoutConfigValue).toMillis, MILLISECONDS)
   val executionContext = context.dispatcher
 }
-
+//<start id="persistence-shoppersRoutes"/>
 trait ShoppersRoutes extends HttpService
     with ShopperMarshalling {
   def routes =
@@ -52,19 +52,20 @@ trait ShoppersRoutes extends HttpService
       }
     }
   }
+//<end id="persistence-shoppersRoutes"/>
 
-  // def getBasket = {
-  //   get {
-  //     pathPrefix("shopper" / ShopperIdSegment / "basket") { shopperId =>
-  //       pathEnd {
-  //         onSuccess(getBaskets) {
-  //           case Items(Nil)   => complete(NotFound)
-  //           case items: Items => complete(OK, items)
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  def getBasket = {
+    get {
+      pathPrefix("shopper" / ShopperIdSegment / "basket") { shopperId =>
+        pathEnd {
+          onSuccess(shoppers.ask(Basket.GetItems(shopperId)).mapTo[Items]) {
+            case Items(Nil)   => complete(NotFound)
+            case items: Items => complete(items)
+          }
+        }
+      }
+    }
+  }
 
   def updateBasket = {
     post {

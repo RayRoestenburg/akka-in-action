@@ -5,9 +5,6 @@ import scala.util.Try
 import akka.serialization._
 import spray.json._
 
-/**
- * A custom Serializer that can only read and write basket events.
- */
 class BasketEventSerializer extends Serializer {
   import JsonFormats._
 

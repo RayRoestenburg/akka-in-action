@@ -1,4 +1,5 @@
 package aia.persistence
+//<start id="persistence-shoppers-singleton"/>
 
 import akka.actor._
 import akka.persistence._
@@ -34,7 +35,9 @@ class ShoppersSingleton extends Actor {
     case command: Shopper.Command => shoppers forward command
   }
 }
+//<end id="persistence-shoppers-singleton"/>
 
+//<start id="persistence-shoppers-singleton-actor"/>
 object Shoppers {
   def props = Props(new Shoppers)
   def name = "shoppers"
@@ -53,7 +56,7 @@ class Shoppers extends PersistentActor
 
   override def createAndForward(cmd: Shopper.Command, shopperId: Long) = {
     val shopper = createShopper(shopperId)
-    persistAsync(ShopperCreated(shopperId)) { _ =>
+    persist(ShopperCreated(shopperId)) { _ =>
       forwardCommand(cmd)(shopper)
     }
   }
@@ -63,3 +66,4 @@ class Shoppers extends PersistentActor
       context.child(Shopper.name(shopperId)).getOrElse(createShopper(shopperId))
   }
 }
+//<end id="persistence-shoppers-singleton-actor"/>
