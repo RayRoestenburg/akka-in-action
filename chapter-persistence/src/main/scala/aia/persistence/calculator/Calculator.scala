@@ -38,7 +38,7 @@ object Calculator {
 }
 
 //<start id="persistence-extend_persistent_actor"/>
-class Calculator extends PersistentActor {
+class Calculator extends PersistentActor with ActorLogging {
   import Calculator._
 
   def persistenceId = Calculator.name

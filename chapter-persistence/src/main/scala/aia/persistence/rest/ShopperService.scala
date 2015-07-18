@@ -34,7 +34,7 @@ trait ShoppersRoutes extends HttpService
   def routes =
     deleteItem ~
     updateItem ~
-    //getBasket ~
+    getBasket ~
     updateBasket ~
     deleteBasket ~
     pay
