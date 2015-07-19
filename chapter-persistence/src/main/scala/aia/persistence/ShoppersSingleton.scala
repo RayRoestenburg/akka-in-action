@@ -56,7 +56,7 @@ class Shoppers extends PersistentActor
 
   override def createAndForward(cmd: Shopper.Command, shopperId: Long) = {
     val shopper = createShopper(shopperId)
-    persist(ShopperCreated(shopperId)) { _ =>
+    persistAsync(ShopperCreated(shopperId)) { _ =>
       forwardCommand(cmd)(shopper)
     }
   }
