@@ -20,8 +20,9 @@ class BasketEventSerializer extends Serializer {
     }
   }
 
-  def fromBinary(bytes: Array[Byte], clazz: Option[Class[_]]): AnyRef = {
-    val jsonAst = new String(bytes).parseJson //<co id="parse_json_from_bytes"/>
+  def fromBinary(bytes: Array[Byte],
+                 clazz: Option[Class[_]]): AnyRef = {
+    val jsonAst = new String(bytes).parseJson//<co id="parse_json_from_bytes"/>
     BasketEventFormat.read(jsonAst) //<co id="read_json_format"/>
   }
 }
@@ -41,7 +42,8 @@ class BasketSnapshotSerializer extends Serializer {
     }
   }
 
-  def fromBinary(bytes: Array[Byte], clazz: Option[Class[_]]): AnyRef = {
+  def fromBinary(bytes: Array[Byte],
+                 clazz: Option[Class[_]]): AnyRef = {
     val jsonStr = new String(bytes)
     jsonStr.parseJson.convertTo[Basket.Snapshot]
   }
@@ -59,7 +61,7 @@ object JsonFormats extends DefaultJsonProtocol {
 
   implicit val addedEventFormat: RootJsonFormat[Basket.Added] =
     jsonFormat1(Basket.Added)
-  implicit val removedEventFormat: RootJsonFormat[Basket.ItemRemoved] =
+  implicit val reFormat: RootJsonFormat[Basket.ItemRemoved] =
     jsonFormat1(Basket.ItemRemoved)
   implicit val updatedEventFormat: RootJsonFormat[Basket.ItemUpdated] =
     jsonFormat2(Basket.ItemUpdated)
@@ -72,7 +74,8 @@ object JsonFormats extends DefaultJsonProtocol {
     jsonFormat1(Basket.Snapshot)
 
   //<start id="persistence-basket-event-format"/>
-  implicit object BasketEventFormat extends RootJsonFormat[Basket.Event] {
+  implicit object BasketEventFormat
+      extends RootJsonFormat[Basket.Event] {
     import Basket._
     val addedId =  JsNumber(1)
     val removedId =  JsNumber(2)
@@ -82,11 +85,16 @@ object JsonFormats extends DefaultJsonProtocol {
 
     def write(event: Event) = {
       event match {
-        case e: Added => JsArray(addedId, addedEventFormat.write(e))
-        case e: ItemRemoved => JsArray(removedId, removedEventFormat.write(e))
-        case e: ItemUpdated => JsArray(updatedId, updatedEventFormat.write(e))
-        case e: Replaced => JsArray(replacedId, replacedEventFormat.write(e))
-        case e: Cleared => JsArray(clearedId, clearedEventFormat.write(e))
+        case e: Added =>
+          JsArray(addedId, addedEventFormat.write(e))
+        case e: ItemRemoved =>
+          JsArray(removedId, removedEventFormat.write(e))
+        case e: ItemUpdated =>
+          JsArray(updatedId, updatedEventFormat.write(e))
+        case e: Replaced =>
+          JsArray(replacedId, replacedEventFormat.write(e))
+        case e: Cleared =>
+          JsArray(clearedId, clearedEventFormat.write(e))
       }
     }
     def read(json: JsValue): Basket.Event = {

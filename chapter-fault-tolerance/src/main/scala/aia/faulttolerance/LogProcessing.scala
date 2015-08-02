@@ -13,8 +13,8 @@ package dbstrategy1 {
     val sources = Vector("file:///source1/", "file:///source2/")
     val system = ActorSystem("logprocessing")
     // create the props and dependencies
-    val con = new DbCon("http://mydatabase")
-    val writerProps = Props(new DbWriter(con))
+    def createCon() = new DbCon("http://mydatabase")
+    val writerProps = Props(new DbWriter(createCon()))
     val dbSuperProps = Props(new DbSupervisor(writerProps))
     val logProcSuperProps = Props(
       new LogProcSupervisor(dbSuperProps))

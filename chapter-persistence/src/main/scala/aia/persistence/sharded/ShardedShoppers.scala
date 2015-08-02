@@ -18,7 +18,9 @@ class ShardedShoppers extends Actor {
     shardResolver = ShardedShopper.shardResolver
   )
 
-  def shardedShopper = ClusterSharding(context.system).shardRegion(ShardedShopper.shardName)
+  def shardedShopper = {
+    ClusterSharding(context.system).shardRegion(ShardedShopper.shardName)
+  }
 
   def receive = {
     case cmd: Shopper.Command =>

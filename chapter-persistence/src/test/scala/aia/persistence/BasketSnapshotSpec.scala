@@ -25,13 +25,13 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
       basket ! Basket.GetItems(shopperId)
       expectMsg(Items(macbookPro, displays))
 
-      basket ! Basket.Clear(shopperId) //<co id="cause_snapshot"/>
+      basket ! Basket.Clear(shopperId) //<co id="cause_snapshot_1"/>
 
       basket ! Basket.Add(macPro, shopperId)
       basket ! Basket.RemoveItem(macPro.productId, shopperId)
       expectMsg(Some(Basket.ItemRemoved(macPro.productId)))
 
-      basket ! Basket.Clear(shopperId) //<co id="cause_snapshot"/>
+      basket ! Basket.Clear(shopperId) //<co id="cause_snapshot_2"/>
       basket ! Basket.Add(dWave, shopperId)
       basket ! Basket.Add(displays, shopperId)
 

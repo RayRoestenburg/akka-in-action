@@ -63,7 +63,8 @@ class Shoppers extends PersistentActor
 
   def receiveRecover = {
     case ShopperCreated(shopperId) =>
-      context.child(Shopper.name(shopperId)).getOrElse(createShopper(shopperId))
+      context.child(Shopper.name(shopperId))
+        .getOrElse(createShopper(shopperId))
   }
 }
 //<end id="persistence-shoppers-singleton-actor"/>
