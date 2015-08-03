@@ -1,7 +1,3 @@
-import com.typesafe.sbt.SbtNativePackager._
-import NativePackagerHelper._
-import NativePackagerKeys._
-
 name := "deploy"
 
 version := "0.1-SNAPSHOT"
@@ -20,7 +16,7 @@ scalacOptions ++= Seq(
   "-language:_"
 )
 
-packageArchetype.java_application
+enablePlugins(JavaAppPackaging)
 
 scriptClasspath +="../conf"
 
