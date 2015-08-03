@@ -19,11 +19,11 @@ class AgentTest extends TestKit(ActorSystem("AgentTest"))
 
   "Agent" must {
     "test1" in {
-      val agent = Agent(new StateBookStatics(0, Map()))
+      val agent = Agent(new StateBookStatistics(0, Map()))
 
       Future {
         Thread.sleep(2000)
-        agent send (new StateBookStatics(22, Map()))
+        agent send (new StateBookStatistics(22, Map()))
       }
       println("1: " + agent())
       atomic {
@@ -31,17 +31,17 @@ class AgentTest extends TestKit(ActorSystem("AgentTest"))
           val value = agent.get
           println("2: " + agent())
           Thread.sleep(5000)
-          agent send (new StateBookStatics(value.sequence + 1, Map()))
+          agent send (new StateBookStatistics(value.sequence + 1, Map()))
       }
       println("3: " + agent())
       println("4: " + Await.result(agent.future(), 1 second))
     }
     "test2" in {
-      val agent = Agent(new StateBookStatics(0, Map()))
+      val agent = Agent(new StateBookStatistics(0, Map()))
 
       Future {
         Thread.sleep(2000)
-        agent send (new StateBookStatics(22, Map()))
+        agent send (new StateBookStatistics(22, Map()))
       }
       println("1: " + agent())
       atomic {
@@ -54,8 +54,8 @@ class AgentTest extends TestKit(ActorSystem("AgentTest"))
       println("4: " + Await.result(agent.future(), 1 second))
     }
     "test3" in {
-      val agent = Agent(new StateBookStatics(0, Map()))
-      val func = (oldState: StateBookStatics) => {
+      val agent = Agent(new StateBookStatistics(0, Map()))
+      val func = (oldState: StateBookStatistics) => {
         oldState.copy(sequence = oldState.sequence + 1)
       }
       agent.send(func)
@@ -65,8 +65,8 @@ class AgentTest extends TestKit(ActorSystem("AgentTest"))
     }
     "test4" in {
       val probe = TestProbe()
-      val agent = Agent(new StateBookStatics(0, Map()))
-      val func = (oldState: StateBookStatics) => {
+      val agent = Agent(new StateBookStatistics(0, Map()))
+      val func = (oldState: StateBookStatistics) => {
         if (oldState.sequence == 0)
           probe.ref ! "test"
         oldState.copy(sequence = oldState.sequence + 1)
@@ -92,20 +92,20 @@ class AgentTest extends TestKit(ActorSystem("AgentTest"))
   "AgentMgr" must {
     "test" in {
       val bookName = "Akka in Action"
-      val mgr = new BookStaticsMgr(system)
+      val mgr = new BookStatisticsMgr(system)
       mgr.addBooksSold(bookName, 1)
       mgr.addBooksSold(bookName, 1)
       Await.result(mgr.stateAgent.future(), 1 second)
-      val book = new BookStatics(bookName, 2)
-      mgr.getStateBookStatics() must be(new StateBookStatics(2, Map(bookName -> book)))
+      val book = new BookStatistics(bookName, 2)
+      mgr.getStateBookStatistics() must be(new StateBookStatistics(2, Map(bookName -> book)))
     }
     "test alter" in {
       val bookName = "Akka in Action"
-      val mgr = new BookStaticsMgr(system)
+      val mgr = new BookStatisticsMgr(system)
       mgr.addBooksSold(bookName, 1)
       val state = mgr.addBooksSoldAndReturnNewState(bookName, 1)
-      val book = new BookStatics(bookName, 2)
-      state must be(new StateBookStatics(2, Map(bookName -> book)))
+      val book = new BookStatistics(bookName, 2)
+      state must be(new StateBookStatistics(2, Map(bookName -> book)))
     }
   }
 }

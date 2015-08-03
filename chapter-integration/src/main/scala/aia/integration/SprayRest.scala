@@ -16,7 +16,7 @@ import akka.io.IO
 // without having to spin up an actor
 //<start id="ch08-rest-spray-serviceActor"/>
 class OrderServiceActor(val orderSystem: ActorRef) extends Actor
-  with OrderService {
+    with OrderService {
 
   // the HttpService trait defines only one abstract member, which
   // connects the services environment to the enclosing actor or test
@@ -35,7 +35,8 @@ class OrderServiceActor(val orderSystem: ActorRef) extends Actor
 trait OrderService extends HttpService {
   val orderSystem: ActorRef
 
-  // we use the enclosing ActorContext's or ActorSystem's dispatcher for our Futures and Scheduler
+  // we use the enclosing ActorContext's or ActorSystem's
+  // dispatcher for our Futures and Scheduler
   implicit def executionContext = actorRefFactory.dispatcher
 
   implicit val timeout: Timeout = 1 second

@@ -17,10 +17,10 @@ class HelloWorld extends Actor
 //<end id="ch07-hello"/>
 
 //<start id="ch07-caller"/>
-class HelloWorldCaller(timer:FiniteDuration, actor:ActorRef)
+class HelloWorldCaller(timer: FiniteDuration, actor: ActorRef)
   extends Actor with ActorLogging {
 
-  case class TimerTick(msg:String)
+  case class TimerTick(msg: String)
 
   override def preStart() {
     super.preStart()

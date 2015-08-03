@@ -8,21 +8,21 @@ import akka.util.Timeout
 //import concurrent.ExecutionContext.Implicits.global
 
 //<start id="ch10-agent-state"/>
-case class BookStatics(val nameBook: String, nrSold: Int)
-case class StateBookStatics(val sequence: Long,
-                            books: Map[String, BookStatics])
+case class BookStatistics(val nameBook: String, nrSold: Int)
+case class StateBookStatistics(val sequence: Long,
+                            books: Map[String, BookStatistics])
 //<end id="ch10-agent-state"/>
 
-class BookStaticsMgr(system: ActorSystem) {
+class BookStatisticsMgr(system: ActorSystem) {
   implicit val ex = system.dispatcher //todo: change chapter 2.2 =>2.3
-  val stateAgent = Agent(new StateBookStatics(0, Map())) //todo: change chapter 2.2 =>2.3
+  val stateAgent = Agent(new StateBookStatistics(0, Map())) //todo: change chapter 2.2 =>2.3
 
   def addBooksSold(book: String, nrSold: Int) {
     stateAgent send (oldState => {
       val bookStat = oldState.books.get(book) match {
         case Some(bookState) =>
           bookState.copy(nrSold = bookState.nrSold + nrSold)
-        case None => new BookStatics(book, nrSold)
+        case None => new BookStatistics(book, nrSold)
       }
       oldState.copy(oldState.sequence + 1,
         oldState.books + (book -> bookStat))
@@ -30,12 +30,12 @@ class BookStaticsMgr(system: ActorSystem) {
   }
 
   def addBooksSoldAndReturnNewState(book: String,
-                                    nrSold: Int): StateBookStatics = {
+                                    nrSold: Int): StateBookStatistics = {
     val future = stateAgent alter (oldState => {
       val bookStat = oldState.books.get(book) match {
         case Some(bookState) =>
           bookState.copy(nrSold = bookState.nrSold + nrSold)
-        case None => new BookStatics(book, nrSold)
+        case None => new BookStatistics(book, nrSold)
       }
       oldState.copy(oldState.sequence + 1,
         oldState.books + (book -> bookStat))
@@ -43,7 +43,7 @@ class BookStaticsMgr(system: ActorSystem) {
     Await.result(future, 1 second)
   }
 
-  def getStateBookStatics(): StateBookStatics = {
+  def getStateBookStatistics(): StateBookStatistics = {
     stateAgent.get()
   }
 }

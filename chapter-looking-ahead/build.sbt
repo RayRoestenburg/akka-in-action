@@ -4,7 +4,7 @@ version := "1.0"
 
 organization := "com.manning"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -37,15 +37,10 @@ libraryDependencies ++= {
     "com.typesafe.akka"         %%  "akka-stream-experimental"       % "1.0",
     "com.typesafe.akka"         %%  "akka-http-core-experimental"    % "1.0",
     "com.typesafe.akka"         %%  "akka-http-experimental"         % "1.0",
-//    "io.spray"                  %%  "spray-can"                      % sprayVersion,
-//    "io.spray"                  %%  "spray-client"                   % sprayVersion,
     "io.spray"                  %%  "spray-json"                     % "1.3.2",
-//    "io.spray"                  %%  "spray-routing"                  % sprayVersion,
     "commons-io"                %   "commons-io"                     % "2.4",
     "org.scalatest"             %%  "scalatest"                      % "2.2.4"       % "test",
     "ch.qos.logback"            %   "logback-classic"                % "1.1.2"
-//    "io.spray"                  %%  "spray-can"                      % sprayVersion,
-//    "io.spray"                  %%  "spray-routing"                  % sprayVersion
   )
 }
 
