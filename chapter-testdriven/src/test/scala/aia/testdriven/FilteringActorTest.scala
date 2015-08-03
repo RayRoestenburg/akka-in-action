@@ -11,7 +11,7 @@ class FilteringActorTest extends TestKit(ActorSystem("testsystem"))
   "A Filtering Actor" must {
     //<start id="ch02-filteringactor-test"/>
     "filter out particular messages" in {
-      import FilteringActorProtocol._
+      import FilteringActor._
       val props = Props(new FilteringActor(testActor, 5))
       val filter = system.actorOf(props, "filter-1")
       filter ! Event(1) //<co id="ch02-filteringactor-send"/>
@@ -32,7 +32,7 @@ class FilteringActorTest extends TestKit(ActorSystem("testsystem"))
     //<end id="ch02-filteringactor-test"/>
     //<start id="ch02-filteringactor-test2"/>
     "filter out particular messages using expectNoMsg" in {
-      import FilteringActorProtocol._
+      import FilteringActor._
       val props = Props(new FilteringActor(testActor, 5))
       val filter = system.actorOf(props, "filter-2")
       filter ! Event(1)
@@ -56,13 +56,13 @@ class FilteringActorTest extends TestKit(ActorSystem("testsystem"))
   }
 }
 //<start id="ch02-filteringactor-imp"/>
-object FilteringActorProtocol {
+object FilteringActor {
   case class Event(id: Long)
 }
 
 class FilteringActor(nextActor: ActorRef,
                      bufferSize: Int) extends Actor { //<co id="ch02-filteringactor-constructor"/>
-  import FilteringActorProtocol._
+  import FilteringActor._
   var lastMessages = Vector[Event]() //<co id="ch02-filteringactor-lastmessages"/>
   def receive = {
     case msg: Event =>

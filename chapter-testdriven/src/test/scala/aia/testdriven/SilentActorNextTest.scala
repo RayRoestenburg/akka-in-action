@@ -15,7 +15,7 @@ class SilentActorTest extends TestKit(ActorSystem("testsystem"))
     "A Silent Actor" must {
       //<start id="ch02-silentactor-test02"/>
       "change internal state when it receives a message, single" in {
-        import SilentActorProtocol._ //<co id="ch02-silentactor-test02-import-protocol"/>
+        import SilentActor._ //<co id="ch02-silentactor-test02-import-protocol"/>
 
         val silentActor = TestActorRef[SilentActor] //<co id="ch02-silentactor-test02-TestActorRef"/>
         silentActor ! SilentMessage("whisper")
@@ -26,13 +26,13 @@ class SilentActorTest extends TestKit(ActorSystem("testsystem"))
   }
 
   //<start id="ch02-silentactor-test02-imp"/>
-  object SilentActorProtocol { //<co id="ch02-silentactor-test02-protocol"/>
+  object SilentActor { //<co id="ch02-silentactor-test02-protocol"/>
     case class SilentMessage(data: String) //<co id="ch02-silentactor-test02-message"/>
     case class GetState(receiver: ActorRef)
   }
 
   class SilentActor extends Actor {
-    import SilentActorProtocol._
+    import SilentActor._
     var internalState = Vector[String]()
 
     def receive = {
@@ -54,7 +54,7 @@ package silentactor03 {
     "A Silent Actor" must {
       //<start id="ch02-silentactor-test03"/>
       "change internal state when it receives a message, multi" in {
-        import SilentActorProtocol._ //<co id="ch02-silentactor-test03-import-protocol"/>
+        import SilentActor._ //<co id="ch02-silentactor-test03-import-protocol"/>
 
         val silentActor = system.actorOf(Props[SilentActor], "s3") //<co id="ch02-silentactor-test03-create-actor"/>
         silentActor ! SilentMessage("whisper1")
@@ -69,13 +69,13 @@ package silentactor03 {
 
   //<start id="ch02-silentactor-test03-imp"/>
 
-  object SilentActorProtocol {
+  object SilentActor {
     case class SilentMessage(data: String)
     case class GetState(receiver: ActorRef) //<co id="ch02-silentactor-test03-getstate-msg"/>
   }
 
   class SilentActor extends Actor {
-    import SilentActorProtocol._
+    import SilentActor._
     var internalState = Vector[String]()
 
     def receive = {
