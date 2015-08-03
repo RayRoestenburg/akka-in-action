@@ -13,7 +13,7 @@ class SendingActor01Test extends TestKit(ActorSystem("testsystem"))
   "A Sending Actor" must {
     "send a message to an actor when it has finished" in {
       import Agent01._
-      val props = Props(new Agent01(testActor)) //<co id="ch02-sendingactor01-constructor"/>
+      val props = Agent01.props(testActor) //<co id="ch02-sendingactor01-constructor"/>
       val sendingActor = system.actorOf(props, "Agent1")
       val tickets = Vector(Ticket(1), Ticket(2), Ticket(3))
       val game = Game("Lakers vs Bulls", tickets) //<co id="ch02-sendingactor01-game"/>
@@ -29,6 +29,8 @@ class SendingActor01Test extends TestKit(ActorSystem("testsystem"))
 }
 //<start id="ch02-sendingactor01-imp"/>
 object Agent01 {
+  def props(nextAgent: ActorRef) =
+    Props(new Agent01(nextAgent))
   case class Ticket(seat: Int) //<co id="ch02-sendingactor01-protocol-ticket"/>
   case class Game(name: String, tickets: Seq[Ticket]) //<co id="ch02-sendingactor01-protocol-game"/>
 }
