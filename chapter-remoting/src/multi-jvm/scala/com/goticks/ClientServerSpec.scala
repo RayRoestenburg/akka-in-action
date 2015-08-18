@@ -14,10 +14,12 @@ with STMultiNodeSpec with ImplicitSender {
 
   import ClientServerConfig._
 
+  val backendNode = node(backend)
+
   trait TestRemoteBoxOfficeCreator extends RemoteBoxOfficeCreator { this: Actor =>
 
     override def createPath: String = {
-      val actorPath = node(backend) / "user" /"boxOffice"
+      val actorPath =  backendNode / "user" /"boxOffice"
       actorPath.toString
     }
   }
@@ -31,6 +33,10 @@ with STMultiNodeSpec with ImplicitSender {
     }
 
     "be able to create an event and sell a ticket" in {
+      runOn(backend) {
+        system.actorOf(Props[BoxOffice], "boxOffice")
+        enterBarrier("deployed")
+      }
 
       runOn(frontend) {
         enterBarrier("deployed")
@@ -54,10 +60,6 @@ with STMultiNodeSpec with ImplicitSender {
         expectMsg(Ticket("RHCP", 1))
       }
 
-      runOn(backend) {
-        system.actorOf(Props[BoxOffice], "boxOffice")
-        enterBarrier("deployed")
-      }
 
       enterBarrier("finished")
     }
