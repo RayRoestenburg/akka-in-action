@@ -14,7 +14,7 @@ with STMultiNodeSpec with ImplicitSender {
 
   import ClientServerConfig._
 
-  trait TestRemoteBoxOfficeCreator extends RemoteBoxOfficeCreator { this:Actor =>
+  trait TestRemoteBoxOfficeCreator extends RemoteBoxOfficeCreator { this: Actor =>
 
     override def createPath: String = {
       val actorPath = node(backend) / "user" /"boxOffice"
@@ -68,7 +68,7 @@ class RestInterfaceMock extends Actor with RemoteBoxOfficeCreator with ActorLogg
   val boxOffice = createBoxOffice
 
   def receive = {
-    case msg:Any =>
+    case msg: Any =>
       boxOffice forward msg
   }
 }

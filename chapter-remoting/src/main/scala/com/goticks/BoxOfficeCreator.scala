@@ -7,7 +7,7 @@ import akka.actor.Identify
 import scala.language.postfixOps
 
 trait BoxOfficeCreator { this: Actor =>
-  def createBoxOffice:ActorRef = context.actorOf(Props[BoxOffice],"boxOffice")
+  def createBoxOffice: ActorRef = context.actorOf(Props[BoxOffice],"boxOffice")
 }
 
 object RemoteBoxOfficeCreator {
@@ -19,14 +19,14 @@ object RemoteBoxOfficeCreator {
   val actorName = config.getString("actor")
 }
 
-trait RemoteBoxOfficeCreator extends BoxOfficeCreator { this:Actor =>
+trait RemoteBoxOfficeCreator extends BoxOfficeCreator { this: Actor =>
   import RemoteBoxOfficeCreator._
 
-  def createPath:String = {
+  def createPath: String = {
     s"$protocol://$systemName@$host:$port/$actorName"
   }
 
-  override def createBoxOffice:ActorRef = {
+  override def createBoxOffice: ActorRef = {
     val path = createPath
     context.actorOf(Props(classOf[RemoteLookupProxy],path), "lookupBoxOffice")
   }
@@ -34,7 +34,7 @@ trait RemoteBoxOfficeCreator extends BoxOfficeCreator { this:Actor =>
 
 import scala.concurrent.duration._
 
-class RemoteLookupProxy(path:String)
+class RemoteLookupProxy(path: String)
   extends Actor with ActorLogging {
 
   context.setReceiveTimeout(3 seconds)
@@ -47,7 +47,7 @@ class RemoteLookupProxy(path:String)
 
   def receive = identify
 
-  def identify:Receive = {
+  def identify: Receive = {
     case ActorIdentity(`path`, Some(actor)) =>
       context.setReceiveTimeout(Duration.Undefined)
       log.info("switching to active state")
@@ -60,7 +60,7 @@ class RemoteLookupProxy(path:String)
     case ReceiveTimeout =>
       sendIdentifyRequest()
 
-    case msg:Any =>
+    case msg: Any =>
       log.error(s"Ignoring message $msg, remote actor is not ready yet.")
   }
 
@@ -72,11 +72,11 @@ class RemoteLookupProxy(path:String)
       context.setReceiveTimeout(3 seconds)
       sendIdentifyRequest()
 
-    case msg:Any => actor forward msg
+    case msg: Any => actor forward msg
   }
 }
 
-trait ConfiguredRemoteBoxOfficeDeployment extends BoxOfficeCreator { this:Actor =>
+trait ConfiguredRemoteBoxOfficeDeployment extends BoxOfficeCreator { this: Actor =>
 
   override def createBoxOffice = {
     context.actorOf(Props[RemoteBoxOfficeForwarder],
@@ -99,16 +99,16 @@ class RemoteBoxOfficeForwarder extends Actor with ActorLogging {
 
   def receive = deploying
 
-  def deploying:Receive = {
+  def deploying: Receive = {
 
     case ReceiveTimeout =>
       deployAndWatch()
 
-    case msg:Any =>
+    case msg: Any =>
       log.error(s"Ignoring message $msg, remote actor is not ready yet.")
   }
 
-  def maybeActive(actor:ActorRef): Receive = {
+  def maybeActive(actor: ActorRef): Receive = {
     case Terminated(actorRef) =>
       log.info("Actor $actorRef terminated.")
       log.info("switching to deploying state")
@@ -116,11 +116,11 @@ class RemoteBoxOfficeForwarder extends Actor with ActorLogging {
       context.setReceiveTimeout(3 seconds)
       deployAndWatch()
 
-    case msg:Any => actor forward msg
+    case msg: Any => actor forward msg
   }
 }
 
-trait RemoteBoxOfficeDeployment extends BoxOfficeCreator { this:Actor =>
+trait RemoteBoxOfficeDeployment extends BoxOfficeCreator { this: Actor =>
 
   override def createBoxOffice = {
     val config = ConfigFactory.load("frontend").getConfig("backend")

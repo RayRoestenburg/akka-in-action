@@ -67,7 +67,7 @@ class GetLicenseCreator2(nrActors: Int, nextStep: ActorRef) extends Actor {
   }
 }
 
-case class PreferredSize(size:Int)
+case class PreferredSize(size: Int)
 
 class WrongDynamicRouteeSizer(nrActors: Int, props: Props, router: ActorRef) extends Actor {
   var nrChildren = nrActors

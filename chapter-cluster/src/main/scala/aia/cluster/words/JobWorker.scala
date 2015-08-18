@@ -9,8 +9,8 @@ import akka.actor._
 object JobWorker {
   def props = Props(new JobWorker)
 
-  case class Work(jobName:String, master:ActorRef)
-  case class Task(input:List[String], master:ActorRef)
+  case class Work(jobName: String, master: ActorRef)
+  case class Task(input: List[String], master: ActorRef)
   case object WorkLoadDepleted
 }
 
@@ -23,7 +23,7 @@ class JobWorker extends Actor
   var processed = 0
 
   def receive = idle
-  
+
   def idle: Receive = {
     case Work(jobName, master) =>
       become(enlisted(jobName, master))
@@ -35,8 +35,8 @@ class JobWorker extends Actor
 
       setReceiveTimeout(30 seconds)
   }
-  
-  def enlisted(jobName:String, master:ActorRef): Receive = {
+
+  def enlisted(jobName: String, master: ActorRef): Receive = {
     case ReceiveTimeout =>
       master ! NextTask
 

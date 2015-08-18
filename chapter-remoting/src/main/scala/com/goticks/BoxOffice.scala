@@ -38,7 +38,7 @@ class BoxOffice extends Actor with ActorLogging {
 
       val capturedSender = sender
 
-      def askAndMapToEvent(ticketSeller:ActorRef) =  {
+      def askAndMapToEvent(ticketSeller: ActorRef) =  {
 
         val futureInt = ticketSeller.ask(GetEvents).mapTo[Int]
 

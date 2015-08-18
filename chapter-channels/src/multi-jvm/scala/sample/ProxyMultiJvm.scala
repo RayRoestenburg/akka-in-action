@@ -80,7 +80,7 @@ class ProxyMultiJvmTest extends
 
 class EchoMessageActor extends Actor {
   def receive = {
-    case msg:AnyRef => {
+    case msg: AnyRef => {
       println("Received message:" + msg)
       sender() ! msg
     }

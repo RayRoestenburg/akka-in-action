@@ -14,11 +14,11 @@ object BoxOffice {
   case class CreateEvent(name: String, tickets: Int) //<co id="ch02_create_event"/>
   case class GetEvent(name: String) //<co id="ch02_get_event"/>
   case object GetEvents //<co id="ch02_get_events"/>
-  case class GetTickets(event: String, tickets:Int) //<co id="ch02_get_tickets"/>
+  case class GetTickets(event: String, tickets: Int) //<co id="ch02_get_tickets"/>
   case class CancelEvent(name: String) //<co id="ch02_cancel_event"/>
 
   case class Event(name: String, tickets: Int) //<co id="ch02_event"/>
-  case class Events(events:Vector[Event]) //<co id="ch02_events"/>
+  case class Events(events: Vector[Event]) //<co id="ch02_events"/>
 
   sealed trait EventResponse //<co id="ch02_event_response"/>
   case object EventCreated extends EventResponse //<co id="ch02_event_created"/>
@@ -31,7 +31,7 @@ class BoxOffice(implicit timeout: Timeout) extends Actor {
   import context._
 
   //<start id="ch02_create_event"/>
-  def createTicketSeller(name:String) =
+  def createTicketSeller(name: String) =
     context.actorOf(TicketSeller.props(name), name) //<co id="ch02_create_ticket_seller"/>
 
   def receive = {

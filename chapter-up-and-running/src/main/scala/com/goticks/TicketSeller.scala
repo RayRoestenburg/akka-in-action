@@ -4,9 +4,9 @@ import akka.actor.{ Actor, Props, PoisonPill }
 object TicketSeller {
   def props(event: String) = Props(new TicketSeller(event))
 //<start id="ch02-ticketseller-messages"/>
-  case class Add(tickets:Vector[Ticket]) //<co id="ch02_add_tickets"/>
+  case class Add(tickets: Vector[Ticket]) //<co id="ch02_add_tickets"/>
   case class Buy(tickets: Int) //<co id="ch02_buy_tickets"/>
-  case class Ticket(id:Int) //<co id="ch02_ticket"/>
+  case class Ticket(id: Int) //<co id="ch02_ticket"/>
   case class Tickets(event: String,
                      entries: Vector[Ticket] = Vector.empty[Ticket]) //<co id="ch02_tickets"/>
   case object GetEvent //<co id="ch02_get_event_ticket_seller"/>

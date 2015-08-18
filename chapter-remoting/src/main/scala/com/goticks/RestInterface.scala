@@ -53,13 +53,13 @@ trait RestApi extends HttpService with ActorLogging with BoxOfficeCreator { acto
       boxOffice.ask(req).pipeTo(responder)
     }
 
-  def createResponder(requestContext:RequestContext) = {
+  def createResponder(requestContext: RequestContext) = {
     context.actorOf(Props(new Responder(requestContext, boxOffice)))
   }
 
 }
 
-class Responder(requestContext:RequestContext, boxOffice:ActorRef) extends Actor with ActorLogging {
+class Responder(requestContext: RequestContext, boxOffice: ActorRef) extends Actor with ActorLogging {
   import TicketProtocol._
   import spray.httpx.SprayJsonSupport._
 
@@ -67,7 +67,7 @@ class Responder(requestContext:RequestContext, boxOffice:ActorRef) extends Actor
 
   def receive = {
 
-    case ticket:Ticket =>
+    case ticket: Ticket =>
       requestContext.complete(StatusCodes.OK, ticket)
       self ! PoisonPill
 

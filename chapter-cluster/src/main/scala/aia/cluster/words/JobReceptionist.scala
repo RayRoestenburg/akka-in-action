@@ -14,12 +14,12 @@ object JobReceptionist {
   case class JobRequest(name: String, text: List[String])
 
   sealed trait Response
-  case class JobSuccess(name:String, map: Map[String, Int]) extends Response
-  case class JobFailure(name:String) extends Response
+  case class JobSuccess(name: String, map: Map[String, Int]) extends Response
+  case class JobFailure(name: String) extends Response
 
-  case class WordCount(name:String, map: Map[String, Int])
+  case class WordCount(name: String, map: Map[String, Int])
 
-  case class Job(name: String, text: List[String], respondTo: ActorRef, jobMaster:ActorRef)
+  case class Job(name: String, text: List[String], respondTo: ActorRef, jobMaster: ActorRef)
 }
 
 class JobReceptionist extends Actor
@@ -81,6 +81,6 @@ class JobReceptionist extends Actor
 }
 
 trait CreateMaster {
-  def context:ActorContext
-  def createMaster(name:String) = context.actorOf(JobMaster.props, name)
+  def context: ActorContext
+  def createMaster(name: String) = context.actorOf(JobMaster.props, name)
 }

@@ -108,11 +108,11 @@ trait BoxOfficeApi {
   def getEvents() =
     boxOffice.ask(GetEvents).mapTo[Events]
 
-  def getEvent(event:String) =
+  def getEvent(event: String) =
     boxOffice.ask(GetEvent(event))
       .mapTo[Option[Event]]
 
-  def cancelEvent(event:String) =
+  def cancelEvent(event: String) =
     boxOffice.ask(CancelEvent(event))
       .mapTo[Option[Event]]
 

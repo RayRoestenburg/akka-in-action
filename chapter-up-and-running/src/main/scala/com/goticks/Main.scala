@@ -50,7 +50,7 @@ trait ShutdownIfNotBound {
   import scala.concurrent.Future
 
   def shutdownIfNotBound(f: Future[Any]) //<co id="ch02_shutdownIfNotBound"/>
-    (implicit system:ActorSystem, ec: ExecutionContext) = {
+    (implicit system: ActorSystem, ec: ExecutionContext) = {
     f.mapTo[Http.Event].map {
       case Http.Bound(address) =>
         println(s"REST interface bound to $address")

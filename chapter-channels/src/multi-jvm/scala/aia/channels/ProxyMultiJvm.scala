@@ -91,7 +91,7 @@ class ReliableProxySample
       runOn(server) {
         system.actorOf(Props(new Actor {                               //<co id="ch09-proxy-test-9"/>
           def receive = {
-            case msg:AnyRef => {
+            case msg: AnyRef => {
               sender() ! msg
             }
           }

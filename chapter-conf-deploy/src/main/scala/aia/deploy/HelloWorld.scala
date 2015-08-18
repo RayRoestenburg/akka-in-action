@@ -8,7 +8,7 @@ class HelloWorld extends Actor
   with ActorLogging {  //<co id="ch07-hello-log"/>
 
   def receive = {
-    case msg:String  =>
+    case msg: String  =>
       val hello = "Hello %s".format(msg)
       sender() ! hello
       log.info("Sent response {}",hello)

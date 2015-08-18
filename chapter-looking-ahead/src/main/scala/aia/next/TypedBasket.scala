@@ -18,7 +18,7 @@ object TypedBasket {
 
   // a simplified version of Items and Item
   case class Items(list: Vector[Item]= Vector.empty[Item])
-  case class Item(productId:String, number: Int, unitPrice: BigDecimal)
+  case class Item(productId: String, number: Int, unitPrice: BigDecimal)
 
   val basketBehavior =
   ContextAware[Command] { ctx ⇒

@@ -14,7 +14,7 @@ class TicketSellerSpec extends TestKit(ActorSystem("testTickets"))
     "Give out tickets until they are sold out" in {
       import TicketProtocol._
 
-      def mkTickets(event:String) = (1 to 10).map(i=>Ticket(event, i)).toList
+      def mkTickets(event: String) = (1 to 10).map(i=>Ticket(event, i)).toList
 
       val ticketingActor = system.actorOf(Props[TicketSeller])
 
@@ -27,7 +27,7 @@ class TicketSellerSpec extends TestKit(ActorSystem("testTickets"))
       nrs.foreach(_ => ticketingActor ! BuyTicket)
 
       val tickets = receiveN(9)
-      tickets.zip(nrs).foreach { case (ticket:Ticket, nr) => ticket.nr must be(nr) }
+      tickets.zip(nrs).foreach { case (ticket: Ticket, nr) => ticket.nr must be(nr) }
 
       ticketingActor ! BuyTicket
       expectMsg(SoldOut)

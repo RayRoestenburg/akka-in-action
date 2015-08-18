@@ -150,9 +150,9 @@ trait WebServiceCalls {
 
   def callWeatherYService(ticketInfo: TicketInfo): Future[Option[Weather]]
 
-  def callTrafficService(origin: Location, destination: Location, time: DateTime):Future[Option[RouteByCar]]
+  def callTrafficService(origin: Location, destination: Location, time: DateTime): Future[Option[RouteByCar]]
 
-  def callPublicTransportService(origin: Location, destination: Location, time: DateTime):Future[Option[PublicTransportAdvice]]
+  def callPublicTransportService(origin: Location, destination: Location, time: DateTime): Future[Option[PublicTransportAdvice]]
 
   def callSimilarArtistsService(event: Event): Future[Seq[Artist]]
 

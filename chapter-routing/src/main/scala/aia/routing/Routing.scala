@@ -13,7 +13,7 @@ case class PerformanceRoutingMessage(photo: String,
                                      processedBy: Option[String]) //<co id="ch09-routing-perf-1" />
 //<end id="ch09-routing-perf-msg"/>
 
-case class SetService(id:String, serviceTime: FiniteDuration)
+case class SetService(id: String, serviceTime: FiniteDuration)
 
 class GetLicense(pipe: ActorRef, initialServiceTime: FiniteDuration = 0 millis)
   extends Actor {

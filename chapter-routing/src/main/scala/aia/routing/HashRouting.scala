@@ -5,13 +5,13 @@ import akka.routing.ConsistentHashingRouter.ConsistentHashable
 
 
 trait GatherMessage {
-  val id:String
-  val values:Seq[String]
+  val id: String
+  val values: Seq[String]
 }
 
-case class GatherMessageNormalImpl(id:String, values:Seq[String]) extends GatherMessage
+case class GatherMessageNormalImpl(id: String, values: Seq[String]) extends GatherMessage
 
-case class GatherMessageWithHash(id:String, values:Seq[String]) extends GatherMessage with ConsistentHashable {
+case class GatherMessageWithHash(id: String, values: Seq[String]) extends GatherMessage with ConsistentHashable {
   override def consistentHashKey: Any = id
 }
 

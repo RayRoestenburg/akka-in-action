@@ -12,7 +12,7 @@ object JobMaster {
   def props = Props(new JobMaster)
 
   case class StartJob(name: String, text: List[String])
-  case class Enlist(worker:ActorRef)
+  case class Enlist(worker: ActorRef)
 
   case object NextTask
   case class TaskResult(map: Map[String, Int])
@@ -50,9 +50,9 @@ class JobMaster extends Actor
       become(working(jobName, sender, cancellable))
   }
 
-  def working(jobName:String,
-              receptionist:ActorRef,
-              cancellable:Cancellable): Receive = {
+  def working(jobName: String,
+              receptionist: ActorRef,
+              cancellable: Cancellable): Receive = {
     case Enlist(worker) =>
       watch(worker)
       workers  = workers + worker

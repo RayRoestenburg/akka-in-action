@@ -56,7 +56,7 @@ object JsonFormats extends DefaultJsonProtocol {
 
   implicit val itemsFormat: RootJsonFormat[Items] =
     jsonFormat(
-      (list:List[Item]) => Items.aggregate(list), "items"
+      (list: List[Item]) => Items.aggregate(list), "items"
     )
 
   implicit val addedEventFormat: RootJsonFormat[Basket.Added] =

@@ -2,11 +2,11 @@ package com.goticks
 
 import spray.json._
 //<start id="ch02_rest_messages"/>
-case class EventDescription(tickets:Int) { //<co id="ch02_rest_event_decription"/>
+case class EventDescription(tickets: Int) { //<co id="ch02_rest_event_decription"/>
   require(tickets > 0)
 }
 
-case class TicketRequest(tickets:Int) { //<co id="ch02_rest_ticket_request"/>
+case class TicketRequest(tickets: Int) { //<co id="ch02_rest_ticket_request"/>
   require(tickets > 0)
 }
 

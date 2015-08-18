@@ -23,7 +23,7 @@ case class Items(list: List[Item]) {
   def clear = Items()
 }
 //<start id="persistence-basket-item"/>
-case class Item(productId:String, number: Int, unitPrice: BigDecimal) {
+case class Item(productId: String, number: Int, unitPrice: BigDecimal) {
   // more code for working with the item..
 //<end id="persistence-basket-item"/>
   /*
@@ -46,7 +46,7 @@ object Items {
   def aggregate(list: List[Item]): Items = Items(add(list))
 
   private def add(list: List[Item]) = aggregateIndexed(indexed(list))
-  private def indexed(list:List[Item]) = list.zipWithIndex
+  private def indexed(list: List[Item]) = list.zipWithIndex
 
   private def aggregateIndexed(indexed: List[(Item, Int)]) = {
     def grouped = indexed.groupBy {
