@@ -32,7 +32,7 @@ class TestActor(nrChild: Int) extends Actor {
     }
   }
   def receive = {
-    case msg: AnyRef => sender ! msg
+    case msg: AnyRef => sender() ! msg
   }
 }
 

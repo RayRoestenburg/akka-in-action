@@ -9,19 +9,19 @@ class TicketSeller extends Actor {
 
   def receive = {
 
-    case GetEvents => sender ! tickets.size
+    case GetEvents => sender() ! tickets.size
 
     case Tickets(newTickets) => tickets = tickets ++ newTickets
 
     case BuyTicket =>
       if (tickets.isEmpty) {
-        sender ! SoldOut
+        sender() ! SoldOut
         self ! PoisonPill
       }
 
       tickets.headOption.foreach { ticket =>
         tickets = tickets.tail
-        sender ! ticket
+        sender() ! ticket
       }
   }
 }

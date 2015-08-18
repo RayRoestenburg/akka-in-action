@@ -23,14 +23,14 @@ class BoxOffice extends Actor with ActorLogging {
         ticketSeller ! tickets
       }
 
-      sender ! EventCreated
+      sender() ! EventCreated
 
     case TicketRequest(name) =>
       log.info(s"Getting a ticket for the ${name} event.")
 
       context.child(name) match {
         case Some(ticketSeller) => ticketSeller.forward(BuyTicket)
-        case None               => sender ! SoldOut
+        case None               => sender() ! SoldOut
       }
 
     case GetEvents =>

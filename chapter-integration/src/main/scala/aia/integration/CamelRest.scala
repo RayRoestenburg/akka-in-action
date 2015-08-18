@@ -28,13 +28,13 @@ class ProcessOrders extends Actor {
       lastOrderId += 1
       val newOrder = new TrackingOrder(lastOrderId, "received", order)
       orderList += lastOrderId -> newOrder
-      sender ! newOrder
+      sender() ! newOrder
     }
     case order: OrderId => { //<co id="ch08-rest-camel-system-2"/>
       orderList.get(order.id) match {
         case Some(intOrder) =>
-          sender ! intOrder.copy(status = "processing")
-        case None => sender ! NoSuchOrder(order.id)
+          sender() ! intOrder.copy(status = "processing")
+        case None => sender() ! NoSuchOrder(order.id)
       }
     }
     case "reset" => {
@@ -63,21 +63,21 @@ class OrderConsumerRest(uri: String, next: ActorRef)
             msg.headerAs[String]("id") match {
               case Success(id) => processStatus(id) //<co id="ch08-rest-camel-recv-3"/>
               case other =>
-                sender ! createErrorMsg(400, "ID not set") //<co id="ch08-rest-camel-recv-4"/>
+                sender() ! createErrorMsg(400, "ID not set") //<co id="ch08-rest-camel-recv-4"/>
             }
           }
           case Success(act) => {
-            sender ! createErrorMsg(400, //Bad Request        //<co id="ch08-rest-camel-recv-5"/>
+            sender() ! createErrorMsg(400, //Bad Request        //<co id="ch08-rest-camel-recv-5"/>
               "Unsupported action %s".format(act))
           }
           case Failure(_) => {
-            sender ! createErrorMsg(400, //Bad Request        //<co id="ch08-rest-camel-recv-6"/>
+            sender() ! createErrorMsg(400, //Bad Request        //<co id="ch08-rest-camel-recv-6"/>
               "HTTP_METHOD not supplied")
           }
         }
       } catch {
         case ex: Exception =>
-          sender ! createErrorMsg(500, //Internal Server Error    //<co id="ch08-rest-camel-recv-7"/>
+          sender() ! createErrorMsg(500, //Internal Server Error    //<co id="ch08-rest-camel-recv-7"/>
             ex.getMessage)
       }
     }

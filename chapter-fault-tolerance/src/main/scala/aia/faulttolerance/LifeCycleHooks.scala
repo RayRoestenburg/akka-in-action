@@ -37,6 +37,6 @@ class LifeCycleHooks extends Actor with ActorLogging {
       throw new IllegalStateException("force restart")
     case msg: AnyRef =>
       println("Receive")
-      sender ! msg
+      sender() ! msg
   }
 }

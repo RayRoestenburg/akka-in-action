@@ -128,11 +128,11 @@ class Publisher(totalNrBooks: Int, nrBooksPerRequest: Int)
   def receive = {
     case PublisherRequest => {
       if (nrLeft == 0)
-        sender ! BookSupplySoldOut //<co id="ch10-fsm-Publisher-1"/>
+        sender() ! BookSupplySoldOut //<co id="ch10-fsm-Publisher-1"/>
       else {
         val supply = min(nrBooksPerRequest, nrLeft)
         nrLeft -= supply
-        sender ! new BookSupply(supply) //<co id="ch10-fsm-Publisher-2"/>
+        sender() ! new BookSupply(supply) //<co id="ch10-fsm-Publisher-2"/>
       }
     }
   }

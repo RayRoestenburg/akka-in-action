@@ -59,9 +59,9 @@ class JobMaster extends Actor
 
     case NextTask =>
       if(textParts.isEmpty) {
-        sender ! WorkLoadDepleted
+        sender() ! WorkLoadDepleted
       } else {
-        sender ! Task(textParts.head, self)
+        sender() ! Task(textParts.head, self)
         workGiven = workGiven + 1
         textParts = textParts.tail
       }

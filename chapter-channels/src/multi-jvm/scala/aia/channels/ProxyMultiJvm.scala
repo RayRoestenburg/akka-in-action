@@ -92,7 +92,7 @@ class ReliableProxySample
         system.actorOf(Props(new Actor {                               //<co id="ch09-proxy-test-9"/>
           def receive = {
             case msg:AnyRef => {
-              sender ! msg
+              sender() ! msg
             }
           }
         }), "echo")

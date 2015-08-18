@@ -10,7 +10,7 @@ class HelloWorld extends Actor
   def receive = {
     case msg:String  =>
       val hello = "Hello %s".format(msg)
-      sender ! hello
+      sender() ! hello
       log.info("Sent response {}",hello)
   }
 }

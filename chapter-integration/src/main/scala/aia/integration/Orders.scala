@@ -62,10 +62,10 @@ class OrderConfirmConsumerXml(uri: String, next: ActorRef)
         val productId = (order \\ "productId").text
         val number = (order \\ "number").text.toInt
         next ! new Order(customer, productId, number)
-        sender ! "<confirm>OK</confirm>" //<co id="ch08-order-consumer2-1"/>
+        sender() ! "<confirm>OK</confirm>" //<co id="ch08-order-consumer2-1"/>
       } catch {
         case ex: Exception =>
-          sender ! "<confirm>%s</confirm>".format(ex.getMessage)
+          sender() ! "<confirm>%s</confirm>".format(ex.getMessage)
       }
     }
   }
