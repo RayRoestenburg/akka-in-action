@@ -75,14 +75,14 @@ trait OrderService extends HttpService {
                 <confirm>
                   <id>{ result.id }</id>
                   <status>{ result.status }</status>
-                </confirm>.toString()
+                </confirm>
               }
               case result: Any => {
                 <confirm>
                   <status>
                     Response is unknown{ result.toString() }
                   </status>
-                </confirm>.toString()
+                </confirm>
               }
             }
           }
