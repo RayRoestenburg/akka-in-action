@@ -21,7 +21,7 @@ object BoxOffice {
   case class Events(events: Vector[Event]) //<co id="ch02_events"/>
 
   sealed trait EventResponse //<co id="ch02_event_response"/>
-  case object EventCreated extends EventResponse //<co id="ch02_event_created"/>
+  case class EventCreated(event: Event) extends EventResponse //<co id="ch02_event_created"/>
   case object EventExists extends EventResponse //<co id="ch02_event_exists"/>
 //<end id="ch02-boxoffice-messages"/>
 }
@@ -42,7 +42,7 @@ class BoxOffice(implicit timeout: Timeout) extends Actor {
           TicketSeller.Ticket(ticketId)
         }.toVector
         eventTickets ! TicketSeller.Add(newTickets)
-        sender() ! EventCreated
+        sender() ! EventCreated(Event(name, tickets))
       }
       context.child(name).fold(create())(_ => sender() ! EventExists) //<co id="ch02_create_or_respond_with_exists"/>
       //<end id="ch02_create_event"/>

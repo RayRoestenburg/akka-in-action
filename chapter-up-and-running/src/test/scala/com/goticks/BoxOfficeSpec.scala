@@ -12,18 +12,19 @@ class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
     with ImplicitSender
     with DefaultTimeout
     with StopSystemAfterAll {
-  "The TicketMaster" must {
+  "The BoxOffice" must {
 
     "Create an event and get tickets from the correct Ticket Seller" in {
       import BoxOffice._
       import TicketSeller._
 
       val boxOffice = system.actorOf(BoxOffice.props)
-      boxOffice ! CreateEvent("RHCP", 10)
-      expectMsg(EventCreated)
+      val eventName = "RHCP"
+      boxOffice ! CreateEvent(eventName, 10)
+      expectMsg(EventCreated(Event(eventName, 10)))
 
-      boxOffice ! GetTickets("RHCP", 1)
-      expectMsg(Tickets("RHCP", Vector(Ticket(1))))
+      boxOffice ! GetTickets(eventName, 1)
+      expectMsg(Tickets(eventName, Vector(Ticket(1))))
 
       boxOffice ! GetTickets("DavidBowie", 1)
       expectMsg(Tickets("DavidBowie"))
@@ -41,10 +42,11 @@ class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
       )
 
       val tickets = 3
+      val eventName = "RHCP"
       val expectedTickets = (1 to tickets).map(Ticket).toVector
-      boxOffice ! CreateEvent("RHCP", tickets)
+      boxOffice ! CreateEvent(eventName, tickets)
       expectMsg(Add(expectedTickets))
-      expectMsg(EventCreated)
+      expectMsg(EventCreated(Event(eventName, tickets)))
     }
   }
 }
