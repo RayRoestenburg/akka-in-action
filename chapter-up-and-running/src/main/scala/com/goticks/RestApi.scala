@@ -16,7 +16,6 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 class RestApi(system: ActorSystem, timeout: Timeout)
     extends RestRoutes {
   implicit val requestTimeout = timeout
-
   implicit def executionContext = system.dispatcher
 
   def createBoxOffice = system.actorOf(BoxOffice.props, BoxOffice.name)
