@@ -30,7 +30,7 @@ class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
       expectMsg(Tickets("DavidBowie"))
     }
 
-    "Create a child actor when an event is created and send it a Tickets message" in {
+    "Create a child actor when an event is created and sends it a Tickets message" in {
       import BoxOffice._
       import TicketSeller._
 
