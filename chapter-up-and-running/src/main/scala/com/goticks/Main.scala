@@ -17,20 +17,22 @@ import com.typesafe.config.{ Config, ConfigFactory } //<co id="ch02_import_confi
 object Main extends App
     with RequestTimeout {
 
-  implicit val system = ActorSystem()
+  implicit val system = ActorSystem() //<co id="ch02_create_actorsystem"/>
   implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
+  implicit val ec = system.dispatcher  //<co id="ch02_ec_for_future"/>
 
   val config = ConfigFactory.load() //<co id="ch02_load_config"/>
   val host = config.getString("http.host") //<co id="ch02_get_http_pars"/>
   val port = config.getInt("http.port")
-  val api = new RestApi(system, requestTimeout(config)).routes
+  val api = new RestApi(system, requestTimeout(config)).routes //<co id="ch02_routes"/>
  
   val bindingFuture: Future[ServerBinding] =
-    Http().bindAndHandle(api, host, port)
+    Http().bindAndHandle(api, host, port) //<co id="ch02_startServer"/>
  
   val log =  Logging(system.eventStream, "go-ticks")
-  bindingFuture.onFailure {
+  bindingFuture.map { serverBinding =>
+    log.info(s"RestApi bound to ${serverBinding.localAddress} ")
+  }.onFailure { 
     case ex: Exception =>
       log.error(ex, "Failed to bind to {}:{}!", host, port)
       system.terminate()

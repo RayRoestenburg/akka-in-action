@@ -6,14 +6,8 @@ version := "1.0"
 
 organization := "com.goticks" //<co id="example-app-info"/>
 
-scalaVersion := "2.11.7"
-
-resolvers ++=
-  Seq(Resolver.typesafeRepo("releases"),
-      "Spray Repository"    at "http://repo.spray.io") //<co id="example-resolvers"/>
-
 libraryDependencies ++= {
-  val akkaVersion       = "2.4.2-RC2" //<co id="akkaVersion"/>
+  val akkaVersion       = "2.4.2" //<co id="akkaVersion"/>
   Seq(
     "com.typesafe.akka" %% "akka-actor"      % akkaVersion, //<co id="actorDep"/>
     "com.typesafe.akka" %% "akka-http-core"  % akkaVersion, 
