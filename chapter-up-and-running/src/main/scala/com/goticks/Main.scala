@@ -2,13 +2,16 @@ package com.goticks
 
 //<start id="ch02-main-imports"/>
 import scala.concurrent.Future
+
 import akka.actor.{ ActorSystem , Actor, Props } //<co id="ch02_import_actor"/>
 import akka.event.Logging
 import akka.util.Timeout //<co id="ch02_import_timeout"/>
+
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+
 import com.typesafe.config.{ Config, ConfigFactory } //<co id="ch02_import_config"/>
 
 //<end id="ch02-main-imports"/>
@@ -17,17 +20,18 @@ import com.typesafe.config.{ Config, ConfigFactory } //<co id="ch02_import_confi
 object Main extends App
     with RequestTimeout {
 
-  implicit val system = ActorSystem() //<co id="ch02_create_actorsystem"/>
-  implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher  //<co id="ch02_ec_for_future"/>
-
-  val config = ConfigFactory.load() //<co id="ch02_load_config"/>
-  val host = config.getString("http.host") //<co id="ch02_get_http_pars"/>
+  val config = ConfigFactory.load() 
+  val host = config.getString("http.host") // Gets the host and a port from the configuration
   val port = config.getInt("http.port")
-  val api = new RestApi(system, requestTimeout(config)).routes //<co id="ch02_routes"/>
+
+  implicit val system = ActorSystem() 
+  implicit val ec = system.dispatcher  //bindAndHandle requires an implicit ExecutionContext
+
+  val api = new RestApi(system, requestTimeout(config)).routes // the RestApi provides a Route
  
+  implicit val materializer = ActorMaterializer()
   val bindingFuture: Future[ServerBinding] =
-    Http().bindAndHandle(api, host, port) //<co id="ch02_startServer"/>
+    Http().bindAndHandle(api, host, port) //Starts the HTTP server
  
   val log =  Logging(system.eventStream, "go-ticks")
   bindingFuture.map { serverBinding =>
