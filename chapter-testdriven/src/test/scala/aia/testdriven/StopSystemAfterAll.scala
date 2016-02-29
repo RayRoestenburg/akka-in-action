@@ -8,7 +8,7 @@ trait StopSystemAfterAll extends BeforeAndAfterAll {
   this: TestKit with Suite => //<co id="ch02-stop-system-self-type"/>
   override protected def afterAll() {
     super.afterAll()
-    system.terminate() //<co id="ch02-stop-system-shutdown"/>
+    system.terminate() //<co id="ch02-stop-system-terminate"/>
   }
 }
 //<end id="ch02-stopsystem"/>
