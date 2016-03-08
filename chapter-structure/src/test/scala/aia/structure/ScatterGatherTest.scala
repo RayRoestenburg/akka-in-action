@@ -15,7 +15,7 @@ class ScatterGatherTest
   with BeforeAndAfterAll {
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "The ScatterGather" must {

@@ -10,7 +10,7 @@ class RecipientListTest
   with BeforeAndAfterAll {
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "The RecipientList" must {

@@ -14,7 +14,7 @@ class AggregatorTest
   with WordSpecLike with BeforeAndAfterAll {
 
   protected override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "The Agregator" must {
