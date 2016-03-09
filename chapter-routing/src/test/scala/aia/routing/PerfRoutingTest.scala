@@ -20,11 +20,11 @@ class PerfRoutingTest
   with BeforeAndAfterAll {
 
   override def afterAll() = {
-    system.shutdown
+    system.terminate()
   }
 
   "The routerGroup" must {
-    "Use manage routees" in {
+    "use manage routees" in {
       val endProbe = TestProbe()
       val deadProbe = TestProbe()
       system.eventStream.subscribe(
@@ -71,7 +71,8 @@ class PerfRoutingTest
       system.stop(router)
       system.stop(creator)
     }
-    "should survive killed routee" in {
+    "survive killed actor ref routee" in {
+      val termProbe = TestProbe()
       val endProbe = TestProbe()
       val deadProbe = TestProbe()
       system.eventStream.subscribe(
@@ -80,25 +81,23 @@ class PerfRoutingTest
 
       val router = system.actorOf(RoundRobinGroup(List()).props(), "router-test2")
       val props = Props(new GetLicense(endProbe.ref))
-      val creator = system.actorOf(Props( new WrongDynamicRouteeSizer(2, props, router)),"DynamicRouteeSizer-test2")
+      val creator = system.actorOf(Props(new WrongDynamicRouteeSizer(2, props, router)),"DynamicRouteeSizer-test2")
       Thread.sleep(100)
-      val msg = PerformanceRoutingMessage(
-        ImageProcessing.createPhotoString(new Date(), 60, "123xyz"),
-        None,
-        None)
 
       val future = router.ask(GetRoutees)(1 second)
       val routeesMsg = Await.result(future, 1.second).asInstanceOf[Routees]
       val routees = routeesMsg.getRoutees
-      routees.get(0).send(PoisonPill, endProbe.ref)
-
-      Thread.sleep(1000)
-      //router is also terminated due to the use of ActorRefRoutee
-      router.isTerminated must be (true)
-
+      val routee = routees.get(0).asInstanceOf[ActorRefRoutee]
+      termProbe.watch(routee.ref)
+      termProbe.watch(router)
+      routee.send(PoisonPill, endProbe.ref)
+      termProbe.expectTerminated(routee.ref)
+      termProbe.expectNoMsg
+      termProbe.unwatch(router)
       system.stop(creator)
     }
     "survive killed routee" in {
+      val termProbe = TestProbe()
       val endProbe = TestProbe()
       val deadProbe = TestProbe()
       system.eventStream.subscribe(
@@ -119,10 +118,11 @@ class PerfRoutingTest
       val routees = routeesMsg.getRoutees
       routees.get(0).send(PoisonPill, endProbe.ref)
 
-      Thread.sleep(1000)
-      //router is isn't terminated due to the use of ActorSelectionRoutee
-      router.isTerminated must be (false)
-      //check if all routees are working
+      termProbe.watch(router)
+      //// router isn't terminated due to the use of ActorSelectionRoutee
+      termProbe.expectNoMsg
+      termProbe.unwatch(router)
+
       val future2 = router.ask(GetRoutees)(1 second)
       val routeesMsg2 = Await.result(future2, 1.second).asInstanceOf[Routees]
       routeesMsg2.getRoutees.size must be (2)
@@ -136,10 +136,10 @@ class PerfRoutingTest
       println("Received: "+ procMsg2)
       system.stop(router)
       system.stop(creator)
-
     }
 
-    "Use manage routees2" in {
+    "use manage routees2" in {
+      val termProbe = TestProbe()
       val endProbe = TestProbe()
       val deadProbe = TestProbe()
       system.eventStream.subscribe(
@@ -175,10 +175,10 @@ class PerfRoutingTest
       deadProbe.expectNoMsg()
 
       router ! Broadcast(PoisonPill)
-      Thread.sleep(1000)
-      //this fails when all routees are killed somehow
-      router.isTerminated must be (true)
 
+      termProbe.watch(router)
+      termProbe.expectTerminated(router)  
+      
       system.stop(router)
       system.stop(creator)
     }
@@ -303,10 +303,11 @@ class PerfRoutingTest
       val deadMsg = deadProbe.expectMsgType[DeadLetter](1 second)
       println(deadMsg)
       router ! msg
-      val procMsg = endProbe.expectMsgType[PerformanceRoutingMessage](1 second)
+
+      endProbe.expectMsgType[PerformanceRoutingMessage](1 second)
       router ! msg
 
-      val deadMsg2 = deadProbe.expectMsgType[DeadLetter](1 second)
+      deadProbe.expectMsgType[DeadLetter](1 second)
       system.stop(router)
       system.stop(creator)
     }
@@ -459,9 +460,9 @@ class PerfRoutingTest
       val msgProcessedByActor2 = grouped.get(Some("500"))
         .getOrElse(Seq())
 
-      msgProcessedByActor1.size must be(7 plusOrMinus 1) //<co id="ch09-routing-perf-test4-4" />
-      msgProcessedByActor2.size must be(3 plusOrMinus 1) //<co id="ch09-routing-perf-test4-5" />
-      testSystem.shutdown()
+      msgProcessedByActor1.size must be(7 +- 1) //<co id="ch09-routing-perf-test4-4" />
+      msgProcessedByActor2.size must be(3 +- 1) //<co id="ch09-routing-perf-test4-5" />
+      testSystem.terminate()
       //<end id="ch09-routing-dispatcher-test"/>
       system.stop(router)
     }
@@ -495,9 +496,9 @@ class PerfRoutingTest
         .getOrElse(Seq())
       val msgProcessedByActor2 = grouped.get(Some("500"))
         .getOrElse(Seq())
-      msgProcessedByActor1.size must be(7 plusOrMinus 1)
-      msgProcessedByActor2.size must be(3 plusOrMinus 1)
-      testSystem.shutdown()
+      msgProcessedByActor1.size must be(7 +- 1)
+      msgProcessedByActor2.size must be(3 +- 1)
+      testSystem.terminate()
       //<end id="ch09-routing-dispatch-test"/>
       system.stop(router)
     }

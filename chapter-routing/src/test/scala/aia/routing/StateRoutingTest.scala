@@ -11,7 +11,7 @@ class StateRoutingTest
   with WordSpecLike with BeforeAndAfterAll {
 
   override def afterAll() {
-    system.shutdown
+    system.terminate
   }
 
   "The Router" must {
