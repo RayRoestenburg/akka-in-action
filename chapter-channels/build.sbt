@@ -1,7 +1,7 @@
 import com.typesafe.sbt.SbtMultiJvm
 import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.MultiJvm
 
-val akkaVersion = "2.3.12"
+val akkaVersion = "2.4.2"
 
 val project = Project(
   id = "channels",
@@ -17,9 +17,8 @@ val project = Project(
     "com.typesafe.akka" %%  "akka-remote"             % akkaVersion,
     "com.typesafe.akka" %%  "akka-multi-node-testkit" % akkaVersion,
     "com.typesafe.akka" %%  "akka-contrib"            % akkaVersion,
-    "com.typesafe.akka" %%  "akka-remote-tests"       % akkaVersion  % "test",
     "com.typesafe.akka" %%  "akka-testkit"            % akkaVersion  % "test",
-    "org.scalatest"     %%  "scalatest"               % "2.2.4"      % "test"
+    "org.scalatest"     %%  "scalatest"               % "2.2.6"      % "test"
     ),
     // make sure that MultiJvm test are compiled by the default test compilation
     compile in MultiJvm <<= (compile in MultiJvm) triggeredBy (compile in Test),
