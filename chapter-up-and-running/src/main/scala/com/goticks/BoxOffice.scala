@@ -8,7 +8,7 @@ import akka.util.Timeout
 
 object BoxOffice {
   def props(implicit timeout: Timeout) = Props(new BoxOffice)
-  def name = "box-office"
+  def name = "boxOffice"
 
 //<start id="ch02-boxoffice-messages"/>
   case class CreateEvent(name: String, tickets: Int) //<co id="ch02_create_event"/>

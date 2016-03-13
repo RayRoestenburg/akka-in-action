@@ -1,10 +1,12 @@
 package com.goticks
 
+import scala.concurrent.duration._
 import akka.remote.testkit.MultiNodeSpec
+import akka.util.Timeout
 
 import akka.testkit.ImplicitSender
 import akka.actor._
-import TicketProtocol._
+import TicketSeller._
 
 class ClientServerSpecMultiJvmFrontend extends ClientServerSpec
 class ClientServerSpecMultiJvmBackend extends ClientServerSpec
@@ -16,14 +18,6 @@ with STMultiNodeSpec with ImplicitSender {
 
   val backendNode = node(backend)
 
-  trait TestRemoteBoxOfficeCreator extends RemoteBoxOfficeCreator { this: Actor =>
-
-    override def createPath: String = {
-      val actorPath =  backendNode / "user" /"boxOffice"
-      actorPath.toString
-    }
-  }
-
   def initialParticipants = roles.size
 
   "A Client Server configured app" must {
@@ -34,13 +28,12 @@ with STMultiNodeSpec with ImplicitSender {
 
     "be able to create an event and sell a ticket" in {
       runOn(backend) {
-        system.actorOf(Props[BoxOffice], "boxOffice")
+        system.actorOf(BoxOffice.props(Timeout(1 second)), "boxOffice")
         enterBarrier("deployed")
       }
 
       runOn(frontend) {
         enterBarrier("deployed")
-        val restInterface = system.actorOf(Props(new RestInterfaceMock with TestRemoteBoxOfficeCreator))
 
         val path = node(backend) / "user" / "boxOffice"
         val actorSelection = system.actorSelection(path)
@@ -48,16 +41,18 @@ with STMultiNodeSpec with ImplicitSender {
         actorSelection.tell(Identify(path), testActor)
 
         val actorRef = expectMsgPF() {
-          case ActorIdentity(`path`, ref) => ref
+          case ActorIdentity(`path`, Some(ref)) => ref
         }
+        
+        import BoxOffice._
 
-        restInterface ! Event("RHCP", 1)
+        actorRef ! CreateEvent("RHCP", 20000)
 
-        expectMsg(EventCreated)
+        expectMsg(EventCreated(Event("RHCP", 20000)))
 
-        restInterface ! TicketRequest("RHCP")
+        actorRef ! GetTickets("RHCP", 1)
 
-        expectMsg(Ticket("RHCP", 1))
+        expectMsg(Tickets("RHCP", Vector(Ticket(1))))
       }
 
 
@@ -65,13 +60,3 @@ with STMultiNodeSpec with ImplicitSender {
     }
   }
 }
-
-class RestInterfaceMock extends Actor with RemoteBoxOfficeCreator with ActorLogging {
-  val boxOffice = createBoxOffice
-
-  def receive = {
-    case msg: Any =>
-      boxOffice forward msg
-  }
-}
-

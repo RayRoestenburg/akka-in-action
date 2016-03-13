@@ -6,7 +6,7 @@ import com.typesafe.sbt.SbtMultiJvm.MultiJvmKeys.{ MultiJvm }
 object GoTicksBuild extends Build {
 
   lazy val buildSettings = Defaults.defaultSettings ++ multiJvmSettings ++ Seq(
-    crossPaths   := false
+    crossPaths := false
   )
 
   lazy val goticks = Project(
