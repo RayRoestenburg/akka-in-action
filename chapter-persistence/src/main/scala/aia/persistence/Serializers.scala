@@ -61,7 +61,7 @@ object JsonFormats extends DefaultJsonProtocol {
 
   implicit val addedEventFormat: RootJsonFormat[Basket.Added] =
     jsonFormat1(Basket.Added)
-  implicit val reFormat: RootJsonFormat[Basket.ItemRemoved] =
+  implicit val removedEventFormat: RootJsonFormat[Basket.ItemRemoved] =
     jsonFormat1(Basket.ItemRemoved)
   implicit val updatedEventFormat: RootJsonFormat[Basket.ItemUpdated] =
     jsonFormat2(Basket.ItemUpdated)
