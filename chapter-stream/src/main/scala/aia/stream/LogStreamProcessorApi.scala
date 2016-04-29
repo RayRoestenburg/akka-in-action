@@ -152,7 +152,7 @@ trait LogStreamProcessorRoutes extends EventMarshalling {
         } ~
         get {
           if(logFile(logId).exists) {
-            entityOut(logId)
+            negotiatedEntity(logId)
           } else {
             complete(StatusCodes.NotFound)
           }
@@ -175,64 +175,43 @@ trait LogStreamProcessorRoutes extends EventMarshalling {
   import akka.http.scaladsl.model.HttpCharsets._
   import akka.http.scaladsl.model.MediaTypes._
   import akka.http.scaladsl.model.headers.Accept
+  import akka.http.scaladsl.marshalling._
 
   sealed trait LogType
   case object TextLog extends LogType
   case object JsonLog extends LogType
   
-  def entityOut(logId: String) = 
-    headerValueByType[Accept]() { accept =>
-      if (accept.acceptsAll || 
-        accept.mediaRanges.contains(MediaRange(`application/json`))
-      ) {
-        complete(
-          HttpEntity(
-            ContentTypes.`application/json`, 
-            FileIO.fromFile(logFile(logId))
-          )
-        )
-      } else {
-        complete(
-          HttpEntity(
-            ContentTypes.`text/plain(UTF-8)`, 
-            FileIO.fromFile(logFile(logId))
-              .via(
-                JsonFraming.json(maxJsonObject)
-                  .map { 
-                    _.decodeString("UTF8")
-                    .parseJson
-                    .convertTo[Event]
-                  }
-                  .map{ event => 
-                    ByteString(LogStreamProcessor.logLine(event))
-                  }
-              )
-          )
-        )
-      }
-    }
-  
-  def extractContentType: Directive1[ContentType] = 
-    extractRequest.flatMap { request => 
-      provide(request.entity.contentType)
+  implicit val marshallers: ToEntityMarshaller[Source[ByteString, _]] = {
+    val js = ContentTypes.`application/json`
+    val txt = ContentTypes.`text/plain(UTF-8)`
+    val jsMarshaller = Marshaller.withFixedContentType(js) { src:Source[ByteString, _] ⇒
+      HttpEntity(js, src)
     }
 
-  def extractSupportedLogContentType: Directive1[LogType] = 
-    extractContentType.flatMap { contentType => 
-      if(contentType == ContentTypes.`application/json`) {
-        provide(JsonLog)
-      } else if (contentType == ContentTypes.`text/plain(UTF-8)`) {
-        provide(TextLog)
-      } else {
-        reject(
-          UnsupportedRequestContentTypeRejection(
-            Set(
-              ContentTypeRange(`application/json`),
-              ContentTypeRange(`text/plain`, `UTF-8`)
-            )
-          )
-        )
-      }
+    def toText(src: Source[ByteString, _]): Source[ByteString, _] = 
+      src.via(
+        JsonFraming.json(maxJsonObject)
+          .map { 
+            _.decodeString("UTF8")
+            .parseJson
+            .convertTo[Event]
+          }
+          .map{ event => 
+            ByteString(LogStreamProcessor.logLine(event))
+          }
+      )
+
+    val txtMarshaller = Marshaller.withFixedContentType(txt) { src:Source[ByteString, _] ⇒ 
+      HttpEntity(txt, toText(src))
+    }
+
+    Marshaller.oneOf(jsMarshaller, txtMarshaller)
+  }
+
+  def negotiatedEntity(logId: String) = 
+    extractRequest { req =>
+      val src = FileIO.fromFile(logFile(logId)) 
+      complete(Marshal(src).toResponseFor(req))
     }
 
   def extractInFlow: Directive1[Flow[ByteString, Event, NotUsed]] =
