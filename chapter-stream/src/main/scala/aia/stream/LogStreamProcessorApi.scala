@@ -20,6 +20,8 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 
+import spray.json._
+
 class LogStreamProcessorApi(
     val processFlow: Flow[Event, Event, _],
     val notificationsDir: Path, 
@@ -133,32 +135,24 @@ trait LogStreamProcessorRoutes extends EventMarshalling {
   def logRoute =
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
-        post { 
-          entity(as[HttpRequest]) { req => 
-            onComplete(
-              req.entity.dataBytes
-                // this is basically read log, write to outputs, same for HTTP or command line.
-                .delimitedText(maxLine)
-                .parseLogEvents
-                .via(processFlow)
-                // broadcast to predefined streams, store event, notifications, host/service 'indexed' logs.
-                // store filters, this is basically a groupBy key? (errors, ok, critical, warnings, can it append)
-                // run notification logic (write to sink, and write to file. (could be the same))
-                // 
-                // broadcast, detached, or preferred 
-                // merge back in, keep the size of the logs in JSON?
-                .convertToJsonBytes
-                .toMat(FileIO.toFile(logFile(logId)))(Keep.right)
-                .run
-            ) {
-              case Success(io) => complete((StatusCodes.OK, LogReceipt(logId, io.count)))
-              case Failure(e) => complete(StatusCodes.BadRequest)
+        post {
+         extractInFlow { inFlow =>
+            entity(as[HttpRequest]) { req => 
+              onComplete(
+                req.entity.dataBytes.via(inFlow) //<co id="dataBytes"/>
+                  .map(events => ByteString(events.toJson.compactPrint))
+                  .toMat(FileIO.toFile(logFile(logId)))(Keep.right)
+                  .run
+              ) {
+                case Success(io) => complete((StatusCodes.OK, LogReceipt(logId, io.count)))
+                case Failure(e) => complete(StatusCodes.BadRequest)
+              }
             }
           }
         } ~
         get {
           if(logFile(logId).exists) {
-            complete(HttpEntity(ContentTypes.`application/json`, FileIO.fromFile(logFile(logId))))
+            entityOut(logId)
           } else {
             complete(StatusCodes.NotFound)
           }
@@ -173,6 +167,89 @@ trait LogStreamProcessorRoutes extends EventMarshalling {
         }
       }
     }
+
+  import akka.NotUsed
+  import akka.stream.scaladsl.Framing
+  import akka.stream.io.JsonFraming
+  import spray.json._
+  import akka.http.scaladsl.model.HttpCharsets._
+  import akka.http.scaladsl.model.MediaTypes._
+  import akka.http.scaladsl.model.headers.Accept
+
+  sealed trait LogType
+  case object TextLog extends LogType
+  case object JsonLog extends LogType
+  
+  def entityOut(logId: String) = 
+    headerValueByType[Accept]() { accept =>
+      if (accept.acceptsAll || 
+        accept.mediaRanges.contains(MediaRange(`application/json`))
+      ) {
+        complete(
+          HttpEntity(
+            ContentTypes.`application/json`, 
+            FileIO.fromFile(logFile(logId))
+          )
+        )
+      } else {
+        complete(
+          HttpEntity(
+            ContentTypes.`text/plain(UTF-8)`, 
+            FileIO.fromFile(logFile(logId))
+              .via(
+                JsonFraming.json(maxJsonObject)
+                  .map { 
+                    _.decodeString("UTF8")
+                    .parseJson
+                    .convertTo[Event]
+                  }
+                  .map{ event => 
+                    ByteString(LogStreamProcessor.logLine(event))
+                  }
+              )
+          )
+        )
+      }
+    }
+  
+  def extractContentType: Directive1[ContentType] = 
+    extractRequest.flatMap { request => 
+      provide(request.entity.contentType)
+    }
+
+  def extractSupportedLogContentType: Directive1[LogType] = 
+    extractContentType.flatMap { contentType => 
+      if(contentType == ContentTypes.`application/json`) {
+        provide(JsonLog)
+      } else if (contentType == ContentTypes.`text/plain(UTF-8)`) {
+        provide(TextLog)
+      } else {
+        reject(
+          UnsupportedRequestContentTypeRejection(
+            Set(
+              ContentTypeRange(`application/json`),
+              ContentTypeRange(`text/plain`, `UTF-8`)
+            )
+          )
+        )
+      }
+    }
+
+  def extractInFlow: Directive1[Flow[ByteString, Event, NotUsed]] =
+    extractSupportedLogContentType.flatMap {
+      case TextLog =>
+        val textIn = Framing.delimiter(ByteString("\n"), maxLine)
+          .map(_.decodeString("UTF8"))
+          .map(LogStreamProcessor.parseLineEx)
+        provide(textIn)
+      case JsonLog => 
+        val jsonIn = JsonFraming.json(maxJsonObject)
+          .map(_.decodeString("UTF8")
+          .parseJson
+          .convertTo[Event])
+        provide(jsonIn)
+    }
+
 
   def logFile(id: String) = new File(logsDir.toFile, id)   
 
