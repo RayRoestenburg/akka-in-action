@@ -17,10 +17,10 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.12"
-  val sprayVersion      = "1.3.3"
-  val camelVersion      = "2.13.2"
-  val activeMQVersion   = "5.4.1"
+  val akkaVersion     = "2.3.12"
+  val sprayVersion    = "1.3.3"
+  val camelVersion    = "2.13.2"
+  val activeMQVersion = "5.4.1"
   Seq(
     "org.scala-lang.modules"  %% "scala-xml" 				 % "1.0.2",
     "com.typesafe.akka"       %% "akka-camel"        % akkaVersion,

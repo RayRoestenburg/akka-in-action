@@ -24,8 +24,8 @@ parallelExecution in Test := false
 fork := true
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.12"
-  val sprayVersion      = "1.3.3"
+  val akkaVersion  = "2.3.12"
+  val sprayVersion = "1.3.3"
   Seq(
     "com.typesafe.akka"         %%  "akka-actor"                     % akkaVersion,
     "com.typesafe.akka"         %%  "akka-slf4j"                     % akkaVersion,

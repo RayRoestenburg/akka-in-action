@@ -17,7 +17,7 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.12"
+  val akkaVersion = "2.3.12"
   val sprayVersion      = "1.3.3"
   Seq(
     "com.typesafe.akka"       %%  "akka-actor"                     % akkaVersion,
