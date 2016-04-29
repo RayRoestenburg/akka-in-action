@@ -90,6 +90,7 @@ object LogStreamProcessor extends EventMarshalling {
    * parses text log line into an Event
    */
   def parseLineEx(line: String): Event = {
+    println("LINE:"+line)
     line.split("\\|") match {
       case Array(host, service, state, time, desc) => //, tag, metric) =>
         Event(
