@@ -18,11 +18,6 @@ libraryDependencies ++= {
     "com.typesafe.akka"       %%  "akka-slf4j"                     % akkaVersion,
     "com.typesafe.akka"       %%  "akka-testkit"                   % akkaVersion   % "test",
     "org.scalatest"           %% "scalatest"                       % "2.2.4"       % "test",
-    "io.spray"                %%  "spray-can"                      % sprayVersion,
-    "io.spray"                %%  "spray-routing"                  % sprayVersion,
-    "io.spray"                %% "spray-json"                      % "1.3.1",
-    "com.typesafe.akka"       %% "akka-slf4j"                      % akkaVersion,
-    "ch.qos.logback"          %  "logback-classic"                 % "1.1.3",
     "com.github.nscala-time"  %%  "nscala-time"                    % "1.8.0"
   )
 }

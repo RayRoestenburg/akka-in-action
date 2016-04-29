@@ -22,7 +22,6 @@ libraryDependencies ++= {
     "com.typesafe.akka" %%  "akka-http-core"                     % akkaVersion, 
     "com.typesafe.akka" %%  "akka-http-experimental"             % akkaVersion, 
     "com.typesafe.akka" %%  "akka-http-spray-json-experimental"  % akkaVersion, 
-    "io.spray"          %%  "spray-json"                         % "1.3.1",
     "ch.qos.logback"    %   "logback-classic"                    % "1.1.6"
   )
 }
