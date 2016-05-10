@@ -4,7 +4,7 @@ version := "1.0"
 
 organization := "com.manning"
 
-scalaVersion := "2.11.7" // BUGBUG was 2.11.6
+scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -24,7 +24,7 @@ parallelExecution in Test := false
 fork := true
 
 libraryDependencies ++= {
-  val akkaVersion  = "2.4.4"  // BUGBUG was 2.3.12
+  val akkaVersion  = "2.4.4"
   val sprayVersion = "1.3.3"
   Seq(
     "com.typesafe.akka"         %%  "akka-actor"                     % akkaVersion,
