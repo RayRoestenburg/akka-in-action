@@ -2,10 +2,8 @@ package aia.persistence
 //<start id="persistence-shoppers-singleton"/>
 
 import akka.actor._
+import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings}
 import akka.persistence._
-
-import akka.contrib.pattern.ClusterSingletonManager
-import akka.contrib.pattern.ClusterSingletonProxy
 
 object ShoppersSingleton {
   def props = Props(new ShoppersSingleton)
@@ -15,20 +13,17 @@ object ShoppersSingleton {
 class ShoppersSingleton extends Actor {
   val singletonManager = context.system.actorOf(
     ClusterSingletonManager.props(
-      singletonProps = Shoppers.props,
-      singletonName = Shoppers.name,
-      terminationMessage = PoisonPill,
-      role = None
-    ), name = Shoppers.name
+      Shoppers.props,
+      PoisonPill,
+      ClusterSingletonManagerSettings(context.system).withRole(None).withSingletonName(Shoppers.name)
+    )
   )
 
   val shoppers = context.system.actorOf(
     ClusterSingletonProxy.props(
-      singletonPath = singletonManager.path
-        .child(Shoppers.name)
-        .toStringWithoutAddress,
-      role = None
-    ), name = "shoppers-proxy"
+      singletonManager.path.child(Shoppers.name).toStringWithoutAddress,
+      ClusterSingletonProxySettings(context.system).withRole(None).withSingletonName("shoppers-proxy")
+    )
   )
 
   def receive = {

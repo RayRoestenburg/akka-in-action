@@ -1,13 +1,10 @@
 package aia.persistence.sharded
 
 import scala.concurrent.duration._
-
 import akka.actor._
-
-import akka.contrib.pattern.ShardRegion
-import akka.contrib.pattern.ShardRegion.Passivate
-
 import aia.persistence._
+import akka.cluster.sharding.ShardRegion
+import akka.cluster.sharding.ShardRegion.Passivate
 
 object ShardedShopper {
   def props = Props(new ShardedShopper)
@@ -18,11 +15,11 @@ object ShardedShopper {
 
   val shardName: String = "shoppers"
 
-  val idExtractor: ShardRegion.IdExtractor = {
+  val extractEntityId: ShardRegion.ExtractEntityId = {
     case cmd: Shopper.Command => (cmd.shopperId.toString, cmd)
   }
 
-  val shardResolver: ShardRegion.ShardResolver = {
+  val extractShardId: ShardRegion.ExtractShardId = {
     case cmd: Shopper.Command => (cmd.shopperId % 12).toString
   }
 }
