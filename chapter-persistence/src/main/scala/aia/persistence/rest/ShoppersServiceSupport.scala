@@ -32,7 +32,7 @@ trait ShoppersServiceSupport {
         case Http.CommandFailed(cmd) =>
           println("Shopper service could not bind to " +
             s"$host:$port, ${cmd.failureMessage}")
-          system.shutdown()
+          system.terminate()
       }
   }
 }
