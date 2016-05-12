@@ -45,4 +45,5 @@ object State {
   }
 }
 
-case class LogReceipt(logId: String, size: Long)
+case class LogReceipt(logId: String, written: Long)
+case class ParseError(logId: String, msg: String)

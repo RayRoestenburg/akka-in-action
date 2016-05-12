@@ -39,4 +39,5 @@ trait EventMarshalling extends DefaultJsonProtocol {
 
   implicit val eventFormat = jsonFormat5(Event)
   implicit val logIdFormat = jsonFormat2(LogReceipt)
+  implicit val errorFormat = jsonFormat2(ParseError)
 }
