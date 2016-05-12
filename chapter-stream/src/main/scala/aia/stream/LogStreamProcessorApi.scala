@@ -32,27 +32,6 @@ class LogStreamProcessorApi(
   implicit val executionContext = system.dispatcher
   implicit val materializer = ActorMaterializer()
 }
-//
-//  /store/logs
-//             /logfile
-//        /host/service/service-log
-//          -> this is both a stream and a file.
-//                     /errors ?
-//                     /critical ? 
-//        /notifications (file version of what is notified) rollups of events, single events
-//  service1 -> add -> count add -> 
-//           -> checkout -> 
-//
-//
-//
-// TODO (possibly)
-// logs/1/errors
-// logs/errors
-// hosts (provides host ids)
-// hosts/host-id (provides services)
-// hosts/host-id/logs (provides logs)?
-// hosts/host-id/services/service-id/logs // provides service logs
-// hosts/host-id/services/service-id/logs/errors provides errors
 
 trait LogStreamProcessorRoutes extends EventMarshalling {
   import LogStreamProcessor._
@@ -136,19 +115,7 @@ trait LogStreamProcessorRoutes extends EventMarshalling {
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         post {
-         extractInFlow { inFlow =>
-            entity(as[HttpRequest]) { req => 
-              onComplete(
-                req.entity.dataBytes.via(inFlow) //<co id="dataBytes"/>
-                  .map(events => ByteString(events.toJson.compactPrint))
-                  .toMat(FileIO.toFile(logFile(logId)))(Keep.right)
-                  .run
-              ) {
-                case Success(io) => complete((StatusCodes.OK, LogReceipt(logId, io.count)))
-                case Failure(e) => complete(StatusCodes.BadRequest)
-              }
-            }
-          }
+          extractInFlow2(logId)
         } ~
         get {
           if(logFile(logId).exists) {
@@ -212,6 +179,65 @@ trait LogStreamProcessorRoutes extends EventMarshalling {
     extractRequest { req =>
       val src = FileIO.fromFile(logFile(logId)) 
       complete(Marshal(src).toResponseFor(req))
+    }
+
+  def extractContentType: Directive1[ContentType] = 
+    extractRequest.flatMap { request => 
+      provide(request.entity.contentType)
+    }
+  
+  import akka.http.scaladsl.unmarshalling._
+  import akka.http.scaladsl.unmarshalling.Unmarshaller._
+  import akka.stream.Materializer
+  
+  implicit val unmarshaller = new Unmarshaller[HttpEntity, Source[Event, _]] {
+    def apply(entity: HttpEntity)(implicit ec: ExecutionContext, materializer: Materializer): Future[Source[Event, _]] = {
+      val future = entity.contentType match {
+        case ContentTypes.`text/plain(UTF-8)` => 
+          Future.successful(
+            Framing.delimiter(ByteString("\n"), maxLine)
+              .map(_.decodeString("UTF8"))
+              .map(LogStreamProcessor.parseLineEx)
+          )
+        case ContentTypes.`application/json` =>
+          Future.successful(
+            JsonFraming.json(maxJsonObject)
+              .map(_.decodeString("UTF8")
+              .parseJson
+              .convertTo[Event])
+          )
+        case other => Future.failed(new UnsupportedContentTypeException(Set(`text/plain`, `application/json`)))
+      }
+      future.map(flow => entity.dataBytes.via(flow))(ec)
+    }
+  }.forContentTypes(`text/plain`, `application/json`)
+
+  def extractInFlow2(logId: String) =
+    entity(as[Source[Event, _]]) { src =>
+      onComplete(src.map(events => ByteString(events.toJson.compactPrint))
+          .toMat(FileIO.toFile(logFile(logId)))(Keep.right)
+          .run) {
+        case Success(io) => complete((StatusCodes.OK, LogReceipt(logId, io.count)))
+        case Failure(e) => complete(StatusCodes.BadRequest)
+      }
+    }
+
+  def extractSupportedLogContentType: Directive1[LogType] = 
+    extractContentType.flatMap { contentType => 
+      if(contentType == ContentTypes.`application/json`) {
+        provide(JsonLog)
+      } else if (contentType == ContentTypes.`text/plain(UTF-8)`) {
+        provide(TextLog)
+      } else {
+        reject(
+          UnsupportedRequestContentTypeRejection(
+            Set(
+              ContentTypeRange(`application/json`),
+              ContentTypeRange(`text/plain`, `UTF-8`)
+            )
+          )
+        )
+      }
     }
 
   def extractInFlow: Directive1[Flow[ByteString, Event, NotUsed]] =
