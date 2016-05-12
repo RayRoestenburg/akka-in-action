@@ -90,7 +90,6 @@ object LogStreamProcessor extends EventMarshalling {
    * parses text log line into an Event
    */
   def parseLineEx(line: String): Event = {
-    println("LINE:"+line)
     line.split("\\|") match {
       case Array(host, service, state, time, desc) => //, tag, metric) =>
         Event(
@@ -107,9 +106,11 @@ object LogStreamProcessor extends EventMarshalling {
         throw new LogParseException(s"Failed on line: $line")
     }
   }
+
   def logLine(event: Event) = {
     s"${event.host} | ${event.service} | ${State.norm(event.state)} | ${event.time.toString} | ${event.description} \n"
   }
+  
   case class LogParseException(msg:String) extends Exception(msg)
 
   /**
