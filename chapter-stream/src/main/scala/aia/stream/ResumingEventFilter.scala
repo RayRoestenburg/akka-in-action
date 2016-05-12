@@ -88,7 +88,6 @@ object ResumingEventFilter extends App with EventMarshalling {
       .via(filter)
       .via(serialize)
 
-
   val runnableGraph: RunnableGraph[Future[IOResult]] = 
     source.via(composedFlow).toMat(sink)(Keep.right)
 
