@@ -37,19 +37,6 @@ object StreamingCopy extends App {
     source.to(sink) //<co id="connect_graph"/>
   //<end id="blueprint"/>
 
-  //<start id="graph-keep"/>
-  import akka.Done
-  import akka.stream.scaladsl.Keep
-
-  val graphRight: RunnableGraph[Future[IOResult]] = 
-    source.toMat(sink)(Keep.right) //<co id="keep_right"/>
-  val graphBoth: RunnableGraph[(Future[IOResult], Future[IOResult])] = 
-    source.toMat(sink)(Keep.both) //<co id="keep_both"/>
-  val graphCustom: RunnableGraph[Future[Done]] = 
-    source.toMat(sink) { (l, r) => 
-      Future.sequence(List(l,r)).map(_ => Done) //<co id="keep_custom"/>
-    } 
-  //<end id="graph-keep"/>
 
 
   //<start id="execute-blueprint"/>
@@ -62,4 +49,21 @@ object StreamingCopy extends App {
     system.terminate()
   }  
   //<end id="execute-blueprint"/>
+
+  // These are just examples, they are not run as part of StreamingCopy
+  //<start id="graph-keep"/>
+  import akka.Done
+  import akka.stream.scaladsl.Keep
+
+  val graphLeft: RunnableGraph[Future[IOResult]] = 
+    source.toMat(sink)(Keep.left) //<co id="keep_left"/>    
+  val graphRight: RunnableGraph[Future[IOResult]] = 
+    source.toMat(sink)(Keep.right) //<co id="keep_right"/>
+  val graphBoth: RunnableGraph[(Future[IOResult], Future[IOResult])] = 
+    source.toMat(sink)(Keep.both) //<co id="keep_both"/>
+  val graphCustom: RunnableGraph[Future[Done]] = 
+    source.toMat(sink) { (l, r) => 
+      Future.sequence(List(l,r)).map(_ => Done) //<co id="keep_custom"/>
+    } 
+  //<end id="graph-keep"/>
 }
