@@ -69,17 +69,17 @@ class LogsApi(
                 .run
             ) {
               case Success(IOResult(count, Success(Done))) => //<co id="logRoutePostSuccess"/>
-                complete(StatusCodes.OK, LogReceipt(logId, count))
+                complete((StatusCodes.OK, LogReceipt(logId, count)))
               case Success(IOResult(count, Failure(e))) => //<co id="logRoutePostIOFailure"/>
-                complete(
+                complete((
                   StatusCodes.BadRequest, 
                   ParseError(logId, e.getMessage)
-                )
+                ))
               case Failure(e) => //<co id="logRoutePostFailure"/>
-                complete(
+                complete((
                   StatusCodes.BadRequest, 
                   ParseError(logId, e.getMessage)
-                )
+                ))
             }
           }
         } 

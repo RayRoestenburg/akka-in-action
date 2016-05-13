@@ -16,7 +16,7 @@ import akka.http.scaladsl.server.Directives._
 
 import com.typesafe.config.{ Config, ConfigFactory }
 
-object LogsApp extends App {
+object FanLogsApp extends App {
 
   val config = ConfigFactory.load() 
   val host = config.getString("http.host")
@@ -27,12 +27,13 @@ object LogsApp extends App {
     Files.createDirectories(FileSystems.getDefault.getPath(dir))
   }
   val maxLine = config.getInt("log-stream-processor.max-line")
+  val maxJsObject = config.getInt("log-stream-processor.max-json-object")
 
   implicit val system = ActorSystem() 
   implicit val ec = system.dispatcher
   
   val decider : Supervision.Decider = {
-    case _: LogStreamProcessor.LogParseException => Supervision.Stop
+    case _: LogStreamProcessor.LogParseException => Supervision.Resume
     case _                    => Supervision.Stop
   }
   
@@ -41,12 +42,12 @@ object LogsApp extends App {
      .withSupervisionStrategy(decider)
   )
   
-  val api = new LogsApi(logsDir, maxLine).routes
+  val api = new FanLogsApi(logsDir, maxLine, maxJsObject).routes
  
   val bindingFuture: Future[ServerBinding] =
     Http().bindAndHandle(api, host, port)
  
-  val log =  Logging(system.eventStream, "logs")
+  val log =  Logging(system.eventStream, "fan-logs")
   bindingFuture.map { serverBinding =>
     log.info(s"Bound to ${serverBinding.localAddress} ")
   }.onFailure { 

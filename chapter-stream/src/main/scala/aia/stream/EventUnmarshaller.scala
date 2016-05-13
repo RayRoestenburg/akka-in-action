@@ -33,9 +33,9 @@ object EventUnmarshaller extends EventMarshalling {
 
         val future = entity.contentType match { //<co id="contentType"/>
           case ContentTypes.`text/plain(UTF-8)` => 
-            Future.successful(textInFlow(maxLine))
+            Future.successful(LogJson.textInFlow(maxLine)) //<co id="textInFlow"/>
           case ContentTypes.`application/json` =>
-            Future.successful(jsonInFlow(maxJsonObject))
+            Future.successful(LogJson.jsonInFlow(maxJsonObject)) //<co id="jsonInFlow"/>
           case other => 
             Future.failed(
               new UnsupportedContentTypeException(supported) //<co id="non_exhaust"/>
@@ -44,19 +44,6 @@ object EventUnmarshaller extends EventMarshalling {
         future.map(flow => entity.dataBytes.via(flow))(ec)  //<co id="map_future"/>
       } 
     }.forContentTypes(supported.toList:_*) //<co id="constrain"/>
-  }
-
-  def textInFlow(maxLine: Int) = {
-    Framing.delimiter(ByteString("\n"), maxLine)
-      .map(_.decodeString("UTF8"))
-      .map(LogStreamProcessor.parseLineEx)
-  }
-
-  def jsonInFlow(maxJsonObject: Int) = {
-    JsonFraming.json(maxJsonObject)
-      .map(_.decodeString("UTF8")
-      .parseJson
-      .convertTo[Event])
   }
 }
 //<end id="unmarshaller"/>

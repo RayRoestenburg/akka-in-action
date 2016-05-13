@@ -58,17 +58,17 @@ class ContentNegLogsApi(
             // Handling Future result omitted here, done the same as before.
             //<end id="postRoute"/>
               case Success(IOResult(count, Success(Done))) =>
-                complete(StatusCodes.OK, LogReceipt(logId, count))
+                complete((StatusCodes.OK, LogReceipt(logId, count)))
               case Success(IOResult(count, Failure(e))) =>
-                complete(
+                complete((
                   StatusCodes.BadRequest, 
                   ParseError(logId, e.getMessage)
-                )
+                ))
               case Failure(e) =>
-                complete(
+                complete((
                   StatusCodes.BadRequest, 
                   ParseError(logId, e.getMessage)
-                )
+                ))
             }
           }
         } 

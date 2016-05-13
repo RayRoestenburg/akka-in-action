@@ -47,9 +47,9 @@ object ContentNegLogsApp extends App {
   val bindingFuture: Future[ServerBinding] =
     Http().bindAndHandle(api, host, port)
  
-  val log =  Logging(system.eventStream, "get-post-logs")
+  val log =  Logging(system.eventStream, "content-neg-logs")
   bindingFuture.map { serverBinding =>
-    log.info(s"LogStreamProcessorApi bound to ${serverBinding.localAddress} ")
+    log.info(s"Bound to ${serverBinding.localAddress} ")
   }.onFailure { 
     case ex: Exception =>
       log.error(ex, "Failed to bind to {}:{}!", host, port)
