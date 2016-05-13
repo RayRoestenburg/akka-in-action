@@ -24,7 +24,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import spray.json._
 
-object LogJsonBidi extends EventMarshalling {
+object LogJson extends EventMarshalling {
   def textInFlow(maxLine: Int) = {
     Framing.delimiter(ByteString("\n"), maxLine)
     .map(_.decodeString("UTF8"))

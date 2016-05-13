@@ -80,7 +80,7 @@ object LogStreamProcessorApp extends App {
  
   val log =  Logging(system.eventStream, "log-stream-processor")
   bindingFuture.map { serverBinding =>
-    log.info(s"LogStreamProcessorApi bound to ${serverBinding.localAddress} ")
+    log.info(s"Bound to ${serverBinding.localAddress} ")
   }.onFailure { 
     case ex: Exception =>
       log.error(ex, "Failed to bind to {}:{}!", host, port)

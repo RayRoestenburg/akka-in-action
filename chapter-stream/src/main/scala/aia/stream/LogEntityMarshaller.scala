@@ -40,7 +40,7 @@ object LogEntityMarshaller extends EventMarshalling {
 
   def toText(src: Source[ByteString, _], 
              maxJsonObject: Int): Source[ByteString, _] = {
-    src.via(LogJsonBidi.jsonToLogFlow(maxJsonObject)) //<co id="jsonToLogFlow"/>
+    src.via(LogJson.jsonToLogFlow(maxJsonObject)) //<co id="jsonToLogFlow"/>
   }
 }
 //<end id="marshaller"/>
