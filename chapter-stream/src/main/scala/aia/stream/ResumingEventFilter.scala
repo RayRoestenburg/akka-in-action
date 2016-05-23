@@ -23,8 +23,9 @@ object ResumingEventFilter extends App with EventMarshalling {
     System.exit(1)
   }
 
-  val inputFile = Paths.get(args(0).trim)
-  val outputFile = Paths.get(args(1).trim)
+  val inputFile = FileArg.shellExpanded(args(0))
+  val outputFile = FileArg.shellExpanded(args(1))
+
   val filterState = args(2) match {
     case State(state) => state
     case unknown => 
@@ -37,7 +38,7 @@ object ResumingEventFilter extends App with EventMarshalling {
     FileIO.fromPath(inputFile)
 
   val sink: Sink[ByteString, Future[IOResult]] = 
-    FileIO.toPath(outputFile)
+    FileIO.toPath(outputFile, Set(CREATE, WRITE, APPEND))
 
   val frame: Flow[ByteString, String, NotUsed] =  
     Framing.delimiter(ByteString("\n"), maxLine) 
@@ -56,6 +57,7 @@ object ResumingEventFilter extends App with EventMarshalling {
 
   val parse: Flow[String, Event, NotUsed] = 
     Flow[String].map(LogStreamProcessor.parseLineEx) 
+      .collect { case Some(e) => e }
       .withAttributes(ActorAttributes.supervisionStrategy(decider)) //<co id="parse_string_supervise_attributes"/>
   //<end id="resume-parse"/>
 

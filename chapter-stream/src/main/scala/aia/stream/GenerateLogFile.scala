@@ -17,7 +17,7 @@ object GenerateLogFile extends App {
   val filePath = args(0)
   val numberOfLines = args(1).toInt
 
-  val sink = FileIO.toPath(Paths.get(filePath), Set(CREATE, APPEND))
+  val sink = FileIO.toPath(FileArg.shellExpanded(filePath), Set(CREATE, WRITE, APPEND))
   def line(i: Int) = {
     val host = "my-host"
     val service = "my-service"

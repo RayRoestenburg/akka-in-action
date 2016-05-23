@@ -1,7 +1,8 @@
 package aia.stream
 
-import java.io.File
 import java.nio.file._
+import java.nio.file.StandardOpenOption._
+
 import java.time.ZonedDateTime
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
@@ -109,7 +110,7 @@ class LogStreamProcessorSpec extends TestKit(ActorSystem("test-filter"))
       val source = logLines(pathLog)
        
       val results = convertToJsonBytes(errors(parseLogEvents(source)))
-        .toMat(FileIO.toPath(pathEvents))(Keep.right) // so this is a big gotcha for beginners.
+        .toMat(FileIO.toPath(pathEvents, Set(CREATE, WRITE, APPEND)))(Keep.right)
         .run
         .flatMap { r =>
           parseJsonEvents(jsonText(pathEvents))

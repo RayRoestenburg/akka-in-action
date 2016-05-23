@@ -23,9 +23,10 @@ object EventFilter extends App with EventMarshalling {
     System.err.println("Provide args: input-file output-file state")
     System.exit(1)
   }
+  
+  val inputFile = FileArg.shellExpanded(args(0))
+  val outputFile = FileArg.shellExpanded(args(1))
 
-  val inputFile = Paths.get(args(0).trim)
-  val outputFile = Paths.get(args(1).trim)
   val filterState = args(2) match {
     case State(state) => state
     case unknown => 
@@ -38,7 +39,7 @@ object EventFilter extends App with EventMarshalling {
     FileIO.fromPath(inputFile)
 
   val sink: Sink[ByteString, Future[IOResult]] = 
-    FileIO.toPath(outputFile)
+    FileIO.toPath(outputFile, Set(CREATE, WRITE, APPEND))
 
   // not used, just to show alternatively defining the entire flow
   //<start id="event-filter"/>
@@ -46,6 +47,7 @@ object EventFilter extends App with EventMarshalling {
     Framing.delimiter(ByteString("\n"), maxLine) //<co id="event_filter_framing"/>
       .map(_.decodeString("UTF8")) //<co id="event_filter_framing"/>
       .map(LogStreamProcessor.parseLineEx) //<co id="event_filter_parse"/>
+      .collect { case Some(e) => e }
       .filter(_.state == filterState) //<co id="event_filter_filter"/>
       .map(event => ByteString(event.toJson.compactPrint)) //<co id="event_filter_serialize"/>
   //<end id="event-filter"/>
@@ -59,6 +61,7 @@ object EventFilter extends App with EventMarshalling {
   //<start id="parse-flow"/>
   val parse: Flow[String, Event, NotUsed] = 
     Flow[String].map(LogStreamProcessor.parseLineEx) //<co id="parse_string"/>
+      .collect { case Some(e) => e }
   //<end id="parse-flow"/>
 
   //<start id="filter-flow"/>

@@ -1,6 +1,9 @@
 package aia.stream
 
 import java.nio.file.{ Files, Path, Paths }
+import java.nio.file.StandardOpenOption
+import java.nio.file.StandardOpenOption._
+
 import java.time.ZonedDateTime
 
 import scala.concurrent.duration._
@@ -36,6 +39,7 @@ class LogsApi(
   val inFlow = Framing.delimiter(ByteString("\n"), maxLine)
     .map(_.decodeString("UTF8"))
     .map(LogStreamProcessor.parseLineEx)
+    .collect { case Some(e) => e }
 
   val outFlow = Flow[Event].map { event => 
     ByteString(event.toJson.compactPrint)
@@ -45,7 +49,7 @@ class LogsApi(
   //<start id="logs_app_flow"/>
   val logToJsonFlow = bidiFlow.join(Flow[Event]) //<co id="logs_app_join"/>
   
-  def logFileSink(logId: String) = FileIO.toPath(logFile(logId))
+  def logFileSink(logId: String) = FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
   def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
   //<end id="logs_app_flow"/>
 
