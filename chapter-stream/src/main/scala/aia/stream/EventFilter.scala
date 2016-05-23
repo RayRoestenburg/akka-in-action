@@ -61,7 +61,7 @@ object EventFilter extends App with EventMarshalling {
   //<start id="parse-flow"/>
   val parse: Flow[String, Event, NotUsed] = 
     Flow[String].map(LogStreamProcessor.parseLineEx) //<co id="parse_string"/>
-      .collect { case Some(e) => e }
+      .collect { case Some(e) => e } //<co id="collect"/>
   //<end id="parse-flow"/>
 
   //<start id="filter-flow"/>
