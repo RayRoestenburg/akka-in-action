@@ -70,6 +70,35 @@ class FanLogsApi(
   def logStateFile(logId: String, state: State) = 
     logFile(s"$logId-${State.norm(state)}")  
   //<end id="processStates"/>
+
+  //<start id="mergeNotOk"/>
+  import akka.stream.SourceShape
+  import akka.stream.scaladsl.{ GraphDSL, Merge }
+
+  def mergeNotOk(logId: String): Source[ByteString, NotUsed] = {
+    val warning = logFileSource(logId, Warning)
+      .via(LogJson.jsonFramed(maxJsObject))
+    val error = logFileSource(logId, Error)
+      .via(LogJson.jsonFramed(maxJsObject))
+    val critical = logFileSource(logId, Critical)
+      .via(LogJson.jsonFramed(maxJsObject))
+
+    Source.fromGraph( //<co id="fromGraph"/>
+      GraphDSL.create() { implicit builder => 
+      import GraphDSL.Implicits._
+
+      val warningShape = builder.add(warning) 
+      val errorShape = builder.add(error) 
+      val criticalShape = builder.add(critical)
+      val merge = builder.add(Merge[ByteString](3)) 
+
+      warningShape  ~> merge
+      errorShape    ~> merge
+      criticalShape ~> merge
+      SourceShape(merge.out)
+    })
+  }
+  //<end id="mergeNotOk"/>
   
   def logFileSource(logId: String) = FileIO.fromFile(logFile(logId))
   def logFileSink(logId: String) = FileIO.toFile(logFile(logId))
@@ -186,9 +215,12 @@ class FanLogsApi(
       pathEndOrSingleSlash {
         get {
           extractRequest { req => 
-            val sources = getFileSources(logsDir)            
+            val sources = getFileSources(logsDir).map { src =>
+              src.via(LogJson.jsonFramed(maxJsObject)) 
+            }            
             mergeSources(sources) match {
-              case Some(src) => complete(Marshal(src).toResponseFor(req))
+              case Some(src) => 
+              complete(Marshal(src).toResponseFor(req))
               case None => complete(StatusCodes.NotFound)
             }
           }
@@ -203,15 +235,7 @@ class FanLogsApi(
       pathEndOrSingleSlash {
         get {
           extractRequest { req => 
-            val warning = logFileSource(logId, Warning)
-            val error = logFileSource(logId, Error)
-            val critical = logFileSource(logId, Critical)
-            val src = Source.combine(
-              warning, 
-              error, 
-              critical
-            )(Merge(_))
-            complete(Marshal(src).toResponseFor(req))
+            complete(Marshal(mergeNotOk(logId)).toResponseFor(req))
           }
         }
       }

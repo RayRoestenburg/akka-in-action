@@ -36,6 +36,9 @@ object LogJson extends EventMarshalling {
       .map(_.decodeString("UTF8").parseJson.convertTo[Event])
   }
 
+  def jsonFramed(maxJsonObject: Int) =
+    JsonFraming.json(maxJsonObject) 
+
   val jsonOutFlow = Flow[Event].map { event => 
     ByteString(event.toJson.compactPrint)
   }
