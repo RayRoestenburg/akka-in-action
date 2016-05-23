@@ -1,6 +1,6 @@
 package aia.stream
 
-import java.io.File
+import java.nio.file.{ Path, Paths }
 import java.nio.file.StandardOpenOption
 import java.nio.file.StandardOpenOption._
 import java.time.ZonedDateTime
@@ -17,7 +17,7 @@ object GenerateLogFile extends App {
   val filePath = args(0)
   val numberOfLines = args(1).toInt
 
-  val sink = FileIO.toFile(new File(filePath), Set(CREATE, APPEND))
+  val sink = FileIO.toPath(Paths.get(filePath), Set(CREATE, APPEND))
   def line(i: Int) = {
     val host = "my-host"
     val service = "my-service"

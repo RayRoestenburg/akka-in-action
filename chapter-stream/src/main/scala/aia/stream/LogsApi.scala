@@ -1,7 +1,6 @@
 package aia.stream
 
-import java.nio.file.{ Files, Path }
-import java.io.File
+import java.nio.file.{ Files, Path, Paths }
 import java.time.ZonedDateTime
 
 import scala.concurrent.duration._
@@ -30,7 +29,7 @@ class LogsApi(
   implicit val executionContext: ExecutionContext, 
   val materializer: ActorMaterializer
 ) extends EventMarshalling {
-  def logFile(id: String) = new File(logsDir.toFile, id) //<co id="logFile"/>
+  def logFile(id: String) = logsDir.resolve(id) //<co id="logFile"/>
 // route logic follows..
 //<end id="logsApi"/>
   
@@ -46,8 +45,8 @@ class LogsApi(
   //<start id="logs_app_flow"/>
   val logToJsonFlow = bidiFlow.join(Flow[Event]) //<co id="logs_app_join"/>
   
-  def logFileSink(logId: String) = FileIO.toFile(logFile(logId))
-  def logFileSource(logId: String) = FileIO.fromFile(logFile(logId))
+  def logFileSink(logId: String) = FileIO.toPath(logFile(logId))
+  def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
   //<end id="logs_app_flow"/>
 
   //<start id="logRoute"/>
@@ -92,7 +91,7 @@ class LogsApi(
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         get { 
-          if(logFile(logId).exists) {
+          if(Files.exists(logFile(logId))) {
             val src = logFileSource(logId) //<co id="logRouteGetSource"/>
             complete(
               HttpEntity(ContentTypes.`application/json`, src) //<co id="logRouteGetComplete"/>
@@ -109,12 +108,8 @@ class LogsApi(
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         delete {
-          if(logFile(logId).exists) {
-            if(logFile(logId).delete()) complete(StatusCodes.OK)
-            else complete(StatusCodes.InternalServerError)
-          } else {
-            complete(StatusCodes.NotFound)
-          }
+          if(Files.deleteIfExists(logFile(logId))) complete(StatusCodes.OK)
+          else complete(StatusCodes.InternalServerError)
         }
       }
     }
