@@ -27,8 +27,8 @@ object BidiEventFilter extends App with EventMarshalling {
     System.exit(1)
   }
 
-  val inputFile = Paths.get(args(2).trim)
-  val outputFile = Paths.get(args(3).trim)
+  val inputFile = FileArg.shellExpanded(args(2))
+  val outputFile = FileArg.shellExpanded(args(3))
   val filterState = args(4) match {
     case State(state) => state
     case unknown => 
@@ -38,17 +38,18 @@ object BidiEventFilter extends App with EventMarshalling {
 
   //<start id="event-bidi-flow"/>
   val inFlow: Flow[ByteString, Event, NotUsed] = 
-    if(args(0).trim.toLowerCase == "json") {
+    if(args(0).toLowerCase == "json") {
       JsonFraming.json(maxJsonObject) //<co id="json-framing"/>
       .map(_.decodeString("UTF8").parseJson.convertTo[Event])
     } else {
       Framing.delimiter(ByteString("\n"), maxLine)
         .map(_.decodeString("UTF8"))
         .map(LogStreamProcessor.parseLineEx)
+        .collect { case Some(event) => event }
     }
 
   val outFlow: Flow[Event, ByteString, NotUsed] = 
-    if(args(1).trim.toLowerCase == "json") {
+    if(args(1).toLowerCase == "json") {
       Flow[Event].map(event => ByteString(event.toJson.compactPrint))
     } else {
       Flow[Event].map{ event => 
@@ -62,7 +63,7 @@ object BidiEventFilter extends App with EventMarshalling {
     FileIO.fromPath(inputFile)
 
   val sink: Sink[ByteString, Future[IOResult]] = 
-    FileIO.toPath(outputFile)
+    FileIO.toPath(outputFile, Set(CREATE, WRITE, APPEND))
   
   //<start id="event-bidi-filter"/>
   val filter: Flow[Event, Event, NotUsed] =   

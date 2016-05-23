@@ -23,15 +23,15 @@ object StreamingCopy extends App {
     System.exit(1)
   }
 
-  val inputFile = Paths.get(args(0).trim)
-  val outputFile = Paths.get(args(1).trim)
+  val inputFile = FileArg.shellExpanded(args(0))
+  val outputFile = FileArg.shellExpanded(args(1))
 
   //<start id="blueprint"/>
   val source: Source[ByteString, Future[IOResult]] = 
     FileIO.fromPath(inputFile) //<co id="create_source"/>
 
   val sink: Sink[ByteString, Future[IOResult]] = 
-    FileIO.toPath(outputFile) //<co id="create_sink"/>
+    FileIO.toPath(outputFile, Set(CREATE, WRITE, APPEND)) //<co id="create_sink"/>
 
   val runnableGraph: RunnableGraph[Future[IOResult]] = 
     source.to(sink) //<co id="connect_graph"/>

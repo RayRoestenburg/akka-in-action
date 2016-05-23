@@ -29,6 +29,7 @@ object LogJson extends EventMarshalling {
     Framing.delimiter(ByteString("\n"), maxLine)
     .map(_.decodeString("UTF8"))
     .map(LogStreamProcessor.parseLineEx)
+    .collect { case Some(e) => e }
   }
 
   def jsonInFlow(maxJsonObject: Int) = {

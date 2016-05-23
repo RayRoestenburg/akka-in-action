@@ -38,6 +38,7 @@ object LogStreamProcessor extends EventMarshalling {
    */
   def parseLogEvents[T](source: Source[String, T]): Source[Event, T] = 
     source.map(parseLineEx)
+      .collect{ case Some(e) => e }
   
   /** 
    * Returns a source which only includes error events.
@@ -90,22 +91,24 @@ object LogStreamProcessor extends EventMarshalling {
   /** 
    * parses text log line into an Event
    */
-  def parseLineEx(line: String): Event = {
-    line.split("\\|") match {
-      case Array(host, service, state, time, desc) => //, tag, metric) =>
-        Event(
-          host.trim, 
-          service.trim,
-          state.trim match {
-            case State(s) => s
-            case _        => throw new Exception(s"Unexpected state: $line")
-          }, 
-          ZonedDateTime.parse(time.trim), 
-          desc.trim
-        ) 
-      case x => 
-        throw new LogParseException(s"Failed on line: $line")
-    }
+  def parseLineEx(line: String): Option[Event] = {
+    if(!line.isEmpty) {
+      line.split("\\|") match {
+        case Array(host, service, state, time, desc) => //, tag, metric) =>
+          Some(Event(
+            host.trim, 
+            service.trim,
+            state.trim match {
+              case State(s) => s
+              case _        => throw new Exception(s"Unexpected state: $line")
+            }, 
+            ZonedDateTime.parse(time.trim), 
+            desc.trim
+          )) 
+        case x => 
+          throw new LogParseException(s"Failed on line: $line")
+      }
+    } else None
   }
 
   def logLine(event: Event) = {

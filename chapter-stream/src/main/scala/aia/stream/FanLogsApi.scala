@@ -1,7 +1,9 @@
 package aia.stream
 
 import java.nio.file.{ Files, Path, Paths }
-import java.io.File
+import java.nio.file.StandardOpenOption
+import java.nio.file.StandardOpenOption._
+
 import java.time.ZonedDateTime
 
 import scala.concurrent.duration._
@@ -66,7 +68,7 @@ class FanLogsApi(
   def logFileSource(logId: String, state: State) = 
     FileIO.fromPath(logStateFile(logId, state))
   def logFileSink(logId: String, state: State) = 
-    FileIO.toPath(logStateFile(logId, state))
+    FileIO.toPath(logStateFile(logId, state), Set(CREATE, WRITE, APPEND))
   def logStateFile(logId: String, state: State) = 
     logFile(s"$logId-${State.norm(state)}")  
   //<end id="processStates"/>
@@ -101,7 +103,7 @@ class FanLogsApi(
   //<end id="mergeNotOk"/>
   
   def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
-  def logFileSink(logId: String) = FileIO.toPath(logFile(logId))
+  def logFileSink(logId: String) = FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
   def routes: Route = 
     getLogsRoute ~  
     getLogNotOkRoute ~ 

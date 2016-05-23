@@ -1,6 +1,9 @@
 package aia.stream
 
 import java.nio.file.{ Files, Path, Paths }
+import java.nio.file.StandardOpenOption
+import java.nio.file.StandardOpenOption._
+
 import java.time.ZonedDateTime
 
 import scala.concurrent.duration._
@@ -36,8 +39,10 @@ class ContentNegLogsApi(
     ByteString(event.toJson.compactPrint)
   }
   
-  def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
-  def logFileSink(logId: String) = FileIO.toPath(logFile(logId))
+  def logFileSource(logId: String) = 
+    FileIO.fromPath(logFile(logId))
+  def logFileSink(logId: String) = 
+    FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
 
   def routes: Route = postRoute ~ getRoute ~ deleteRoute
   
