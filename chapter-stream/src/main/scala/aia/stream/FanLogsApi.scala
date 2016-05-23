@@ -97,7 +97,7 @@ class FanLogsApi(
       warningShape  ~> merge
       errorShape    ~> merge
       criticalShape ~> merge
-      SourceShape(merge.out)
+      SourceShape(merge.out) //<co id="sourceShape"/>
     })
   }
   //<end id="mergeNotOk"/>
@@ -189,15 +189,17 @@ class FanLogsApi(
   //<start id="mergeSources"/>
   import akka.stream.scaladsl.Merge
 
-  def mergeSources[E](sources: Vector[Source[E, _]]): Option[Source[E, _]] = {
+  def mergeSources[E](
+    sources: Vector[Source[E, _]] //<co id="sources_arg"/>
+  ): Option[Source[E, _]] = { //<co id="option_res"/>
     if(sources.size ==0) None
     else if(sources.size == 1) Some(sources(0))
     else {
-      Some(Source.combine(
+      Some(Source.combine( //<co id="simpler_api"/>
         sources(0), 
         sources(1), 
         sources.drop(2) : _*
-      )(Merge(_)))
+      )(Merge(_))) //<co id="simpler_api_fan_in"/>
     }
   } 
   //<end id="mergeSources"/>
@@ -217,13 +219,14 @@ class FanLogsApi(
       pathEndOrSingleSlash {
         get {
           extractRequest { req => 
-            val sources = getFileSources(logsDir).map { src =>
-              src.via(LogJson.jsonFramed(maxJsObject)) 
+            val sources = getFileSources(logsDir).map { src => //<co id="getFileSources"/>
+              src.via(LogJson.jsonFramed(maxJsObject)) //<co id="jsonFramed"/>
             }            
-            mergeSources(sources) match {
+            mergeSources(sources) match { //<co id="merge"/>
               case Some(src) => 
-              complete(Marshal(src).toResponseFor(req))
-              case None => complete(StatusCodes.NotFound)
+                complete(Marshal(src).toResponseFor(req))
+              case None => 
+                complete(StatusCodes.NotFound)
             }
           }
         }
