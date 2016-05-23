@@ -1,7 +1,6 @@
 package aia.stream
 
-import java.nio.file.{ Files, Path }
-import java.io.File
+import java.nio.file.{ Files, Path, Paths }
 import java.time.ZonedDateTime
 
 import scala.concurrent.duration._
@@ -31,14 +30,14 @@ class ContentNegLogsApi(
   implicit val executionContext: ExecutionContext, 
   val materializer: ActorMaterializer
 ) extends EventMarshalling {
-  def logFile(id: String) = new File(logsDir.toFile, id) //<co id="logFile"/>
+  def logFile(id: String) = logsDir.resolve(id) //<co id="logFile"/>
   
   val outFlow = Flow[Event].map { event => 
     ByteString(event.toJson.compactPrint)
   }
   
-  def logFileSource(logId: String) = FileIO.fromFile(logFile(logId))
-  def logFileSink(logId: String) = FileIO.toFile(logFile(logId))
+  def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
+  def logFileSink(logId: String) = FileIO.toPath(logFile(logId))
 
   def routes: Route = postRoute ~ getRoute ~ deleteRoute
   
@@ -83,7 +82,7 @@ class ContentNegLogsApi(
       pathEndOrSingleSlash {
         get { 
           extractRequest { req => //<co id="extract_request"/>
-            if(logFile(logId).exists) {
+            if(Files.exists(logFile(logId))) {
               val src = logFileSource(logId) 
               complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
             } else {
@@ -99,9 +98,8 @@ class ContentNegLogsApi(
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         delete {
-          if(logFile(logId).exists) {
-            if(logFile(logId).delete()) complete(StatusCodes.OK)
-            else complete(StatusCodes.InternalServerError)
+          if(Files.deleteIfExists(logFile(logId))) {
+            complete(StatusCodes.OK)
           } else {
             complete(StatusCodes.NotFound)
           }

@@ -1,6 +1,7 @@
 package aia.stream
 
-import java.io.File
+import java.nio.file.Path
+
 import java.time.ZonedDateTime
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
@@ -17,8 +18,8 @@ object LogStreamProcessor extends EventMarshalling {
   /** 
    * Returns a Source of log lines from File.
    */
-  def logLines(file: File): Source[String, Future[IOResult]] =
-    delimitedText(FileIO.fromFile(file), 1024 * 1024)
+  def logLines(path: Path): Source[String, Future[IOResult]] =
+    delimitedText(FileIO.fromPath(path), 1024 * 1024)
   
   /** 
    * Converts (previously framed) ByteStrings to String.
@@ -71,8 +72,8 @@ object LogStreamProcessor extends EventMarshalling {
   /** 
    * Returns a Source of ByteStrings containing JSON text from  file.
    */
-  def jsonText(file: File): Source[String, Future[IOResult]] =
-    jsonText(FileIO.fromFile(file), 1024 * 1024)
+  def jsonText(path: Path): Source[String, Future[IOResult]] =
+    jsonText(FileIO.fromPath(path), 1024 * 1024)
 
   /** 
    * Returns a Source of JSON Strings from a Source of chunked ByteStrings.
@@ -112,33 +113,4 @@ object LogStreamProcessor extends EventMarshalling {
   }
   
   case class LogParseException(msg:String) extends Exception(msg)
-
-  /**
-   * Adds ops to ByteString Source for convenient log stream processing.
-   */
-  implicit class ByteStringSourceOps[Mat](source: Source[ByteString, Mat]) {
-    def delimitedText(maxLine: Int): Source[String, Mat] = LogStreamProcessor.delimitedText[Mat](source, maxLine)
-    def jsonText(maxObject: Int): Source[String, Mat] = LogStreamProcessor.jsonText[Mat](source, maxObject)
-  }
-  
-  implicit class StringSourceOps[Mat](source: Source[String, Mat]) {
-    def parseLogEvents: Source[Event, Mat] = LogStreamProcessor.parseLogEvents(source)
-    def parseJsonEvents: Source[Event, Mat] = LogStreamProcessor.parseJsonEvents(source)
-  }
-
-  /**
-   * Adds ops to Event Source for convenient log stream processing.
-   */
-  implicit class EventSourceOps[Mat](source: Source[Event, Mat]) {
-    def errors: Source[Event, Mat] = 
-      source.filter(_.state == Error)
-
-    def rollup(predicate: Event => Boolean,
-               nrEvents: Int, 
-               duration: FiniteDuration): Source[Seq[Event], Mat] = 
-      source.filter(predicate).groupedWithin(nrEvents, duration)
-    
-    def convertToJsonBytes: Source[ByteString, Mat] = 
-      LogStreamProcessor.convertToJsonBytes(source) 
-  }
 }

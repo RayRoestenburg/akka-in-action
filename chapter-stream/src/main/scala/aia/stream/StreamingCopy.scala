@@ -1,7 +1,7 @@
 package aia.stream
 
 
-import java.io.File
+import java.nio.file.{ Path, Paths }
 import java.nio.file.StandardOpenOption
 import java.nio.file.StandardOpenOption._
 import scala.concurrent.Future
@@ -23,15 +23,15 @@ object StreamingCopy extends App {
     System.exit(1)
   }
 
-  val inputFile = new File(args(0).trim)
-  val outputFile = new File(args(1).trim)
+  val inputFile = Paths.get(args(0).trim)
+  val outputFile = Paths.get(args(1).trim)
 
   //<start id="blueprint"/>
   val source: Source[ByteString, Future[IOResult]] = 
-    FileIO.fromFile(inputFile) //<co id="create_source"/>
+    FileIO.fromPath(inputFile) //<co id="create_source"/>
 
   val sink: Sink[ByteString, Future[IOResult]] = 
-    FileIO.toFile(outputFile) //<co id="create_sink"/>
+    FileIO.toPath(outputFile) //<co id="create_sink"/>
 
   val runnableGraph: RunnableGraph[Future[IOResult]] = 
     source.to(sink) //<co id="connect_graph"/>

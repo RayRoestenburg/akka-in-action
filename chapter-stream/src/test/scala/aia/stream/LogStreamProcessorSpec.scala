@@ -34,7 +34,7 @@ class LogStreamProcessorSpec extends TestKit(ActorSystem("test-filter"))
        import LogStreamProcessor._
        
        val source: Source[String, Future[IOResult]] = 
-        logLines(path.toFile)
+        logLines(path)
        
        val eventsSource: Source[Event, Future[IOResult]] = 
          errors(parseLogEvents(source))
@@ -88,7 +88,7 @@ class LogStreamProcessorSpec extends TestKit(ActorSystem("test-filter"))
       Files.write(path, bytes, StandardOpenOption.APPEND)
 
       import LogStreamProcessor._
-      val source = jsonText(path.toFile)
+      val source = jsonText(path)
 
       val results = errors(parseJsonEvents(source)).runWith(Sink.seq[Event])
       Await.result(results, 10 seconds) must be(
@@ -106,13 +106,13 @@ class LogStreamProcessorSpec extends TestKit(ActorSystem("test-filter"))
       Files.write(pathLog, bytes, StandardOpenOption.APPEND)
 
       import LogStreamProcessor._
-      val source = logLines(pathLog.toFile)
+      val source = logLines(pathLog)
        
       val results = convertToJsonBytes(errors(parseLogEvents(source)))
-        .toMat(FileIO.toFile(pathEvents.toFile))(Keep.right) // so this is a big gotcha for beginners.
+        .toMat(FileIO.toPath(pathEvents))(Keep.right) // so this is a big gotcha for beginners.
         .run
         .flatMap { r =>
-          parseJsonEvents(jsonText(pathEvents.toFile))
+          parseJsonEvents(jsonText(pathEvents))
           .runWith(Sink.seq[Event])
         }
       Await.result(results, 10 seconds) must be(
@@ -135,7 +135,7 @@ class LogStreamProcessorSpec extends TestKit(ActorSystem("test-filter"))
 
       val source = Source[Event](Vector(mkEvent, mkEvent, mkEvent, mkEvent))
        
-      val results = rollup(source, e => e.state == Error, 3, 10 seconds)
+      val results = LogStreamProcessor.rollup(source, e => e.state == Error, 3, 10 seconds)
         .runWith(Sink.seq[Seq[Event]])
 
       val grouped = Await.result(results, 10 seconds)
@@ -150,7 +150,7 @@ class LogStreamProcessorSpec extends TestKit(ActorSystem("test-filter"))
 
       val source = Source[Event](Vector(mkEvent, mkEvent, mkEvent, mkEvent))
        
-      val results = source.rollup(e => e.state == Error, 3, 10 seconds)
+      val results = LogStreamProcessor.rollup(source, e => e.state == Error, 3, 10 seconds)
         .runWith(Sink.seq[Seq[Event]])
 
       val grouped = Await.result(results, 10 seconds)

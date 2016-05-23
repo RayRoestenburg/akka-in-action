@@ -1,6 +1,6 @@
 package aia.stream
 
-import java.nio.file.{ Files, Path }
+import java.nio.file.{ Files, Path, Paths }
 import java.io.File
 import java.time.ZonedDateTime
 
@@ -31,7 +31,7 @@ class FanLogsApi(
   implicit val executionContext: ExecutionContext, 
   val materializer: ActorMaterializer
 ) extends EventMarshalling {
-  def logFile(id: String) = new File(logsDir.toFile, id) //<co id="logFile"/>
+  def logFile(id: String) = logsDir.resolve(id) //<co id="logFile"/>
 
   //<start id="processStates"/>
   import akka.stream.{ FlowShape, Graph } 
@@ -64,9 +64,9 @@ class FanLogsApi(
   }
 
   def logFileSource(logId: String, state: State) = 
-    FileIO.fromFile(logStateFile(logId, state))
+    FileIO.fromPath(logStateFile(logId, state))
   def logFileSink(logId: String, state: State) = 
-    FileIO.toFile(logStateFile(logId, state))
+    FileIO.toPath(logStateFile(logId, state))
   def logStateFile(logId: String, state: State) = 
     logFile(s"$logId-${State.norm(state)}")  
   //<end id="processStates"/>
@@ -100,8 +100,8 @@ class FanLogsApi(
   }
   //<end id="mergeNotOk"/>
   
-  def logFileSource(logId: String) = FileIO.fromFile(logFile(logId))
-  def logFileSink(logId: String) = FileIO.toFile(logFile(logId))
+  def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
+  def logFileSink(logId: String) = FileIO.toPath(logFile(logId))
   def routes: Route = 
     getLogsRoute ~  
     getLogNotOkRoute ~ 
@@ -150,7 +150,7 @@ class FanLogsApi(
       pathEndOrSingleSlash {
         get { 
           extractRequest { req => //<co id="extract_request"/>
-            if(logFile(logId).exists) {
+            if(Files.exists(logFile(logId))) {
               val src = logFileSource(logId) 
               complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
             } else {
@@ -172,7 +172,7 @@ class FanLogsApi(
       pathEndOrSingleSlash {
         get { 
           extractRequest { req => //<co id="extract_request"/>
-            if(logStateFile(logId, state).exists) {
+            if(Files.exists(logStateFile(logId, state))) {
               val src = logFileSource(logId, state) 
               complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
             } else {
@@ -205,7 +205,7 @@ class FanLogsApi(
     try {
       import scala.collection.JavaConverters._
       val paths = dirStream.iterator.asScala.toVector
-      paths.map(path => FileIO.fromFile(path.toFile)).toVector
+      paths.map(path => FileIO.fromPath(path)).toVector
     } finally dirStream.close
   }
 
@@ -246,9 +246,8 @@ class FanLogsApi(
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         delete {
-          if(logFile(logId).exists) {
-            if(logFile(logId).delete()) complete(StatusCodes.OK)
-            else complete(StatusCodes.InternalServerError)
+          if(Files.deleteIfExists(logFile(logId))) {
+            complete(StatusCodes.OK)
           } else {
             complete(StatusCodes.NotFound)
           }

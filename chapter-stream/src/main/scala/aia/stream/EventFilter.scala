@@ -1,6 +1,6 @@
 package aia.stream
 
-import java.io.File
+import java.nio.file.{ Path, Paths }
 import java.nio.file.StandardOpenOption
 import java.nio.file.StandardOpenOption._
 
@@ -24,8 +24,8 @@ object EventFilter extends App with EventMarshalling {
     System.exit(1)
   }
 
-  val inputFile = new File(args(0).trim)
-  val outputFile = new File(args(1).trim)
+  val inputFile = Paths.get(args(0).trim)
+  val outputFile = Paths.get(args(1).trim)
   val filterState = args(2) match {
     case State(state) => state
     case unknown => 
@@ -35,10 +35,10 @@ object EventFilter extends App with EventMarshalling {
   import akka.stream.scaladsl._
 
   val source: Source[ByteString, Future[IOResult]] = 
-    FileIO.fromFile(inputFile)
+    FileIO.fromPath(inputFile)
 
   val sink: Sink[ByteString, Future[IOResult]] = 
-    FileIO.toFile(outputFile)
+    FileIO.toPath(outputFile)
 
   // not used, just to show alternatively defining the entire flow
   //<start id="event-filter"/>
