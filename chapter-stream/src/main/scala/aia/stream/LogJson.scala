@@ -24,7 +24,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import spray.json._
 
-object LogJson extends EventMarshalling {
+object LogJson extends EventMarshalling 
+    with NotificationMarshalling 
+    with MetricMarshalling {
   def textInFlow(maxLine: Int) = {
     Framing.delimiter(ByteString("\n"), maxLine)
     .map(_.decodeString("UTF8"))
@@ -42,6 +44,14 @@ object LogJson extends EventMarshalling {
 
   val jsonOutFlow = Flow[Event].map { event => 
     ByteString(event.toJson.compactPrint)
+  }
+
+  val notifyOutFlow = Flow[Summary].map { ws => 
+    ByteString(ws.toJson.compactPrint)
+  }
+
+  val metricOutFlow = Flow[Metric].map { m => 
+    ByteString(m.toJson.compactPrint)
   }
 
   val textOutFlow = Flow[Event].map{ event => 

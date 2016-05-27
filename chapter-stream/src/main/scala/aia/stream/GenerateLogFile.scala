@@ -16,7 +16,7 @@ import akka.util.ByteString
 object GenerateLogFile extends App {
   val filePath = args(0)
   val numberOfLines = args(1).toInt
-
+  val rnd = new java.util.Random()
   val sink = FileIO.toPath(FileArg.shellExpanded(filePath), Set(CREATE, WRITE, APPEND))
   def line(i: Int) = {
     val host = "my-host"
@@ -27,7 +27,9 @@ object GenerateLogFile extends App {
       else if(i % 1002 == 0) "critical"
       else "ok"
     val description = "Some description of what has happened."
-    s"$host | $service | $state | $time | $description\n"
+    val tag = "tag"
+    val metric = rnd.nextDouble() * 100
+    s"$host | $service | $state | $time | $description | $tag | $metric \n"
   }
 
   val graph = Source.fromIterator{() => 

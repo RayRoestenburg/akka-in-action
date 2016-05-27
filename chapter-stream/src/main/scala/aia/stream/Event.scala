@@ -16,7 +16,9 @@ case class Event(
   service: String,
   state: State,
   time: ZonedDateTime,
-  description: String
+  description: String,
+  tag: Option[String] = None, 
+  metric: Option[Double] = None
 )
 //<end id="event"/>
 

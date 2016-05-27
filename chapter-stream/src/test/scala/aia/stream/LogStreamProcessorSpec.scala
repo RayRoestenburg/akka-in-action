@@ -19,10 +19,10 @@ class LogStreamProcessorSpec extends TestKit(ActorSystem("test-filter"))
   with StopSystemAfterAll {
 
    val lines = 
-   "my-host-1  | web-app | ok       | 2015-08-12T12:12:00.127Z | 5 tickets sold to RHCP.\n" +
-   "my-host-2  | web-app | ok       | 2015-08-12T12:12:01.127Z | 3 tickets sold to RHCP.\n" +
-   "my-host-3  | web-app | ok       | 2015-08-12T12:12:02.127Z | 1 tickets sold to RHCP.\n" +
-   "my-host-3  | web-app | error    | 2015-08-12T12:12:03.127Z | exception occurred...\n"
+   "my-host-1  | web-app | ok       | 2015-08-12T12:12:00.127Z | 5 tickets sold to RHCP.||\n" +
+   "my-host-2  | web-app | ok       | 2015-08-12T12:12:01.127Z | 3 tickets sold to RHCP.| | \n" +
+   "my-host-3  | web-app | ok       | 2015-08-12T12:12:02.127Z | 1 tickets sold to RHCP.| | \n" +
+   "my-host-3  | web-app | error    | 2015-08-12T12:12:03.127Z | exception occurred...| | \n"
 
   "A log stream processor" must {
     "be able to read a log file and parse events" in {

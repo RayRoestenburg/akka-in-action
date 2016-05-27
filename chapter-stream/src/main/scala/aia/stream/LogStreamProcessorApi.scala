@@ -1,283 +1,348 @@
-// package aia.stream
+package aia.stream
 
-// import java.nio.file.{ Files, Path }
-// import java.io.File
-// import java.time.ZonedDateTime
+import java.nio.file.{ Files, Path, Paths }
+import java.nio.file.StandardOpenOption
+import java.nio.file.StandardOpenOption._
 
-// import scala.concurrent.duration._
-// import scala.concurrent.ExecutionContext
-// import scala.concurrent.Future
-// import scala.util.{ Success, Failure}
+import java.time.ZonedDateTime
 
-// import akka.actor._
-// import akka.util.ByteString
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
+import scala.util.{ Success, Failure }
 
-// import akka.stream.{ ActorMaterializer, IOResult }
-// import akka.stream.scaladsl.{ FileIO, Flow, Keep, Merge, Sink, Source }
+import akka.{ Done, NotUsed }
+import akka.actor._
+import akka.util.ByteString
 
-// import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-// import akka.http.scaladsl.model._
-// import akka.http.scaladsl.server.Directives._
-// import akka.http.scaladsl.server._
+import akka.stream.{ ActorAttributes, ActorMaterializer, IOResult }
+import akka.stream.scaladsl.{ FileIO, BidiFlow, Flow, Framing, Keep, Sink, Source }
 
-// import spray.json._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.marshalling.Marshal
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server._
+import spray.json._
 
-// class LogStreamProcessorApi(
-//     val processFlow: Flow[Event, Event, _],
-//     val notificationsDir: Path, 
-//     val logsDir: Path, 
-//     val maxLine: Int, 
-//     val maxJsonObject: Int)(implicit system: ActorSystem)
-//     extends LogStreamProcessorRoutes {
-//   implicit val executionContext = system.dispatcher
-//   implicit val materializer = ActorMaterializer()
-// }
-
-// trait LogStreamProcessorRoutes extends EventMarshalling {
-//   import LogStreamProcessor._
-
-//   implicit def executionContext: ExecutionContext
-//   implicit def materializer: ActorMaterializer
-//   def notificationsDir: Path
-//   def logsDir: Path
-//   def maxLine: Int
-//   def maxJsonObject: Int
-//   def processFlow: Flow[Event, Event, _]
-
-//   def routes: Route = notificationsRoute ~ 
-//                       logsRoute ~ 
-//                       logErrors ~ 
-//                       logNotOk ~ 
-//                       logRoute 
-
-//   def notificationsRoute =
-//     pathPrefix("notifications") {
-//       pathEndOrSingleSlash {
-//         get {
-//           completeFromSource(FileIO.fromPath(notificationsFile))
-//         }
-//       }
-//     }
-
-//   def completeFromSource[T](source: Source[ByteString, T]) = 
-//     complete(HttpEntity(ContentTypes.`application/json`, source))
-
-//   def logsRoute =
-//     pathPrefix("logs") {
-//       pathEndOrSingleSlash {
-//         get {
-//           val sources = getFileSources(logsDir)            
-//           mergeSources(sources) match {
-//             case Some(source) => completeFromSource(source)
-//             case None => complete(StatusCodes.NotFound)
-//           }
-//         }
-//       }
-//     }
-
-//   def logErrors =     
-//     pathPrefix("logs" / "errors") {
-//       pathEndOrSingleSlash {
-//         get {
-//           val sources = getFileSources(logsDir).map { source =>
-//             source.jsonText(maxJsonObject)
-//               .parseJsonEvents
-//               .errors
-//               .convertToJsonBytes             
-//           }
-//           mergeSources(sources) match {
-//             case Some(source) => completeFromSource(source)
-//             case None => complete(StatusCodes.NotFound)
-//           }
-//         }
-//       }
-//     } 
-
-//   def logNotOk =     
-//     pathPrefix("logs" / "not-ok") {
-//       pathEndOrSingleSlash {
-//         get {
-//           val sources = getFileSources(logsDir).map { source =>
-//             source.jsonText(maxJsonObject)
-//               .parseJsonEvents
-//               .filter(_.state != Ok)
-//               .convertToJsonBytes             
-//           }
-//           mergeSources(sources) match {
-//             case Some(source) => completeFromSource(source)
-//             case None => complete(StatusCodes.NotFound)
-//           }
-//         }
-//       }
-//     } 
-
-//   def logRoute =
-//     pathPrefix("logs" / Segment) { logId =>
-//       pathEndOrSingleSlash {
-//         post {
-//           extractInFlow2(logId)
-//         } ~
-//         get {
-//           if(logFile(logId).exists) {
-//             negotiatedEntity(logId)
-//           } else {
-//             complete(StatusCodes.NotFound)
-//           }
-//         } ~
-//         delete {
-//           if(logFile(logId).exists) {
-//             if(logFile(logId).delete()) complete(StatusCodes.OK)
-//             else complete(StatusCodes.InternalServerError)
-//           } else {
-//             complete(StatusCodes.NotFound)
-//           }
-//         }
-//       }
-//     }
-
-//   import akka.NotUsed
-//   import akka.stream.scaladsl.Framing
-//   import akka.stream.io.JsonFraming
-//   import spray.json._
-//   import akka.http.scaladsl.model.HttpCharsets._
-//   import akka.http.scaladsl.model.MediaTypes._
-//   import akka.http.scaladsl.model.headers.Accept
-//   import akka.http.scaladsl.marshalling._
-
-//   sealed trait LogType
-//   case object TextLog extends LogType
-//   case object JsonLog extends LogType
+class LogStreamProcessorApi(
+  val logsDir: Path, 
+  val notificationsDir: Path, 
+  val metricsDir: Path, 
+  val maxLine: Int,
+  val maxJsObject: Int
+)(
+  implicit val executionContext: ExecutionContext, 
+  val materializer: ActorMaterializer
+) extends EventMarshalling {
+  def logFile(id: String) = logsDir.resolve(id) //<co id="logFile"/>
   
-//   implicit val marshallers: ToEntityMarshaller[Source[ByteString, _]] = {
-//     val js = ContentTypes.`application/json`
-//     val txt = ContentTypes.`text/plain(UTF-8)`
-//     val jsMarshaller = Marshaller.withFixedContentType(js) { src:Source[ByteString, _] ⇒
-//       HttpEntity(js, src)
-//     }
+  // this is just for testing, 
+  // in a realistice application this would be a Sink to some other
+  // service, for instance a Kafka Sink, or an email service.
+  val notificationSink = FileIO.toPath(notificationsDir.resolve("notifications.json"), Set(CREATE, WRITE, APPEND))
+  val metricsSink = FileIO.toPath(metricsDir.resolve("metrics.json"), Set(CREATE, WRITE, APPEND))
 
-//     def toText(src: Source[ByteString, _]): Source[ByteString, _] = 
-//       src.via(
-//         JsonFraming.json(maxJsonObject)
-//           .map { 
-//             _.decodeString("UTF8")
-//             .parseJson
-//             .convertTo[Event]
-//           }
-//           .map{ event => 
-//             ByteString(LogStreamProcessor.logLine(event))
-//           }
-//       )
-
-//     val txtMarshaller = Marshaller.withFixedContentType(txt) { src:Source[ByteString, _] ⇒ 
-//       HttpEntity(txt, toText(src))
-//     }
-
-//     Marshaller.oneOf(jsMarshaller, txtMarshaller)
-//   }
-
-//   def negotiatedEntity(logId: String) = 
-//     extractRequest { req =>
-//       val src = FileIO.fromPath(logFile(logId)) 
-//       complete(Marshal(src).toResponseFor(req))
-//     }
-
-//   def extractContentType: Directive1[ContentType] = 
-//     extractRequest.flatMap { request => 
-//       provide(request.entity.contentType)
-//     }
+  //<start id="processEvents"/>
+  import akka.stream.{ FlowShape, Graph, OverflowStrategy } 
+  import akka.stream.scaladsl.{ Broadcast, GraphDSL, MergePreferred, RunnableGraph }
   
-//   import akka.http.scaladsl.unmarshalling._
-//   import akka.http.scaladsl.unmarshalling.Unmarshaller._
-//   import akka.stream.Materializer
+  type FlowLike = Graph[FlowShape[Event, ByteString], NotUsed]
+
+  def processEvents(logId: String): FlowLike = { 
+    val jsFlow = LogJson.jsonOutFlow
+    val notifyOutFlow = LogJson.notifyOutFlow
+    val metricOutFlow = LogJson.metricOutFlow
+
+    Flow.fromGraph( 
+      GraphDSL.create() { implicit builder => 
+      import GraphDSL.Implicits._ 
+
+      val nrWarnings = 100
+      val nrErrors = 10
+      val archBufSize = 100000
+      val warnBufSize = 100
+      val errBufSize = 1000
+      val errDuration = 10 seconds
+      val warnDuration = 1 minute
+      //<start id="metricFlow"/>
+      val toMetric = Flow[Event].collect { //<co id="to_metric"/>
+        case Event(_, service, _, time, _, Some(tag), Some(metric)) =>
+          Metric(service, time, metric, tag) 
+      }
+      //<end id="metricFlow"/>
+
+      //<start id="drift"/>
+      val recordDrift = Flow[Metric] //<co id="drift"/>
+        .expand { metric => 
+          Iterator.from(0).map(d => metric.copy(drift = d))
+        }
+      //<end id="drift"/>
+
+      //<start id="buildFlow"/>
+      val bcast = builder.add(Broadcast[Event](5))  
+      val wbcast = builder.add(Broadcast[Event](2)) //<co id="wbbcast"/>
+      val ebcast = builder.add(Broadcast[Event](2)) //<co id="ebbcast"/>
+      val cbcast = builder.add(Broadcast[Event](2)) //<co id="cbbcast"/>
+      val okcast = builder.add(Broadcast[Event](2)) //<co id="okbcast"/>
+
+      val mergeNotify = builder.add(MergePreferred[Summary](2)) //<co id="mergePref"/>
+      val archive = builder.add(jsFlow) //<co id="archiveFlow"/>
+      //<end id="buildFlow"/>
+
+      //<start id="critError"/>
+      val toNot = Flow[Event].map(e=> Summary(Vector(e)))
+      //<end id="critError"/>
+
+      val ok = Flow[Event].filter(_.state == Ok) 
+      val warning = Flow[Event].filter(_.state == Warning)
+      val error = Flow[Event].filter(_.state == Error)
+      val critical = Flow[Event].filter(_.state == Critical)
+
+      //<start id="rollup"/>
+      def rollup(nr: Int, duration: FiniteDuration) = //<co id="rollup"/>
+        Flow[Event].groupedWithin(nr, duration)
+          .map(events => Summary(events.toVector))
+
+      val rollupErr = rollup(nrErrors, errDuration)    
+      val rollupWarn = rollup(nrWarnings, warnDuration)    
+      //<end id="rollup"/>
+
+      //<start id="buffers"/>
+      val archBuf = Flow[Event]
+        .buffer(archBufSize, OverflowStrategy.fail) //<co id="archBuf"/>
+
+      val warnBuf = Flow[Event]
+        .buffer(warnBufSize, OverflowStrategy.dropHead) //<co id="warnBuf"/>
+      
+      val errBuf = Flow[Event]
+        .buffer(errBufSize, OverflowStrategy.backpressure) //<co id="errBuf"/>
+
+      val metricBuf = Flow[Event]
+        .buffer(errBufSize, OverflowStrategy.dropHead) //<co id="metricBuf"/>
+      //<end id="buffers"/>
+
+      //<start id="connectFlow"/>
+      bcast ~> archBuf  ~> archive.in //<co id="main_bcast"/>
+      bcast ~> ok       ~> okcast
+      bcast ~> warning  ~> wbcast
+      bcast ~> error    ~> ebcast
+      bcast ~> critical ~> cbcast
+
+      okcast ~> jsFlow ~> logFileSink(logId, Ok) 
+      okcast ~> metricBuf ~> 
+        toMetric ~> recordDrift ~> metricOutFlow ~> metricsSink //<co id="metrics_flow"/>
+
+      cbcast ~> jsFlow ~> logFileSink(logId, Critical)
+      cbcast ~> toNot ~> mergeNotify.preferred //<co id="notifications_flow_pref"/>
+
+      ebcast ~> jsFlow ~> logFileSink(logId, Error)
+      ebcast ~> errBuf ~> rollupErr ~> mergeNotify.in(0) //<co id="notifications_flow_error"/>
+
+      wbcast ~> jsFlow ~> logFileSink(logId, Warning)
+      wbcast ~> warnBuf ~> rollupWarn ~> mergeNotify.in(1) //<co id="notifications_flow_warn"/>
+      
+      mergeNotify ~> notifyOutFlow ~> notificationSink 
+
+      FlowShape(bcast.in, archive.out)
+      //<end id="connectFlow"/>
+    })
+  }
+  //<end id="processEvents"/>
+
+
+  def logFileSource(logId: String, state: State) = 
+    FileIO.fromPath(logStateFile(logId, state))
+  def logFileSink(logId: String, state: State) = 
+    FileIO.toPath(logStateFile(logId, state), Set(CREATE, WRITE, APPEND))
+  def logStateFile(logId: String, state: State) = 
+    logFile(s"$logId-${State.norm(state)}")  
+
+  //<start id="mergeNotOk"/>
+  import akka.stream.SourceShape
+  import akka.stream.scaladsl.{ GraphDSL, Merge }
+
+  def mergeNotOk(logId: String): Source[ByteString, NotUsed] = {
+    val warning = logFileSource(logId, Warning)
+      .via(LogJson.jsonFramed(maxJsObject))
+    val error = logFileSource(logId, Error)
+      .via(LogJson.jsonFramed(maxJsObject))
+    val critical = logFileSource(logId, Critical)
+      .via(LogJson.jsonFramed(maxJsObject))
+
+    Source.fromGraph( //<co id="fromGraph"/>
+      GraphDSL.create() { implicit builder => 
+      import GraphDSL.Implicits._
+
+      val warningShape = builder.add(warning) 
+      val errorShape = builder.add(error) 
+      val criticalShape = builder.add(critical)
+      val merge = builder.add(Merge[ByteString](3)) 
+
+      warningShape  ~> merge
+      errorShape    ~> merge
+      criticalShape ~> merge
+      SourceShape(merge.out) //<co id="sourceShape"/>
+    })
+  }
+  //<end id="mergeNotOk"/>
   
-//   implicit val unmarshaller = new Unmarshaller[HttpEntity, Source[Event, _]] {
-//     def apply(entity: HttpEntity)(implicit ec: ExecutionContext, materializer: Materializer): Future[Source[Event, _]] = {
-//       val future = entity.contentType match {
-//         case ContentTypes.`text/plain(UTF-8)` => 
-//           Future.successful(
-//             Framing.delimiter(ByteString("\n"), maxLine)
-//               .map(_.decodeString("UTF8"))
-//               .map(LogStreamProcessor.parseLineEx)
-//           )
-//         case ContentTypes.`application/json` =>
-//           Future.successful(
-//             JsonFraming.json(maxJsonObject)
-//               .map(_.decodeString("UTF8")
-//               .parseJson
-//               .convertTo[Event])
-//           )
-//         case other => Future.failed(new UnsupportedContentTypeException(Set(`text/plain`, `application/json`)))
-//       }
-//       future.map(flow => entity.dataBytes.via(flow))(ec)
-//     }
-//   }.forContentTypes(`text/plain`, `application/json`)
+  def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
+  def archiveSink(logId: String) = FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
+  def logFileSink(logId: String) = FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
+  def routes: Route = 
+    getLogsRoute ~  
+    getLogNotOkRoute ~ 
+    postRoute ~ 
+    getLogStateRoute ~ 
+    getRoute ~ 
+    deleteRoute
+  
+  implicit val unmarshaller = EventUnmarshaller.create(maxLine, maxJsObject) //<co id="implicit_unmarshaller"/>
 
-//   def extractInFlow2(logId: String) =
-//     entity(as[Source[Event, _]]) { src =>
-//       onComplete(src.map(events => ByteString(events.toJson.compactPrint))
-//           .toMat(FileIO.toPath(logFile(logId)))(Keep.right)
-//           .run) {
-//         case Success(io) => complete((StatusCodes.OK, LogReceipt(logId, io.count)))
-//         case Failure(e) => complete(StatusCodes.BadRequest)
-//       }
-//     }
+  def postRoute = 
+    pathPrefix("logs" / Segment) { logId =>
+      pathEndOrSingleSlash {
+        post {
+          entity(as[Source[Event, _]]) { src =>
+            onComplete(
+            //<start id="postRoute"/>
+              src.via(processEvents(logId))
+                .toMat(archiveSink(logId))(Keep.right)
+                .run
+            //<end id="postRoute"/>
+            ) {
+            // Handling Future result omitted here, done the same as before.
+              case Success(IOResult(count, Success(Done))) =>
+                complete((StatusCodes.OK, LogReceipt(logId, count)))
+              case Success(IOResult(count, Failure(e))) =>
+                complete((
+                  StatusCodes.BadRequest, 
+                  ParseError(logId, e.getMessage)
+                ))
+              case Failure(e) =>
+                complete((
+                  StatusCodes.BadRequest, 
+                  ParseError(logId, e.getMessage)
+                ))
+            }
+          }
+        } 
+      }
+    }
 
-//   def extractSupportedLogContentType: Directive1[LogType] = 
-//     extractContentType.flatMap { contentType => 
-//       if(contentType == ContentTypes.`application/json`) {
-//         provide(JsonLog)
-//       } else if (contentType == ContentTypes.`text/plain(UTF-8)`) {
-//         provide(TextLog)
-//       } else {
-//         reject(
-//           UnsupportedRequestContentTypeRejection(
-//             Set(
-//               ContentTypeRange(`application/json`),
-//               ContentTypeRange(`text/plain`, `UTF-8`)
-//             )
-//           )
-//         )
-//       }
-//     }
+  implicit val marshaller = LogEntityMarshaller.create(maxJsObject) //<co id="implicit_marshaller"/>
 
-//   def extractInFlow: Directive1[Flow[ByteString, Event, NotUsed]] =
-//     extractSupportedLogContentType.flatMap {
-//       case TextLog =>
-//         val textIn = Framing.delimiter(ByteString("\n"), maxLine)
-//           .map(_.decodeString("UTF8"))
-//           .map(LogStreamProcessor.parseLineEx)
-//         provide(textIn)
-//       case JsonLog => 
-//         val jsonIn = JsonFraming.json(maxJsonObject)
-//           .map(_.decodeString("UTF8")
-//           .parseJson
-//           .convertTo[Event])
-//         provide(jsonIn)
-//     }
+  def getRoute = 
+    pathPrefix("logs" / Segment) { logId =>
+      pathEndOrSingleSlash {
+        get { 
+          extractRequest { req => //<co id="extract_request"/>
+            if(Files.exists(logFile(logId))) {
+              val src = logFileSource(logId) 
+              complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
+            } else {
+              complete(StatusCodes.NotFound)
+            }
+          }
+        }
+      }
+    }
 
+  //<start id="getLogStateRoute"/>
+  val StateSegment = Segment.flatMap {
+    case State(state) => Some(state)
+    case _ => None
+  }
 
-//   def logFile(id: String) = new File(logsDir.toFile, id)   
+  def getLogStateRoute = 
+    pathPrefix("logs" / Segment / StateSegment) { (logId, state) =>
+      pathEndOrSingleSlash {
+        get { 
+          extractRequest { req => //<co id="extract_request"/>
+            if(Files.exists(logStateFile(logId, state))) {
+              val src = logFileSource(logId, state) 
+              complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
+            } else {
+              complete(StatusCodes.NotFound)
+            }
+          }
+        }
+      }
+    }
+  //<end id="getLogStateRoute"/>
+  
+  //<start id="mergeSources"/>
+  import akka.stream.scaladsl.Merge
 
-//   def notificationsFile = new File(notificationsDir.toFile, "notify")   
+  def mergeSources[E](
+    sources: Vector[Source[E, _]] //<co id="sources_arg"/>
+  ): Option[Source[E, _]] = { //<co id="option_res"/>
+    if(sources.size ==0) None
+    else if(sources.size == 1) Some(sources(0))
+    else {
+      Some(Source.combine( //<co id="simpler_api"/>
+        sources(0), 
+        sources(1), 
+        sources.drop(2) : _*
+      )(Merge(_))) //<co id="simpler_api_fan_in"/>
+    }
+  } 
+  //<end id="mergeSources"/>
 
-//   def getFileSources[T](dir: Path): Vector[Source[ByteString, Future[IOResult]]] = {
-//     val dirStream = Files.newDirectoryStream(dir)
-//     try {
-//       import scala.collection.JavaConverters._
-//       val paths = dirStream.iterator.asScala.toVector
-//       paths.map(path => FileIO.fromPath(path.toFile)).toVector
-//     } finally dirStream.close
-//   }
+  def getFileSources[T](dir: Path): Vector[Source[ByteString, Future[IOResult]]] = {
+    val dirStream = Files.newDirectoryStream(dir)
+    try {
+      import scala.collection.JavaConverters._
+      val paths = dirStream.iterator.asScala.toVector
+      paths.map(path => FileIO.fromPath(path)).toVector
+    } finally dirStream.close
+  }
 
-//   def mergeSources[E](sources: Vector[Source[E, _]]): Option[Source[E, _]] = {
-//     if(sources.size ==0) None
-//     else if(sources.size == 1) Some(sources(0))
-//     else {
-//       Some(Source.combine(
-//         sources(0), 
-//         sources(1), 
-//         sources.drop(2) : _*
-//       )(Merge(_)))
-//     }
-//   } 
-// }
+  //<start id="getLogsRoute"/>
+  def getLogsRoute =
+    pathPrefix("logs") {
+      pathEndOrSingleSlash {
+        get {
+          extractRequest { req => 
+            val sources = getFileSources(logsDir).map { src => //<co id="getFileSources"/>
+              src.via(LogJson.jsonFramed(maxJsObject)) //<co id="jsonFramed"/>
+            }            
+            mergeSources(sources) match { //<co id="merge"/>
+              case Some(src) => 
+                complete(Marshal(src).toResponseFor(req))
+              case None => 
+                complete(StatusCodes.NotFound)
+            }
+          }
+        }
+      }
+    }
+  //<end id="getLogsRoute"/>
+
+  //<start id="getLogNotOkRoute"/>
+  def getLogNotOkRoute =     
+    pathPrefix("logs" / Segment /"not-ok") { logId =>
+      pathEndOrSingleSlash {
+        get {
+          extractRequest { req => 
+            complete(Marshal(mergeNotOk(logId)).toResponseFor(req))
+          }
+        }
+      }
+    } 
+  //<end id="getLogNotOkRoute"/>
+
+  def deleteRoute = 
+    pathPrefix("logs" / Segment) { logId =>
+      pathEndOrSingleSlash {
+        delete {
+          if(Files.deleteIfExists(logFile(logId))) {
+            complete(StatusCodes.OK)
+          } else {
+            complete(StatusCodes.NotFound)
+          }
+        }
+      }
+    }
+}
