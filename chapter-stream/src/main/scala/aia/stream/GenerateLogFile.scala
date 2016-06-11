@@ -40,7 +40,7 @@ object GenerateLogFile extends App {
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  graph.run.foreach { result =>
+  graph.run().foreach { result =>
     println(s"Wrote ${result.count} bytes to '$filePath'.")
     system.terminate()
   }  

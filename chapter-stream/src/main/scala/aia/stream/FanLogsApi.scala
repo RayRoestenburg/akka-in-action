@@ -123,7 +123,7 @@ class FanLogsApi(
             //<start id="postRoute"/>
               src.via(processStates(logId))
                 .toMat(logFileSink(logId))(Keep.right)
-                .run
+                .run()
             //<end id="postRoute"/>
             ) {
             // Handling Future result omitted here, done the same as before.

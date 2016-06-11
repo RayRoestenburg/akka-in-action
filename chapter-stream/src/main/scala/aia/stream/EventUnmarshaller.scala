@@ -22,8 +22,8 @@ import akka.http.scaladsl.unmarshalling.Unmarshaller._
 
 object EventUnmarshaller extends EventMarshalling {
   val supported = Set[ContentTypeRange]( //<co id="supported"/>
-    `text/plain`, 
-    `application/json`
+    ContentTypes.`text/plain(UTF-8)`, 
+    ContentTypes.`application/json`
   )
 
   def create(maxLine: Int, maxJsonObject: Int) = {

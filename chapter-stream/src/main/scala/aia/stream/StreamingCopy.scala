@@ -5,8 +5,8 @@ import java.nio.file.{ Path, Paths }
 import java.nio.file.StandardOpenOption
 import java.nio.file.StandardOpenOption._
 import scala.concurrent.Future
-import akka.actor.ActorSystem
 //<start id="copy-imports"/>
+import akka.actor.ActorSystem
 import akka.stream.{ ActorMaterializer, IOResult } //<co id="stream"/>
 import akka.stream.scaladsl.{ FileIO, RunnableGraph, Source, Sink } //<co id="scaladsl"/>
 import akka.util.ByteString //<co id="bytestring"/>
@@ -44,7 +44,7 @@ object StreamingCopy extends App {
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer() //<co id="materializer"/>
 
-  runnableGraph.run.foreach { result => //<co id="run_graph"/>
+  runnableGraph.run().foreach { result => //<co id="run_graph"/>
     println(s"${result.status}, ${result.count} bytes read.")
     system.terminate()
   }  

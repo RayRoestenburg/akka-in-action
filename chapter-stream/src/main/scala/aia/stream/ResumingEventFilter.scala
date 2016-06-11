@@ -92,7 +92,7 @@ object ResumingEventFilter extends App with EventMarshalling {
   val runnableGraph: RunnableGraph[Future[IOResult]] = 
     source.via(composedFlow).toMat(sink)(Keep.right)
 
-  runnableGraph.run.foreach { result =>
+  runnableGraph.run().foreach { result =>
     println(s"Wrote ${result.count} bytes to '$outputFile'.")
     system.terminate()
   }  

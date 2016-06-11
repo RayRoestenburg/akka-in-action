@@ -57,7 +57,7 @@ class ContentNegLogsApi(
             onComplete(
               src.via(outFlow)
                 .toMat(logFileSink(logId))(Keep.right)
-                .run
+                .run()
             ) {
             // Handling Future result omitted here, done the same as before.
             //<end id="postRoute"/>

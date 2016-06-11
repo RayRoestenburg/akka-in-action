@@ -19,7 +19,7 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= {
-  val version = "2.4.6"
+  val version = "2.4.7"
   Seq(
     "com.typesafe.akka" %% "akka-actor" % version,
     //<start id="stream-dependencies">

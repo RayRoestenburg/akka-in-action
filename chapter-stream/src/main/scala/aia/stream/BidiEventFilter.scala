@@ -79,7 +79,7 @@ object BidiEventFilter extends App with EventMarshalling {
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  runnableGraph.run.foreach { result =>
+  runnableGraph.run().foreach { result =>
     println(s"Wrote ${result.count} bytes to '$outputFile'.")
     system.terminate()
   }  

@@ -209,7 +209,7 @@ class LogStreamProcessorApi(
             //<start id="postRoute"/>
               src.via(processEvents(logId))
                 .toMat(archiveSink(logId))(Keep.right)
-                .run
+                .run()
             //<end id="postRoute"/>
             ) {
             // Handling Future result omitted here, done the same as before.

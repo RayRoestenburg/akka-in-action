@@ -47,6 +47,9 @@ class LogsApi(
   val bidiFlow = BidiFlow.fromFlows(inFlow, outFlow)
 
   //<start id="logs_app_flow"/>
+  import java.nio.file.StandardOpenOption
+  import java.nio.file.StandardOpenOption._
+
   val logToJsonFlow = bidiFlow.join(Flow[Event]) //<co id="logs_app_join"/>
   
   def logFileSink(logId: String) = FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
@@ -69,7 +72,7 @@ class LogsApi(
                 .dataBytes //<co id="logRoutePostDataBytes"/>
                 .via(logToJsonFlow) //<co id="logRoutePostFlow"/>
                 .toMat(logFileSink(logId))(Keep.right) //<co id="logRoutePostSink"/>
-                .run
+                .run()
             ) {
               case Success(IOResult(count, Success(Done))) => //<co id="logRoutePostSuccess"/>
                 complete((StatusCodes.OK, LogReceipt(logId, count)))
