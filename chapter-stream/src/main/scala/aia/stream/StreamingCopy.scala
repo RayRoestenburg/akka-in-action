@@ -7,9 +7,9 @@ import java.nio.file.StandardOpenOption._
 import scala.concurrent.Future
 //<start id="copy-imports"/>
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, IOResult } //<co id="stream"/>
+import akka.stream.{ ActorMaterializer, IOResult }
 import akka.stream.scaladsl.{ FileIO, RunnableGraph, Source, Sink } //<co id="scaladsl"/>
-import akka.util.ByteString //<co id="bytestring"/>
+import akka.util.ByteString
 //<end id="copy-imports"/>
 
 import com.typesafe.config.{ Config, ConfigFactory }

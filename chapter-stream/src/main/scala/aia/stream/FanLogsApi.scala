@@ -103,7 +103,8 @@ class FanLogsApi(
   //<end id="mergeNotOk"/>
   
   def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
-  def logFileSink(logId: String) = FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
+  def logFileSink(logId: String) = 
+    FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
   def routes: Route = 
     getLogsRoute ~  
     getLogNotOkRoute ~ 

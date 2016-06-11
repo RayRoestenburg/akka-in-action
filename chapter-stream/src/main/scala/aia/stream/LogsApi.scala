@@ -52,7 +52,8 @@ class LogsApi(
 
   val logToJsonFlow = bidiFlow.join(Flow[Event]) //<co id="logs_app_join"/>
   
-  def logFileSink(logId: String) = FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
+  def logFileSink(logId: String) = 
+    FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
   def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
   //<end id="logs_app_flow"/>
 
