@@ -26,7 +26,7 @@ class SprayRestTest extends TestKit(ActorSystem("SprayRestTest"))
     orderHttp.stop()
     system.stop(orderSystem)
     Thread.sleep(5000)
-    system.shutdown
+    system.terminate()
   }
 
   "RestConsumer" must {

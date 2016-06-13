@@ -126,13 +126,13 @@ class OrderHttpServer(host: String, portNr: Int, orderSystem: ActorRef)
     case Http.CommandFailed(cmd) =>
       println("REST interface could not bind to " +
         s"$host:$portNr, ${cmd.failureMessage}")
-      system.shutdown()
+      system.terminate()
   }
 
   def stop() { //<co id="ch08-rest-spray-boot-4"/>
     httpServer ! Http.ClosedAll
     system.stop(httpServer)
-    system.shutdown()
+    system.terminate()
   }
 
 }

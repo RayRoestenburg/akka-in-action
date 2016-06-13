@@ -33,7 +33,7 @@
 //  }
 //
 //  override protected def afterAll() {
-//    system.shutdown()
+//    system.terminate()
 //  }
 //
 //  trait WireTap extends Actor {

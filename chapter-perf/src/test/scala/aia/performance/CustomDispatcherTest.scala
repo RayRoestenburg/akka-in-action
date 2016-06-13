@@ -10,7 +10,7 @@ class CustomDispatcherTest extends WordSpecLike with MustMatchers with BeforeAnd
   implicit val system = ActorSystem("DispatcherTest", configuration)
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
     super.afterAll()
   }
 

@@ -13,7 +13,7 @@ class MonitorMailboxTest extends WordSpecLike with BeforeAndAfterAll
   implicit val system = ActorSystem("MonitorMailboxTest", configuration)
 
   override protected def afterAll() {
-    system.shutdown()
+    system.terminate()
     super.afterAll()
   }
 

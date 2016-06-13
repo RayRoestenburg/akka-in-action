@@ -7,7 +7,7 @@ import akka.actor._
 class LifeCycleHooksTest extends TestKit(ActorSystem("LifCycleTest")) with WordSpecLike with BeforeAndAfterAll {
 
   override def afterAll() {
-    system.shutdown()
+    system.terminate()
   }
 
   "The Child" must {

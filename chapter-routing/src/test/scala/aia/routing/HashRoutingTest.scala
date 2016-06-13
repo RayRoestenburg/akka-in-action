@@ -14,7 +14,7 @@ class HashRoutingTest
   with WordSpecLike with BeforeAndAfterAll {
 
   override def afterAll() = {
-    system.terminate
+    system.terminate()
   }
 
   "The HashRouting" must {
