@@ -10,7 +10,6 @@ val project = Project(
     name := "akka-sample-multi-node-scala",
     organization := "manning",
     version := "1.0",
-    scalaVersion := "2.11.8",
     libraryDependencies ++= Seq(
     "com.typesafe.akka" %%  "akka-actor"              % akkaVersion,
     "com.typesafe.akka" %%  "akka-slf4j"              % akkaVersion,
