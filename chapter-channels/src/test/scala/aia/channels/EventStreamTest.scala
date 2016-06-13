@@ -16,7 +16,7 @@ class EventStreamTest extends TestKit(ActorSystem("EventStreamTest"))
   with WordSpecLike with BeforeAndAfterAll with MustMatchers {
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "EventStream" must {
