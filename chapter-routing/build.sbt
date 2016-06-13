@@ -4,20 +4,8 @@ version := "0.1-SNAPSHOT"
 
 organization := "com.manning"
 
-scalaVersion := "2.11.7"
-
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-unchecked",
-  "-Xlint",
-  "-Ywarn-unused",
-  "-Ywarn-dead-code",
-  "-feature",
-  "-language:_"
-)
-
 libraryDependencies ++= {
-  val akkaVersion = "2.4.4"
+  val akkaVersion = "2.4.7"
   Seq(
     "com.typesafe.akka" %% "akka-actor"   % akkaVersion,
     "com.typesafe.akka" %% "akka-remote"  % akkaVersion,
