@@ -1,6 +1,6 @@
 name := "performance"
 
-version := "0.1-SNAPSHOT"
+version := "1.0"
 
 organization := "com.manning"
 

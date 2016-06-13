@@ -6,18 +6,6 @@ version := "1.0"
 
 organization := "com.manning"
 
-scalaVersion := "2.11.8"
-
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-unchecked",
-  "-Xlint",
-  "-Ywarn-unused",
-  "-Ywarn-dead-code",
-  "-feature",
-  "-language:_"
-)
-
 libraryDependencies ++= {
   val version = "2.4.7"
   Seq(
