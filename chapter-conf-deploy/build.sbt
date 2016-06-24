@@ -1,10 +1,8 @@
 name := "deploy"
 
-version := "0.1-SNAPSHOT"
+version := "1.0"
 
 organization := "manning"
-
-scalaVersion := "2.11.7"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -21,13 +19,13 @@ enablePlugins(JavaAppPackaging)
 scriptClasspath +="../conf"
 
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.12"
+  val akkaVersion = "2.4.7"
   Seq(
     "com.typesafe.akka" %%  "akka-actor"      % akkaVersion,
     "com.typesafe.akka" %%  "akka-slf4j"      % akkaVersion,
     "ch.qos.logback"     %  "logback-classic" % "1.0.13",
     "com.typesafe.akka" %%  "akka-testkit"    % akkaVersion   % "test",
-    "org.scalatest"     %%  "scalatest"       % "2.2.4"       % "test"
+    "org.scalatest"     %%  "scalatest"       % "2.2.6"       % "test"
   )
 }
 

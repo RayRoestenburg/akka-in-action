@@ -4,20 +4,12 @@ seq(SbtStartScript.startScriptForClassesSettings: _*)
 
 name := "goticks"
 
-version := "0.1-SNAPSHOT"
+version := "1.0"
 
 organization := "com.goticks"
 
-scalaVersion := "2.11.7"
-
-resolvers ++= Seq("Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
-                  "Sonatype snapshots"  at "http://oss.sonatype.org/content/repositories/snapshots/",
-                  "Spray Repository"    at "http://repo.spray.io",
-                  "Spray Nightlies"     at "http://nightlies.spray.io/")
-
 libraryDependencies ++= {
-  val akkaVersion       = "2.3.12"
-  val sprayVersion      = "1.3.3"
+  val akkaVersion = "2.4.7"
   Seq(
     "com.typesafe.akka" %%  "akka-actor"              % akkaVersion,
     "com.typesafe.akka" %%  "akka-slf4j"              % akkaVersion,
@@ -25,16 +17,16 @@ libraryDependencies ++= {
     "com.typesafe.akka" %%  "akka-remote"             % akkaVersion, //<co id="remote"/>
     "com.typesafe.akka" %%  "akka-multi-node-testkit" % akkaVersion % "test", //<co id="multinode"/>
 //<end id="remote_dependencies"/>
-    "com.typesafe.akka" %%  "akka-testkit"            % akkaVersion % "test",
-    "org.scalatest"     %% "scalatest"                % "2.2.4"     % "test",
-    "io.spray"          %% "spray-can"                % sprayVersion,
-    "io.spray"          %% "spray-routing"            % sprayVersion,
-    "io.spray"          %% "spray-json"                      % "1.3.1",
-    "ch.qos.logback"    %  "logback-classic"                 % "1.1.2"
+    "com.typesafe.akka" %%  "akka-testkit"                       % akkaVersion % "test",
+    "org.scalatest"     %%  "scalatest"                          % "2.2.6"     % "test",
+    "com.typesafe.akka" %%  "akka-http-core"                     % akkaVersion, 
+    "com.typesafe.akka" %%  "akka-http-experimental"             % akkaVersion, 
+    "com.typesafe.akka" %%  "akka-http-spray-json-experimental"  % akkaVersion, 
+    "ch.qos.logback"    %   "logback-classic"                    % "1.1.6"
   )
 }
 
 // Assembly settings
-mainClass in Global := Some("com.goticks.Main")
+mainClass in Global := Some("com.goticks.SingleNodeMain")
 
 jarName in assembly := "goticks-server.jar"

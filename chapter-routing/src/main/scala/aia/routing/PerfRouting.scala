@@ -109,10 +109,6 @@ class WrongDynamicRouteeSizer(nrActors: Int, props: Props, router: ActorRef) ext
       println("Not used: "+ notUsed)
       notUsed.foreach(context.stop(_))
     }
-    //    case Terminated(child) => {
-    //      val newChild = context.actorOf(Props, child.path.name)
-    //      context.watch(newChild)
-    //    }
   }
 
   override def preRestart(reason: Throwable, message: Option[Any]) {
@@ -159,7 +155,7 @@ class DynamicRouteeSizer(nrActors: Int,
     case routees: Routees => {                                          //<co id="ch09-group-sizer-example-6" />
       //translate Routees into a actorPath
       import collection.JavaConversions._
-      var active = routees.getRoutees.map{                              //<co id="ch09-group-sizer-example-7" />
+      val active = routees.getRoutees.map{                              //<co id="ch09-group-sizer-example-7" />
         case x: ActorRefRoutee => x.ref.path.toString
         case x: ActorSelectionRoutee => x.selection.pathString
       }

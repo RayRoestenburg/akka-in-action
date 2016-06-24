@@ -24,7 +24,6 @@ class ProcessCPURequest(serviceTime: Duration, next: ActorRef) extends Actor {
       var tmp = math.Pi
       var tmp2 = math.toRadians(tmp)
       val start = System.currentTimeMillis()
-      var loop = serviceTime.toMillis
 
       do {
         for (i <- 1 until 10000) {

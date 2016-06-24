@@ -10,7 +10,7 @@ class DeadLetterTest extends TestKit(ActorSystem("DeadLetterTest"))
   with ImplicitSender {
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "DeadLetter" must {

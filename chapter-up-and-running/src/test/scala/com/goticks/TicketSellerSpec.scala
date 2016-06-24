@@ -34,7 +34,7 @@ class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
       expectMsg(Tickets(event))
     }
 
-    "Sell tickets in batches until they sold out" in {
+    "Sell tickets in batches until they are sold out" in {
       import TicketSeller._
 
       val firstBatchSize = 10

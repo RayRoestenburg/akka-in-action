@@ -1,27 +1,28 @@
 package com.goticks
 
+import scala.concurrent.Future
+
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.event.Logging
+
 import com.typesafe.config.ConfigFactory
-import akka.actor.{Props, ActorSystem}
-import spray.can.Http
-import spray.can.Http.Bind
 
-object FrontendRemoteDeployWatchMain extends App {
-  val config = ConfigFactory.load("frontend-remote-deploy")
+object FrontendRemoteDeployWatchMain extends App
+    with Startup {
+  val config = ConfigFactory.load("frontend-remote-deploy") 
+  implicit val system = ActorSystem("frontend", config) 
 
-  val host = config.getString("http.host")
-  val port = config.getInt("http.port")
+  val api = new RestApi() {
+    val log = Logging(system.eventStream, "frontend-remote-watch")
+    implicit val requestTimeout = configuredRequestTimeout(config)
+    implicit def executionContext = system.dispatcher
+    def createBoxOffice: ActorRef = {
+      system.actorOf(
+        RemoteBoxOfficeForwarder.props, 
+        RemoteBoxOfficeForwarder.name
+      )
+    }
+  }
 
-  val system = ActorSystem("frontend", config)
-
-  class RestInterfaceWatch extends RestInterface
-                           with ConfiguredRemoteBoxOfficeDeployment
-
-  val restInterface = system.actorOf(Props[RestInterfaceWatch],
-  "restInterface")
-
-  Http(system).manager ! Bind(listener = restInterface,
-  interface = host,
-  port =port)
-
+  startup(api.routes)
 }
-

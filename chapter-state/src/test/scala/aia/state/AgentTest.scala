@@ -14,7 +14,7 @@ class AgentTest extends TestKit(ActorSystem("AgentTest"))
   implicit val ec = system.dispatcher
   implicit val timeout = Timeout(3 seconds)
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "Agent" must {

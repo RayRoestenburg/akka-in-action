@@ -15,7 +15,7 @@ class InventoryTest extends TestKit(ActorSystem("InventoryTest"))
   with ImplicitSender {
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "Inventory" must {

@@ -74,7 +74,7 @@ class SpeedRouterLogic(minSpeed: Int, normalFlowPath: String, cleanUpPath: Strin
 
 case class SpeedRouterPool(minSpeed: Int, normalFlow: Props, cleanUp: Props) extends Pool {
 
-  def nrOfInstances: Int = 1
+  def nrOfInstances(sys: ActorSystem): Int = 1
   def resizer: Option[Resizer] = None
   def supervisorStrategy: SupervisorStrategy = OneForOneStrategy()(SupervisorStrategy.defaultDecider)
 

@@ -1,6 +1,6 @@
 package com.goticks
 
-import org.scalatest.matchers.MustMatchers
+import org.scalatest.MustMatchers
 import org.scalatest.WordSpec
 import scala.concurrent.{Future, Await}
 

@@ -32,7 +32,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
   }
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
     FileUtils.deleteDirectory(dir)
   }
 

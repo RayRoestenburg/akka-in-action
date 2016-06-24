@@ -14,7 +14,7 @@ class PipeAndFilterTest
   with BeforeAndAfterAll {
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "The pipe and filter" must {

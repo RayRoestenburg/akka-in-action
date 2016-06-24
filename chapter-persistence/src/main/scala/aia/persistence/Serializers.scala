@@ -1,7 +1,6 @@
 package aia.persistence
 
 //<start id="persistence-basket-event-serializer"/>
-import scala.util.Try
 import akka.serialization._
 import spray.json._
 
@@ -21,7 +20,7 @@ class BasketEventSerializer extends Serializer {
   }
 
   def fromBinary(bytes: Array[Byte],
-                 clazz: Option[Class[_]]): AnyRef = {
+                 manifest: Option[Class[_]]): AnyRef = {
     val jsonAst = new String(bytes).parseJson//<co id="parse_json_from_bytes"/>
     BasketEventFormat.read(jsonAst) //<co id="read_json_format"/>
   }
@@ -43,7 +42,7 @@ class BasketSnapshotSerializer extends Serializer {
   }
 
   def fromBinary(bytes: Array[Byte],
-                 clazz: Option[Class[_]]): AnyRef = {
+                 manifest: Option[Class[_]]): AnyRef = {
     val jsonStr = new String(bytes)
     jsonStr.parseJson.convertTo[Basket.Snapshot]
   }
@@ -61,7 +60,7 @@ object JsonFormats extends DefaultJsonProtocol {
 
   implicit val addedEventFormat: RootJsonFormat[Basket.Added] =
     jsonFormat1(Basket.Added)
-  implicit val reFormat: RootJsonFormat[Basket.ItemRemoved] =
+  implicit val removedEventFormat: RootJsonFormat[Basket.ItemRemoved] =
     jsonFormat1(Basket.ItemRemoved)
   implicit val updatedEventFormat: RootJsonFormat[Basket.ItemUpdated] =
     jsonFormat2(Basket.ItemUpdated)

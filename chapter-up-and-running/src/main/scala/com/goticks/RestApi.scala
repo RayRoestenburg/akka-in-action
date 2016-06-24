@@ -8,23 +8,20 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 
-import spray.http.StatusCodes
-import spray.httpx.SprayJsonSupport._
-import spray.routing._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server._
 
-class RestApi(timeout: Timeout) extends HttpServiceActor
-    with RestRoutes {
+class RestApi(system: ActorSystem, timeout: Timeout)
+    extends RestRoutes {
   implicit val requestTimeout = timeout
+  implicit def executionContext = system.dispatcher
 
-  def receive = runRoute(routes)
-
-  implicit def executionContext = context.dispatcher
-
-  def createBoxOffice = context.actorOf(BoxOffice.props, BoxOffice.name)
+  def createBoxOffice = system.actorOf(BoxOffice.props, BoxOffice.name)
 }
 
-trait RestRoutes extends HttpService
-    with BoxOfficeApi
+trait RestRoutes extends BoxOfficeApi
     with EventMarshalling {
   import StatusCodes._
 
@@ -49,7 +46,7 @@ trait RestRoutes extends HttpService
           // POST /events/:event
           entity(as[EventDescription]) { ed => //<co id="ch02_unmarshall_json_event"/>
             onSuccess(createEvent(event, ed.tickets)) { //<co id="ch02_call_create_event"/>
-              case BoxOffice.EventCreated => complete(Created) //<co id="ch02_complete_request_with_created"/>
+              case BoxOffice.EventCreated(event) => complete(Created, event) //<co id="ch02_complete_request_with_created"/>
               case BoxOffice.EventExists =>
                 val err = Error(s"$event event exists already.")
                 complete(BadRequest, err) //<co id="ch02_complete_request_with_bad_request"/>
@@ -120,4 +117,4 @@ trait BoxOfficeApi {
     boxOffice.ask(GetTickets(event, tickets))
       .mapTo[TicketSeller.Tickets]
 }
-//<end id="ch02_boxoffice_api"/>
+// //<end id="ch02_boxoffice_api"/>

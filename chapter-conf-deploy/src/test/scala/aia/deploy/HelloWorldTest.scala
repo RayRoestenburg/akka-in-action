@@ -14,7 +14,7 @@ class HelloWorldTest extends TestKit(ActorSystem("HelloWorldTest"))
   val actor = TestActorRef[HelloWorld]
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
   "HelloWorld" must {
     "reply when sending a string" in {

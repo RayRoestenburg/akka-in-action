@@ -17,7 +17,7 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
   implicit val executor = system.dispatcher
 
   override def afterAll() {
-    system.shutdown
+    system.terminate()
   }
 
   "RestConsumer" must {

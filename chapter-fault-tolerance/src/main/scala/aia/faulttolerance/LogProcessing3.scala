@@ -7,18 +7,19 @@ import akka.actor.OneForOneStrategy
 import scala.concurrent.duration._
 import language.postfixOps
 
-package dbstrategy1 {
+package dbstrategy3 {
   //<start id="ch03-build-hierarchy"/>
   object LogProcessingApp extends App {
     val sources = Vector("file:///source1/", "file:///source2/")
     val system = ActorSystem("logprocessing")
     // create the props and dependencies
-    def createCon() = new DbCon("http://mydatabase")
-    val writerProps = Props(new DbWriter(createCon()))
+    val databaseUrl = "http://mydatabase"
+    
+    val writerProps = Props(new DbWriter(databaseUrl))
     val dbSuperProps = Props(new DbSupervisor(writerProps))
     val logProcSuperProps = Props(
       new LogProcSupervisor(dbSuperProps))
-    val topLevelProps = Props(new FileWatchingSupervisor(
+    val topLevelProps = Props(new FileWatcherSupervisor(
       sources,
       logProcSuperProps))
     system.actorOf(topLevelProps) //<co id="ch03-top-level-actor"/>
@@ -26,7 +27,7 @@ package dbstrategy1 {
   //<end id="ch03-build-hierarchy"/>
 
   //<start id="ch03-filewatcher-supervisor"/>
-  class FileWatchingSupervisor(sources: Vector[String],
+  class FileWatcherSupervisor(sources: Vector[String],
                                logProcSuperProps: Props)
     extends Actor {
 
@@ -122,7 +123,9 @@ package dbstrategy1 {
   //<end id="ch03-dbsupervisor"/>
 
   //<start id="ch03-dbwriter"/>
-  class DbWriter(connection: DbCon) extends Actor {
+  class DbWriter(databaseUrl: String) extends Actor {
+    val connection = new DbCon(databaseUrl)
+
     import LogProcessingProtocol._
     def receive = {
       case Line(time, message, messageType) =>
@@ -132,55 +135,60 @@ package dbstrategy1 {
     }
   }
   //<end id="ch03-dbwriter"/>
-}
-class DbCon(url: String) {
-  /**
-   * Writes a map to a database.
-   * @param map the map to write to the database.
-   * @throws DbBrokenConnectionException when the connection is broken. It might be back later
-   * @throws DbNodeDownException when the database Node has been removed from the database cluster. It will never work again.
-   */
-  def write(map: Map[Symbol, Any]) {
-    //
+  class DbCon(url: String) {
+    /**
+     * Writes a map to a database.
+     * @param map the map to write to the database.
+     * @throws DbBrokenConnectionException when the connection is broken. It might be back later
+     * @throws DbNodeDownException when the database Node has been removed from the database cluster. It will never work again.
+     */
+    def write(map: Map[Symbol, Any]):Unit = {
+      //
+    }
+    def close(): Unit = {
+      //
+    }
   }
-}
-//<start id="ch03-strategies-exceptions"/>
-@SerialVersionUID(1L)
-class DiskError(msg: String)
-  extends Error(msg) with Serializable //<co id="ch03-diskerror"/>
+  //<start id="ch03-strategies-exceptions"/>
+  @SerialVersionUID(1L)
+  class DiskError(msg: String)
+    extends Error(msg) with Serializable //<co id="ch03-diskerror"/>
 
-@SerialVersionUID(1L)
-class CorruptedFileException(msg: String, val file: File)
-  extends Exception(msg) with Serializable //<co id="ch03-corruptedfileexception"/>
+  @SerialVersionUID(1L)
+  class CorruptedFileException(msg: String, val file: File)
+    extends Exception(msg) with Serializable //<co id="ch03-corruptedfileexception"/>
 
-@SerialVersionUID(1L)
-class DbBrokenConnectionException(msg: String)
-  extends Exception(msg) with Serializable //<co id="ch03-dbbrokenexception"/>
-//<end id="ch03-strategies-exceptions"/>
+  @SerialVersionUID(1L)
+  class DbBrokenConnectionException(msg: String)
+    extends Exception(msg) with Serializable //<co id="ch03-dbbrokenexception"/>
+  //<end id="ch03-strategies-exceptions"/>
 
-trait LogParsing {
-  import LogProcessingProtocol._
-  // Parses log files. creates line objects from the lines in the log file.
-  // If the file is corrupt a CorruptedFileException is thrown
-  def parse(file: File): Seq[Line] = {
-    Nil
+  trait LogParsing {
+    import LogProcessingProtocol._
+    // Parses log files. creates line objects from the lines in the log file.
+    // If the file is corrupt a CorruptedFileException is thrown
+    def parse(file: File): Vector[Line] = {
+      // implement parser here, now just return dummy value
+      Vector.empty[Line]
+    }
   }
-}
-object FileWatcherProtocol {
-  case class NewFile(file: File, timeAdded: Long)
-  case class SourceAbandoned(uri: String)
-}
-trait FileWatchingAbilities {
-  def register(uri: String) {
-
+  object FileWatcherProtocol {
+    case class NewFile(file: File, timeAdded: Long)
+    case class SourceAbandoned(uri: String)
   }
-}
+  trait FileWatchingAbilities {
+    def register(uri: String) {
 
-//<start id="ch03-strategies-logprocessing"/>
-object LogProcessingProtocol {
-  // represents a new log file
-  case class LogFile(file: File) //<co id="ch03-logfile"/>
-  // A line in the log file parsed by the LogProcessor Actor
-  case class Line(time: Long, message: String, messageType: String) //<co id="ch03-line"/>
+    }
+  }
+
+  //<start id="ch03-strategies-logprocessing"/>
+  object LogProcessingProtocol {
+    // represents a new log file
+    case class LogFile(file: File) //<co id="ch03-logfile"/>
+    // A line in the log file parsed by the LogProcessor Actor
+    case class Line(time: Long, message: String, messageType: String) //<co id="ch03-line"/>
+  }
+  //<end id="ch03-strategies-logprocessing"/>
+
 }
-//<end id="ch03-strategies-logprocessing"/>
