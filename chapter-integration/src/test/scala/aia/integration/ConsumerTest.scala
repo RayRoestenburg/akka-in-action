@@ -37,24 +37,6 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
   }
 
   "Consumer" must {
-    /*
-    "pickup json files" in {
-      val probe = TestProbe()
-      val camelUri = "file:messages"
-      val consumer = system.actorOf(
-        Props(new OrderConsumerJson(camelUri, probe.ref)))
-      val activated = CamelExtension(system).activationFutureFor(
-        consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.result(activated, 5 seconds)
-
-      val msg = new Order("me", "Akka in Action", 10)
-      val json = Serialization.write(msg)(DefaultFormats)
-      val msgFile = new File(dir, "msg1.json")
-      FileUtils.write(msgFile, json)
-
-      probe.expectMsg(msg)
-    }
-*/
     "pickup xml files" in {
       //<start id="ch08-order-consumer-test-create"/>
       val probe = TestProbe()
@@ -67,7 +49,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       val camelExtention = CamelExtension(system) //<co id="ch08-order-consumer-test-0"/>
       val activated = camelExtention.activationFutureFor( //<co id="ch08-order-consumer-test-1"/>
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.result(activated, 5 seconds) //<co id="ch08-order-consumer-test-2"/>
+      Await.ready(activated, 5 seconds) //<co id="ch08-order-consumer-test-2"/>
       //<end id="ch08-order-consumer-test-wait"/>
       //<start id="ch08-order-consumer-test"/>
       val msg = new Order("me", "Akka in Action", 10)
@@ -94,7 +76,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
         Props(new OrderConsumerXml(camelUri, probe.ref)))
       val activated = CamelExtension(system).activationFutureFor(
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.result(activated, 5 seconds)
+      Await.ready(activated, 5 seconds)
 
       val msg = new Order("me", "Akka in Action", 10)
       val xml = <order>
@@ -124,7 +106,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
         Props(new OrderConfirmConsumerXml(camelUri, probe.ref)))
       val activated = CamelExtension(system).activationFutureFor(
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.result(activated, 5 seconds)
+      Await.ready(activated, 5 seconds)
 
       val msg = new Order("me", "Akka in Action", 10)
       val xml = <order>
@@ -140,7 +122,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       ouputWriter.flush()
       val responseReader = new BufferedReader(
         new InputStreamReader(sock.getInputStream))
-      var response = responseReader.readLine() //<co id="ch08-order-consumer-test-confirm-2"/>
+      val response = responseReader.readLine() //<co id="ch08-order-consumer-test-confirm-2"/>
       response must be("<confirm>OK</confirm>")
       probe.expectMsg(msg) //<co id="ch08-order-consumer-test-confirm-3"/>
 
@@ -166,7 +148,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
 
       val activated = CamelExtension(system).activationFutureFor(
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.result(activated, 5 seconds)
+      Await.ready(activated, 5 seconds)
 
       val msg = new Order("me", "Akka in Action", 10)
       val xml = <order>
@@ -192,7 +174,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
         Props(new OrderConsumerXml(camelUri, probe.ref)))
       val activated = CamelExtension(system).activationFutureFor(
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.result(activated, 5 seconds)
+      Await.ready(activated, 5 seconds)
 
       for (nr <- 1 until 100) {
         val msg = new Order("me", "Akka in Action", nr)
@@ -216,7 +198,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
         Props(new OrderConsumerXml(camelUri, probe.ref)))
       val activated = CamelExtension(system).activationFutureFor(
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.result(activated, 5 seconds)
+      Await.ready(activated, 5 seconds)
 
       val sock = new Socket("localhost", 8886)
       val ouputWriter = new PrintWriter(sock.getOutputStream, true)

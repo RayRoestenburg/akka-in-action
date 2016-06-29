@@ -83,27 +83,25 @@ class OrderProducerXml(uri: String) extends Producer {
   override def oneway: Boolean = true //<co id="ch08-order-producer2-1"/>
 
   override protected def transformOutgoingMessage(message: Any): Any = //<co id="ch08-order-producer2-2"/>
-    {
-      message match {
-        case msg: Order => {
-          val xml = <order>
-                      <customerId>{ msg.customerId }</customerId>
-                      <productId>{ msg.productId }</productId>
-                      <number>{ msg.number }</number>
-                    </order>
-          xml.toString().replace("\n", "") //<co id="ch08-order-producer2-3"/>
-        }
-        case other => message
+    message match {
+      case msg: Order => {
+        val xml = <order>
+                    <customerId>{ msg.customerId }</customerId>
+                    <productId>{ msg.productId }</productId>
+                    <number>{ msg.number }</number>
+                  </order>
+        xml.toString().replace("\n", "") //<co id="ch08-order-producer2-3"/>
       }
+      case other => message
     }
-}
+} 
 //<end id="ch08-order-producer2"/>
 //<start id="ch08-order-producer3"/>
 class OrderConfirmProducerXml(uri: String) extends Producer {
   def endpointUri = uri
   override def oneway: Boolean = false
 
-  override def transformOutgoingMessage(message: Any): Any = {
+  override def transformOutgoingMessage(message: Any): Any =
     message match {
       case msg: Order => {
         val xml = <order>
@@ -115,9 +113,8 @@ class OrderConfirmProducerXml(uri: String) extends Producer {
       }
       case other => message
     }
-  }
 
-  override def transformResponse(message: Any): Any = { //<co id="ch08-order-producer3-1"/>
+  override def transformResponse(message: Any): Any = //<co id="ch08-order-producer3-1"/>
     message match {
       case msg: CamelMessage => {
         try {
@@ -132,6 +129,5 @@ class OrderConfirmProducerXml(uri: String) extends Producer {
       }
       case other => message
     }
-  }
 }
 //<end id="ch08-order-producer3"/>

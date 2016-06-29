@@ -176,9 +176,10 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
       val conn = urlConnection.openConnection()
 
       //check result
-      val ex = evaluating {
+
+      val ex = the [IOException] thrownBy {
         conn.getInputStream
-      } must produce[IOException]
+      }
       ex.getMessage must be(
         "Server returned HTTP response code: 400 for URL: " +
           "http://localhost:8181/orderTest")
@@ -200,8 +201,8 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
 
       //<start id="ch08-rest-camel-test1-xml"/>
       val url = "http://localhost:8181/orderTest"
-      val xml = """<order><customerId>customer1</customerId>""" +
-        """<productId>Akka in action</productId>"""
+      val xml = """<order><customerId>customer1</customerId>
+      <productId>Akka in action</productId>"""
 
       val urlConnection = new URL(url)
       val conn = urlConnection.openConnection()
@@ -215,9 +216,9 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
       writer.flush()
       //check result
       //<start id="ch08-rest-camel-test1-xmlCheck"/>
-      val ex = evaluating {
+      val ex = the [IOException] thrownBy  {
         conn.getInputStream
-      } must produce[IOException]
+      }
       ex.getMessage must be(
         "Server returned HTTP response code: 500 for URL: " +
           "http://localhost:8181/orderTest")

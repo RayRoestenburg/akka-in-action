@@ -3,7 +3,9 @@ scalaVersion := "2.11.8"
 scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked",
-  "-Xfatal-warnings",
+  "-Xlint",
+  "-Ywarn-unused",
+  "-Ywarn-dead-code",
   "-feature",
   "-language:_"
 )
