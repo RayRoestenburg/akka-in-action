@@ -6,8 +6,7 @@ import scala.Some
 import java.util.Queue
 import com.typesafe.config.Config
 import java.util.concurrent.ConcurrentLinkedQueue
-import akka.dispatch.MessageQueue
-import akka.dispatch.UnboundedMessageQueueSemantics
+import akka.dispatch.{ MailboxType, MessageQueue, UnboundedMessageQueueSemantics }
 import akka.event.LoggerMessageQueueSemantics
 //<start id="mailbox_statistics"/>
 case class MonitorEnvelope(queueSize: Int,
@@ -23,11 +22,13 @@ case class MailboxStatistics(queueSize: Int,
 //<end id="mailbox_statistics"/>
 
 //<start id="monitor_queue"/>
-class MonitorQueue(val system: ActorSystem) 
-    extends MessageQueue
-    with UnboundedMessageQueueSemantics 
-    with LoggerMessageQueueSemantics {
-  private final val queue = new ConcurrentLinkedQueue[MonitorEnvelope]()
+//<start id="monitor_queue_constructor"/>
+class MonitorQueue(val system: ActorSystem)  //<co id="ch14-monitor_queue_sys" />
+    extends MessageQueue //<co id="monitor_queue_mq" />
+    with UnboundedMessageQueueSemantics  //<co id="unbounded_semantics" />
+    with LoggerMessageQueueSemantics { //<co id="logger_semantics" />
+  private final val queue = new ConcurrentLinkedQueue[MonitorEnvelope]() //<co id="conc_queue" />
+//<end id="monitor_queue_constructor"/>
 
 //<start id="the_rest"/>
   def numberOfMessages = queue.size //<co id="ch14-mailbox-support2-1" />
@@ -82,7 +83,7 @@ class MonitorQueue(val system: ActorSystem)
 
 //<start id="ch14-mailboxType"/>
 class MonitorMailboxType(settings: ActorSystem.Settings, config: Config)
-    extends akka.dispatch.MailboxType 
+    extends MailboxType 
     with ProducesMessageQueue[MonitorQueue]{ //<co id="ch14-mailboxType-1" />
 
   final override def create(owner: Option[ActorRef],
