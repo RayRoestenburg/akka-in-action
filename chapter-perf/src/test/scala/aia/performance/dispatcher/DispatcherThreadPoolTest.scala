@@ -18,7 +18,7 @@ class DispatcherThreadPoolTest extends WordSpecLike
   implicit val system = ActorSystem("DispatcherTest", configuration)
 
   "System" must {
-    "fails to perform threadPool" in {
+    "fail to perform threadPool" in {
       //val nrMessages = 15000
       val nrMessages = 6000
       val nrWorkers = 100

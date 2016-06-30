@@ -5,7 +5,7 @@ These performance test are dependent on the machine the test are run. Some test 
 performance problems, as described in the book. These test are:
 * aia.performance.dispatcher.DispatcherInitTest
 * aia.performance.dispatcher.DispatcherPinnedTest
-* aia.performance.dispatcher.DispatcherSeperateTest
+* aia.performance.dispatcher.DispatcherSeparateTest
 * aia.performance.dispatcher.DispatcherThroughputTest
 
 But it is possible that other tests fail too. Especially when running all the test at once.

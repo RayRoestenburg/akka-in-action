@@ -18,7 +18,6 @@ class ThroughputCPUTest extends WordSpecLike
 
   "System" must {
     "fails to with cpu" in {
-      //      val nrMessages = 99
       val nrWorkers = 40
       val nrMessages = nrWorkers * 40
 
@@ -46,8 +45,6 @@ class ThroughputCPUTest extends WordSpecLike
       system.stop(workers)
       /* throughput 5
 total process time 104094 Average=65
-
-
       */
     }
   }

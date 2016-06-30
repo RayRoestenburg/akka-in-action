@@ -54,7 +54,7 @@ class DispatcherInitTest extends WordSpecLike
       printer ! "print"
       //      val statMsg = statProbe.expectMsgAllOf[Any]()
       //      println(statMsg)
-      val msg = end.receiveN(n = nrMessages, max = 30 seconds)
+      end.receiveN(n = nrMessages, max = 30 seconds)
 
       system.stop(firstStep)
       system.stop(workers)

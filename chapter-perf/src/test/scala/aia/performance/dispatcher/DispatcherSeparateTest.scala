@@ -10,7 +10,7 @@ import aia.performance.{SystemMessage, ProcessRequest, PrintMsg}
 import aia.performance.monitor.{MonitorActor, MailboxStatistics, ActorStatistics, MonitorStatisticsActor}
 import concurrent.duration._
 
-class DispatcherSeperateTest extends WordSpecLike
+class DispatcherSeparateTest extends WordSpecLike
   with BeforeAndAfterAll
   with MustMatchers {
 
@@ -50,7 +50,7 @@ class DispatcherSeperateTest extends WordSpecLike
       }
       Thread.sleep(10000)
       printer ! "print"
-      val msg = end.receiveN(n = nrMessages, max = 30 seconds)
+      end.receiveN(n = nrMessages, max = 30 seconds)
 
       system.stop(firstStep)
       system.stop(workers)

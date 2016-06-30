@@ -7,24 +7,33 @@ import java.util.Queue
 import com.typesafe.config.Config
 import java.util.concurrent.ConcurrentLinkedQueue
 import akka.dispatch.MessageQueue
-
+import akka.dispatch.UnboundedMessageQueueSemantics
+import akka.event.LoggerMessageQueueSemantics
+//<start id="mailbox_statistics"/>
 case class MonitorEnvelope(queueSize: Int,
                            receiver: String,
                            entryTime: Long,
-                           handle: Envelope)
+                           handle: Envelope) //<co id="ch14-mailbox-support-2" />
 
 case class MailboxStatistics(queueSize: Int,
                              receiver: String,
                              sender: String,
                              entryTime: Long,
-                             exitTime: Long)
+                             exitTime: Long) //<co id="ch14-mailbox-support-1" />
+//<end id="mailbox_statistics"/>
 
-trait MonitorMailbox extends MessageQueue {
-  def system: ActorSystem
-  def queue: Queue[MonitorEnvelope]
-  def numberOfMessages = queue.size
-  def hasMessages = !queue.isEmpty
-  def cleanUp(owner: ActorRef, deadLetters: MessageQueue): Unit = {
+//<start id="monitor_queue"/>
+class MonitorQueue(val system: ActorSystem) 
+    extends MessageQueue
+    with UnboundedMessageQueueSemantics 
+    with LoggerMessageQueueSemantics {
+  private final val queue = new ConcurrentLinkedQueue[MonitorEnvelope]()
+
+//<start id="the_rest"/>
+  def numberOfMessages = queue.size //<co id="ch14-mailbox-support2-1" />
+  def hasMessages = !queue.isEmpty //<co id="ch14-mailbox-support2-2" />
+
+  def cleanUp(owner: ActorRef, deadLetters: MessageQueue): Unit = { //<co id="ch14-mailbox-support2-3" />
     if (hasMessages) {
       var envelope = dequeue
       while (envelope ne null) {
@@ -33,21 +42,25 @@ trait MonitorMailbox extends MessageQueue {
       }
     }
   }
+//<end id="the_rest"/>
 
+//<start id="enqueue"/>
   def enqueue(receiver: ActorRef, handle: Envelope): Unit = {
-
     val env = MonitorEnvelope(queueSize = queue.size() + 1,
       receiver = receiver.toString(),
       entryTime = System.currentTimeMillis(),
       handle = handle)
     queue add env
   }
+//<end id="enqueue"/>
+
+//<start id="dequeue"/>
   def dequeue(): Envelope = {
     val monitor = queue.poll()
     if (monitor != null) {
       monitor.handle.message match {
-        case stat: MailboxStatistics => //skip message
-        case _ => {
+        case stat: MailboxStatistics => //skip message <co id="ch14-mailbox-dequeue-1" />
+        case _ => { //<co id="ch14-mailbox-dequeue-2" />
           val stat = MailboxStatistics(
             queueSize = monitor.queueSize,
             receiver = monitor.receiver,
@@ -57,28 +70,28 @@ trait MonitorMailbox extends MessageQueue {
           system.eventStream.publish(stat)
         }
       }
-      monitor.handle
+      monitor.handle //<co id="ch14-mailbox-dequeue-3" />
     } else {
-      null
+      null //<co id="ch14-mailbox-dequeue-4" />
     }
   }
+//<end id="dequeue"/>
+
 }
+//<end id="monitor_queue"/>
 
 //<start id="ch14-mailboxType"/>
 class MonitorMailboxType(settings: ActorSystem.Settings, config: Config)
-    extends akka.dispatch.MailboxType { //<co id="ch14-mailboxType-1" />
+    extends akka.dispatch.MailboxType 
+    with ProducesMessageQueue[MonitorQueue]{ //<co id="ch14-mailboxType-1" />
 
   final override def create(owner: Option[ActorRef],
                             system: Option[ActorSystem]): MessageQueue = {
     system match {
       case Some(sys) =>
-        new ConcurrentLinkedQueue[MonitorEnvelope]() //<co id="ch14-mailboxType-2" />
-        with MonitorMailbox {
-          final def system = sys
-          final def queue: Queue[MonitorEnvelope] = this
-        }
+        new MonitorQueue(sys) //<co id="ch14-mailboxType-2" />
       case _ =>
-        throw new IllegalArgumentException("requires an system") //<co id="ch14-mailboxType-3" />
+        throw new IllegalArgumentException("requires a system") //<co id="ch14-mailboxType-3" />
     }
   }
 }
