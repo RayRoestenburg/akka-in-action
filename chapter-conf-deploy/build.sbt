@@ -19,7 +19,7 @@ enablePlugins(JavaAppPackaging)
 scriptClasspath +="../conf"
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.7"
+  val akkaVersion = "2.4.8"
   Seq(
     "com.typesafe.akka" %%  "akka-actor"      % akkaVersion,
     "com.typesafe.akka" %%  "akka-slf4j"      % akkaVersion,
