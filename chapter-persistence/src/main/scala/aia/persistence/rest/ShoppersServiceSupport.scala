@@ -1,38 +1,54 @@
 package aia.persistence.rest
 
+import com.typesafe.config.Config
+
 import scala.concurrent.duration._
+import scala.concurrent.Future
 
 import akka.actor._
+import akka.event.Logging
 import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
 
-import spray.can._
-import spray.http._
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.Http.ServerBinding
+import akka.http.scaladsl.server.Directives._
+import akka.stream.ActorMaterializer
 
 import aia.persistence._
 
-trait ShoppersServiceSupport {
+trait ShoppersServiceSupport extends RequestTimeout {
   def startService(shoppers: ActorRef)(implicit system: ActorSystem) = {
+    val config = system.settings.config
     val settings = Settings(system)
     val host = settings.http.host
     val port = settings.http.port
 
-    val service = system.actorOf(Props(new ShoppersService(shoppers)),
-      "shoppers-service")
+    implicit val ec = system.dispatcher  //bindAndHandle requires an implicit ExecutionContext
 
-    implicit val executionContext = system.dispatcher
-    implicit val timeout = Timeout(10 seconds)
+    val api = new ShoppersService(shoppers, system, requestTimeout(config)).routes // the RestApi provides a Route
+ 
+    implicit val materializer = ActorMaterializer()
+    val bindingFuture: Future[ServerBinding] =
+      Http().bindAndHandle(api, host, port)
+   
+    val log =  Logging(system.eventStream, "shoppers")
+    bindingFuture.map { serverBinding =>
+      log.info(s"Shoppers API bound to ${serverBinding.localAddress} ")
+    }.onFailure { 
+      case ex: Exception =>
+        log.error(ex, "Failed to bind to {}:{}!", host, port)
+        system.terminate()
+    }
+  }
+}
 
-    IO(Http).ask(Http.Bind(listener = service, interface = host, port = port))
-      .mapTo[Http.Event]
-      .map {
-        case Http.Bound(address) =>
-          println(s"Shopper service bound to $address")
-        case Http.CommandFailed(cmd) =>
-          println("Shopper service could not bind to " +
-            s"$host:$port, ${cmd.failureMessage}")
-          system.terminate()
-      }
+trait RequestTimeout {
+  import scala.concurrent.duration._
+  def requestTimeout(config: Config): Timeout = { //<co id="ch02_timeout_spray_can"/>
+    val t = config.getString("akka.http.server.request-timeout")
+    val d = Duration(t)
+    FiniteDuration(d.length, d.unit)
   }
 }

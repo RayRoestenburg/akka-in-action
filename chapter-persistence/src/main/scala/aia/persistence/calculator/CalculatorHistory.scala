@@ -3,6 +3,12 @@ package aia.persistence.calculator
 import akka.actor._
 import akka.persistence._
 
+import akka.persistence.query.PersistenceQuery
+import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
+ 
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Sink
+
 object CalculatorHistory {
   def props = Props(new CalculatorHistory)
   def name = "calculator-history"
@@ -15,16 +21,17 @@ object CalculatorHistory {
   }
 }
 
-class CalculatorHistory extends PersistentView {
+class CalculatorHistory extends Actor {
   import Calculator._
   import CalculatorHistory._
 
-  def viewId = CalculatorHistory.name
-
-  def persistenceId = Calculator.name
+  val queries = PersistenceQuery(context.system).readJournalFor[LeveldbReadJournal](
+    LeveldbReadJournal.Identifier)
+  implicit val materializer = ActorMaterializer()
+  queries.eventsByPersistenceId(Calculator.name).runWith(Sink.actorRef(self, None))
 
   var history = History()
-
+  
   def receive = {
     case event: Added => history = history.incrementAdded
     case event: Subtracted => history = history.incrementSubtracted

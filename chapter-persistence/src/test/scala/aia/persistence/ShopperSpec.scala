@@ -46,7 +46,7 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       killActors(shopperResurrected)
     }
 
-    "pay for items in the shopping basket and view the payment history" in {
+    "pay for items in the shopping basket" in { // and view the payment history" in {
       val probe = TestProbe()
       system.eventStream.subscribe(probe.ref, classOf[Wallet.Paid])
 
@@ -61,15 +61,15 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       shopper ! Shopper.PayBasket(shopperId)
       probe.expectMsg(Wallet.Paid(List(appleKeyboard), shopperId))
 
-      val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
-        PaymentHistory.name(shopperId))
-      paymentHistory ! PaymentHistory.GetHistory
+      // val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
+      //   PaymentHistory.name(shopperId))
+      // paymentHistory ! PaymentHistory.GetHistory
 
-      expectMsg(PaymentHistory.History(
-        List(appleKeyboard, displays, macPro, appleMouse)
-      ))
+      // expectMsg(PaymentHistory.History(
+      //   List(appleKeyboard, displays, macPro, appleMouse)
+      // ))
 
-      killActors(shopper, paymentHistory)
+      killActors(shopper)//, paymentHistory)
     }
 
     "start with an empty basket after payment, wallet and history intact" in {
@@ -78,18 +78,18 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       shopperResurrected ! Basket.GetItems(shopperId)
       expectMsg(Items())
 
-      val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
-        PaymentHistory.name(shopperId))
-      paymentHistory ! PaymentHistory.GetHistory
+      // val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
+      //   PaymentHistory.name(shopperId))
+      // paymentHistory ! PaymentHistory.GetHistory
 
-      expectMsg(PaymentHistory.History(
-        List(appleKeyboard, displays, macPro, appleMouse)
-      ))
+      // expectMsg(PaymentHistory.History(
+      //   List(appleKeyboard, displays, macPro, appleMouse)
+      // ))
 
       shopperResurrected ! Wallet.SpentHowMuch(shopperId)
 
       expectMsg(expectedTotalSpend)
-      killActors(shopperResurrected, paymentHistory)
+      killActors(shopperResurrected)//, paymentHistory)
      }
 
     "not be able to spend more than the cash in the pocket" in {
@@ -107,15 +107,15 @@ class ShopperSpec extends PersistenceSpec(ActorSystem("test"))
       shopperResurrected ! Wallet.Check(shopperId)
       expectMsg(Wallet.Cash(left))
 
-      val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
-        PaymentHistory.name(shopperId))
-      paymentHistory ! PaymentHistory.GetHistory
+      // val paymentHistory = system.actorOf(PaymentHistory.props(shopperId),
+      //   PaymentHistory.name(shopperId))
+      // paymentHistory ! PaymentHistory.GetHistory
 
-      expectMsg(PaymentHistory.History(
-        List(appleKeyboard, displays, macPro, appleMouse)
-      ))
+      // expectMsg(PaymentHistory.History(
+      //   List(appleKeyboard, displays, macPro, appleMouse)
+      // ))
 
-      killActors(shopperResurrected, paymentHistory)
+      killActors(shopperResurrected)//, paymentHistory)
      }
   }
 }

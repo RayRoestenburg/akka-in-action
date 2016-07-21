@@ -7,9 +7,6 @@ import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
 
-import spray.can._
-import spray.http._
-
 import aia.persistence.rest.ShoppersServiceSupport
 
 object SingletonMain extends App with ShoppersServiceSupport {

@@ -8,29 +8,24 @@ import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
 
-import spray.http.StatusCodes._
-import spray.httpx.SprayJsonSupport._
-import spray.json._
+import akka.stream._
+import akka.stream.scaladsl._
 
-import spray.routing._
-import spray.routing.directives._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.marshalling.Marshal
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server._
+import spray.json._
 
 import aia.persistence._
 
-class ShoppersService(val shoppers: ActorRef) extends HttpServiceActor
-    with ShoppersRoutes {
-  def receive = runRoute(routes)
-  val timeoutConfigValue = context
-    .system
-    .settings
-    .config
-    .getString("spray.can.server.request-timeout")
-  val timeout = Timeout(Duration(timeoutConfigValue).toMillis, MILLISECONDS)
-  val executionContext = context.dispatcher
+class ShoppersService(val shoppers: ActorRef, val system: ActorSystem, val requestTimeout: Timeout) extends ShoppersRoutes {
+  val executionContext = system.dispatcher
 }
 //<start id="persistence-shoppersRoutes"/>
-trait ShoppersRoutes extends HttpService
-    with ShopperMarshalling {
+trait ShoppersRoutes extends ShopperMarshalling {
   def routes =
     deleteItem ~
     updateItem ~
@@ -41,7 +36,7 @@ trait ShoppersRoutes extends HttpService
 
   def shoppers: ActorRef
 
-  implicit def timeout: Timeout
+  implicit def requestTimeout: Timeout
   implicit def executionContext: ExecutionContext
 
   def pay = {
