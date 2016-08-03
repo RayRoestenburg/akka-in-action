@@ -2,7 +2,10 @@ package aia.persistence
 //<start id="persistence-shoppers-singleton"/>
 
 import akka.actor._
-import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings}
+import akka.cluster.singleton.ClusterSingletonManager
+import akka.cluster.singleton.ClusterSingletonManagerSettings
+import akka.cluster.singleton.ClusterSingletonProxy
+import akka.cluster.singleton.ClusterSingletonProxySettings
 import akka.persistence._
 
 object ShoppersSingleton {
@@ -16,14 +19,19 @@ class ShoppersSingleton extends Actor {
     ClusterSingletonManager.props(
       Shoppers.props,
       PoisonPill,
-      ClusterSingletonManagerSettings(context.system).withRole(None).withSingletonName(Shoppers.name)
+      ClusterSingletonManagerSettings(context.system)
+        .withRole(None)
+        .withSingletonName(Shoppers.name)
     )
   )
 
   val shoppers = context.system.actorOf(
     ClusterSingletonProxy.props(
-      singletonManager.path.child(Shoppers.name).toStringWithoutAddress,
-      ClusterSingletonProxySettings(context.system).withRole(None).withSingletonName("shoppers-proxy")
+      singletonManager.path.child(Shoppers.name)
+        .toStringWithoutAddress,
+      ClusterSingletonProxySettings(context.system)
+        .withRole(None)
+        .withSingletonName("shoppers-proxy")
     )
   )
 
@@ -50,7 +58,10 @@ class Shoppers extends PersistentActor
 
   def receiveCommand = forwardToShopper
 
-  override def createAndForward(cmd: Shopper.Command, shopperId: Long) = {
+  override def createAndForward(
+    cmd: Shopper.Command, 
+    shopperId: Long
+  ) = {
     val shopper = createShopper(shopperId)
     persistAsync(ShopperCreated(shopperId)) { _ =>
       forwardCommand(cmd)(shopper)

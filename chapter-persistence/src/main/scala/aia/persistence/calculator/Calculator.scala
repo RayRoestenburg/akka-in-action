@@ -62,17 +62,17 @@ class Calculator extends PersistentActor with ActorLogging {
     case Divide(value)   => if(value != 0) persist(Divided(value))(updateState)
     case Multiply(value) => persist(Multiplied(value))(updateState)
     case PrintResult     => println(s"the result is: ${state.result}")
-    case GetResult     => sender() ! state.result
-    case Clear => persist(Reset)(updateState)
+    case GetResult       => sender() ! state.result
+    case Clear           => persist(Reset)(updateState)
   }
   //<end id="persistence-receive_command_calc"/>
 
   //<start id="persistence-update_state_calc"/>
   val updateState: Event => Unit = {
-    case Reset => state = state.reset
-    case Added(value) => state = state.add(value)
+    case Reset             => state = state.reset
+    case Added(value)      => state = state.add(value)
     case Subtracted(value) => state = state.subtract(value)
-    case Divided(value) => state = state.divide(value)
+    case Divided(value)    => state = state.divide(value)
     case Multiplied(value) => state = state.multiply(value)
   }
   //<end id="persistence-update_state_calc"/>
