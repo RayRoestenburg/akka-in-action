@@ -2,7 +2,7 @@ package aia.stream
 
 import akka.NotUsed
 import akka.stream.scaladsl.Framing
-import akka.stream.io.JsonFraming
+import akka.stream.scaladsl.JsonFraming
 
 import akka.http.scaladsl.model.HttpCharsets._
 import akka.http.scaladsl.model.MediaTypes._

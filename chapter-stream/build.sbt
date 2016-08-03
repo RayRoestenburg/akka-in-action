@@ -7,7 +7,7 @@ version := "1.0"
 organization := "com.manning"
 
 libraryDependencies ++= {
-  val version = "2.4.7"
+  val version = "2.4.9"
   Seq(
     "com.typesafe.akka" %% "akka-actor" % version,
     //<start id="stream-dependencies">

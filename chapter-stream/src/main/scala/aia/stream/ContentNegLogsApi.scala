@@ -18,6 +18,7 @@ import akka.util.ByteString
 import akka.stream.{ ActorAttributes, ActorMaterializer, IOResult }
 import akka.stream.scaladsl.{ FileIO, BidiFlow, Flow, Framing, Keep, Sink, Source }
 
+import akka.http.scaladsl.common.EntityStreamingSupport
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._

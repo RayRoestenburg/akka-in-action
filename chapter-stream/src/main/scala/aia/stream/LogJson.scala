@@ -14,7 +14,7 @@ import akka.actor._
 import akka.util.ByteString
 
 import akka.stream.{ ActorAttributes, ActorMaterializer, IOResult }
-import akka.stream.io.JsonFraming
+import akka.stream.scaladsl.JsonFraming
 import akka.stream.scaladsl.{ FileIO, BidiFlow, Flow, Framing, Keep, Sink, Source }
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -35,12 +35,12 @@ object LogJson extends EventMarshalling
   }
 
   def jsonInFlow(maxJsonObject: Int) = {
-    JsonFraming.json(maxJsonObject) 
+    JsonFraming.objectScanner(maxJsonObject) 
       .map(_.decodeString("UTF8").parseJson.convertTo[Event])
   }
 
   def jsonFramed(maxJsonObject: Int) =
-    JsonFraming.json(maxJsonObject) 
+    JsonFraming.objectScanner(maxJsonObject) 
 
   val jsonOutFlow = Flow[Event].map { event => 
     ByteString(event.toJson.compactPrint)

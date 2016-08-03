@@ -11,7 +11,7 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.{ ActorMaterializer, IOResult }
 import akka.stream.scaladsl._
-import akka.stream.io.JsonFraming
+import akka.stream.scaladsl.JsonFraming
 import akka.util.ByteString
 
 import spray.json._
@@ -39,7 +39,7 @@ object BidiEventFilter extends App with EventMarshalling {
   //<start id="event-bidi-flow"/>
   val inFlow: Flow[ByteString, Event, NotUsed] = 
     if(args(0).toLowerCase == "json") {
-      JsonFraming.json(maxJsonObject) //<co id="json-framing"/>
+      JsonFraming.objectScanner(maxJsonObject) //<co id="json-framing"/>
       .map(_.decodeString("UTF8").parseJson.convertTo[Event])
     } else {
       Framing.delimiter(ByteString("\n"), maxLine)

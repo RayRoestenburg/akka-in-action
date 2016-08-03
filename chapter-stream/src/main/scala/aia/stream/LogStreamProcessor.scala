@@ -80,7 +80,7 @@ object LogStreamProcessor extends EventMarshalling {
    * Returns a Source of JSON Strings from a Source of chunked ByteStrings.
    */
   def jsonText[T](source: Source[ByteString, T], maxObject: Int): Source[String, T] =
-   convertToString(source.via(akka.stream.io.JsonFraming.json(maxObject)))
+   convertToString(source.via(akka.stream.scaladsl.JsonFraming.objectScanner(maxObject)))
 
   /** 
    * Returns a Source of [[Event]]s from a Source of framed ByteStrings.

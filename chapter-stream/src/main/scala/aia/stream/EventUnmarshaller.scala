@@ -3,7 +3,7 @@ package aia.stream
 import scala.concurrent.{ ExecutionContext, Future }
 import akka.NotUsed
 import akka.stream.scaladsl.Framing
-import akka.stream.io.JsonFraming
+import akka.stream.scaladsl.JsonFraming
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 
