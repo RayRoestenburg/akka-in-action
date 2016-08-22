@@ -7,7 +7,7 @@ version := "1.0"
 organization := "com.goticks" //<co id="example-app-info"/>
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.8" //<co id="akkaVersion"/>
+  val akkaVersion = "2.4.9" //<co id="akkaVersion"/>
   Seq(
     "com.typesafe.akka" %% "akka-actor"      % akkaVersion, //<co id="actorDep"/>
     "com.typesafe.akka" %% "akka-http-core"  % akkaVersion, 
