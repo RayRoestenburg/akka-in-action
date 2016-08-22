@@ -26,12 +26,12 @@ object LogEntityMarshaller extends EventMarshalling {
     val txt = ContentTypes.`text/plain(UTF-8)`
 
     val jsMarshaller = Marshaller.withFixedContentType(js) { //<co id="jsMarshaller"/>
-      src:Source[ByteString, _] ⇒
+      src:Source[ByteString, _] =>
       HttpEntity(js, src)
     }
 
     val txtMarshaller = Marshaller.withFixedContentType(txt) { //<co id="txtMarshaller"/>
-      src:Source[ByteString, _] ⇒ 
+      src:Source[ByteString, _] => 
       HttpEntity(txt, toText(src, maxJsonObject))
     }
 
