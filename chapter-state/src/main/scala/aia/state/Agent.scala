@@ -17,7 +17,7 @@ class BookStatisticsMgr(system: ActorSystem) {
   implicit val ex = system.dispatcher //todo: change chapter 2.2 =>2.3
   val stateAgent = Agent(new StateBookStatistics(0, Map())) //todo: change chapter 2.2 =>2.3
 
-  def addBooksSold(book: String, nrSold: Int) {
+  def addBooksSold(book: String, nrSold: Int): Unit = {
     stateAgent send (oldState => {
       val bookStat = oldState.books.get(book) match {
         case Some(bookState) =>

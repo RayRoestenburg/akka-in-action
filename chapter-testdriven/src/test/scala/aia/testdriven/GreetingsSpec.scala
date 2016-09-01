@@ -32,7 +32,7 @@
 //    }
 //  }
 //
-//  override protected def afterAll() {
+//  override protected def afterAll(): Unit = {
 //    system.terminate()
 //  }
 //

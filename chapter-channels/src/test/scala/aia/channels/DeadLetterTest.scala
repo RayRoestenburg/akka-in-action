@@ -9,7 +9,7 @@ class DeadLetterTest extends TestKit(ActorSystem("DeadLetterTest"))
   with WordSpecLike with BeforeAndAfterAll with MustMatchers
   with ImplicitSender {
 
-  override def afterAll() {
+  override def afterAll()  {
     system.terminate()
   }
 

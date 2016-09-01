@@ -14,7 +14,7 @@ class ScatterGatherTest
   with WordSpecLike
   with BeforeAndAfterAll {
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
 

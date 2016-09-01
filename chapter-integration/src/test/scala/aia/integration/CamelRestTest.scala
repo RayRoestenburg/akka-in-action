@@ -16,7 +16,7 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
   implicit val timeout: Timeout = 10 seconds
   implicit val executor = system.dispatcher
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
 

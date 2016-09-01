@@ -6,7 +6,7 @@ import akka.actor._
 
 class LifeCycleHooksTest extends TestKit(ActorSystem("LifCycleTest")) with WordSpecLike with BeforeAndAfterAll {
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
 

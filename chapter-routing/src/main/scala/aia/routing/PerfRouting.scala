@@ -9,7 +9,7 @@ class TestSuper() extends Actor {
     case _ => throw new IllegalArgumentException("not supported")
   }
 
-  override def preRestart(reason: Throwable, message: Option[Any]) {
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     super.preRestart(reason, message)
     println("restart %s".format(self.path.toString))
   }
@@ -18,7 +18,7 @@ class TestSuper() extends Actor {
 class GetLicenseCreator(nrActors: Int, nextStep: ActorRef) extends Actor {
   var createdActors = Seq[ActorRef]()
 
-  override def preStart() {
+  override def preStart(): Unit = {
     super.preStart()
     createdActors = (0 until  nrActors).map(nr => {
       context.actorOf(Props(new GetLicense(nextStep)), "GetLicense"+nr)
@@ -33,7 +33,7 @@ class GetLicenseCreator(nrActors: Int, nextStep: ActorRef) extends Actor {
     case _ => throw new IllegalArgumentException("not supported")
   }
 
-  override def preRestart(reason: Throwable, message: Option[Any]) {
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     super.preRestart(reason, message)
     println("restart %s".format(self.path.toString))
   }
@@ -41,7 +41,7 @@ class GetLicenseCreator(nrActors: Int, nextStep: ActorRef) extends Actor {
 
 class GetLicenseCreator2(nrActors: Int, nextStep: ActorRef) extends Actor {
   //restart children
-  override def preStart() {
+  override def preStart(): Unit = {
     super.preStart()
     (0 until  nrActors).map(nr => {
       val child = context.actorOf(Props(new GetLicense(nextStep)), "GetLicense"+nr)
@@ -61,7 +61,7 @@ class GetLicenseCreator2(nrActors: Int, nextStep: ActorRef) extends Actor {
     }
   }
 
-  override def preRestart(reason: Throwable, message: Option[Any]) {
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     super.preRestart(reason, message)
     println("restart %s".format(self.path.toString))
   }
@@ -73,12 +73,12 @@ class WrongDynamicRouteeSizer(nrActors: Int, props: Props, router: ActorRef) ext
   var nrChildren = nrActors
 
   //restart children
-  override def preStart() {
+  override def preStart(): Unit = {
     super.preStart()
     (0 until  nrChildren).map(nr => createRoutee())
   }
 
-  def createRoutee() {
+  def createRoutee(): Unit = {
     val child = context.actorOf(props)
     router ! AddRoutee(ActorRefRoutee(child))
   }
@@ -111,7 +111,7 @@ class WrongDynamicRouteeSizer(nrActors: Int, props: Props, router: ActorRef) ext
     }
   }
 
-  override def preRestart(reason: Throwable, message: Option[Any]) {
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     super.preRestart(reason, message)
     println("restart %s".format(self.path.toString))
   }
@@ -125,12 +125,12 @@ class DynamicRouteeSizer(nrActors: Int,
   var childInstanceNr = 0
 
   //restart children
-  override def preStart() {                                             //<co id="ch09-group-sizer-example-1" />
+  override def preStart(): Unit = {                                             //<co id="ch09-group-sizer-example-1" />
     super.preStart()
     (0 until  nrChildren).map(nr => createRoutee())
   }
 
-  def createRoutee() {
+  def createRoutee(): Unit = {
     childInstanceNr += 1
     val child = context.actorOf(props, "routee" + childInstanceNr)
     val selection = context.actorSelection(child.path)
@@ -185,12 +185,12 @@ class DynamicRouteeSizer2(nrActors: Int, props: Props, router: ActorRef) extends
   var nrChildren = nrActors
 
   //restart children
-  override def preStart() {
+  override def preStart(): Unit = {
     super.preStart()
     (0 until  nrChildren).map(nr => createRoutee())
   }
 
-  def createRoutee() {
+  def createRoutee(): Unit = {
     val child = context.actorOf(props)
     val selection = context.actorSelection(child.path)
     router ! AddRoutee(ActorSelectionRoutee(selection))
@@ -229,7 +229,7 @@ class DynamicRouteeSizer2(nrActors: Int, props: Props, router: ActorRef) extends
     }
   }
 
-  override def preRestart(reason: Throwable, message: Option[Any]) {
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     super.preRestart(reason, message)
     println("restart %s".format(self.path.toString))
   }

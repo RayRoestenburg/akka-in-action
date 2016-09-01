@@ -13,7 +13,7 @@ class AgentTest extends TestKit(ActorSystem("AgentTest"))
   with WordSpecLike with BeforeAndAfterAll with MustMatchers {
   implicit val ec = system.dispatcher
   implicit val timeout = Timeout(3 seconds)
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
 

@@ -15,7 +15,7 @@ class CancelOrder(time: Date,
 class EventStreamTest extends TestKit(ActorSystem("EventStreamTest"))
   with WordSpecLike with BeforeAndAfterAll with MustMatchers {
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
 

@@ -13,7 +13,7 @@ class AggregatorTest
   extends TestKit(ActorSystem("AggregatorTest"))
   with WordSpecLike with BeforeAndAfterAll {
 
-  protected override def afterAll() {
+  protected override def afterAll(): Unit = {
     system.terminate()
   }
 

@@ -92,7 +92,7 @@ class OrderConsumerRest(uri: String, next: ActorRef)
   //<end id="ch08-rest-camel-recv"/>
 
   //<start id="ch08-rest-camel-procOrder"/>
-  def processOrder(content: String) {
+  def processOrder(content: String): Unit = {
     implicit val timeout: Timeout = 1 second
     implicit val ExecutionContext = context.system.dispatcher
     val order = createOrder(content)
@@ -127,7 +127,7 @@ class OrderConsumerRest(uri: String, next: ActorRef)
   }
   //<end id="ch08-rest-camel-procOrder"/>
   //<start id="ch08-rest-camel-procStatus"/>
-  def processStatus(id: String) {
+  def processStatus(id: String): Unit = {
     implicit val timeout: Timeout = 1 second
     implicit val ExecutionContext = context.system.dispatcher
 

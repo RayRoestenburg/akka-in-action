@@ -177,7 +177,7 @@ package dbstrategy3 {
     case class SourceAbandoned(uri: String)
   }
   trait FileWatchingAbilities {
-    def register(uri: String) {
+    def register(uri: String): Unit = {
 
     }
   }

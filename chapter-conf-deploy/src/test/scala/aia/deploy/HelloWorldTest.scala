@@ -13,7 +13,7 @@ class HelloWorldTest extends TestKit(ActorSystem("HelloWorldTest"))
 
   val actor = TestActorRef[HelloWorld]
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
   "HelloWorld" must {

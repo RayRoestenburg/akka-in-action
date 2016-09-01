@@ -14,7 +14,7 @@ class InventoryTest extends TestKit(ActorSystem("InventoryTest"))
   with WordSpecLike with BeforeAndAfterAll with MustMatchers
   with ImplicitSender {
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
 

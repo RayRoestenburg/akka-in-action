@@ -82,7 +82,7 @@ class Aggregator(timeout: FiniteDuration, pipe: ActorRef)
 
   val messages = new ListBuffer[PhotoMessage]
   implicit val ec = context.system.dispatcher
-  override def preRestart(reason: Throwable, message: Option[Any]) {
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     super.preRestart(reason, message)
     messages.foreach(self ! _) //<co id="ch07-scatter-gather-aggregator3-1" />
     messages.clear()

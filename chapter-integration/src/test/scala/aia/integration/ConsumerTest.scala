@@ -21,7 +21,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
 
   val dir = new File("messages")
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
     if (!dir.exists()) {
       dir.mkdir()
     }
@@ -31,7 +31,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       FileUtils.deleteDirectory(mqData)
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
     FileUtils.deleteDirectory(dir)
   }
@@ -320,7 +320,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       //<end id="ch08-order-producer-test-confirm"/>
     }
   }
-  def sendMQMessage(msg: String) {
+  def sendMQMessage(msg: String): Unit = {
     // Create a ConnectionFactory
     val connectionFactory =
       new ActiveMQConnectionFactory("tcp://localhost:8899");

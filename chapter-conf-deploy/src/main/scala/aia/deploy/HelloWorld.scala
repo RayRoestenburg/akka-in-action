@@ -22,7 +22,7 @@ class HelloWorldCaller(timer: FiniteDuration, actor: ActorRef)
 
   case class TimerTick(msg: String)
 
-  override def preStart() {
+  override def preStart(): Unit = {
     super.preStart()
     implicit val ec = context.dispatcher
     context.system.scheduler.schedule(   //<co id="ch07-schedule-1"/>

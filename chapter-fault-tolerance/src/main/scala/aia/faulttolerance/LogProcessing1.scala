@@ -183,7 +183,7 @@ package dbstrategy1 {
   }
 
   trait FileWatchingAbilities {
-    def register(uri: String) {
+    def register(uri: String): Unit = {
 
     }
   }

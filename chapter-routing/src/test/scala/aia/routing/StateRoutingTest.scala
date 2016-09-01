@@ -10,7 +10,7 @@ class StateRoutingTest
   extends TestKit(ActorSystem("StateRoutingTest"))
   with WordSpecLike with BeforeAndAfterAll {
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     system.terminate()
   }
 

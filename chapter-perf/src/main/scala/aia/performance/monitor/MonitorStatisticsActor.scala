@@ -20,7 +20,7 @@ class MonitorStatisticsActor(period: Duration, processMargin: Long,
     }
   }
 
-  private def process(processTime: Long) {
+  private def process(processTime: Long): Unit = {
     val exceededPeriod = processTime % period.toMillis
     //make sure we have received all events for each period
     val currentPeriod = if (exceededPeriod > processMargin)
@@ -42,7 +42,7 @@ class MonitorStatisticsActor(period: Duration, processMargin: Long,
     }
   }
 
-  private def processPeriod(periodNr: Long) {
+  private def processPeriod(periodNr: Long): Unit = {
     val startTimePeriod = periodNr * period.toMillis
     val endTimePeriod = startTimePeriod + period.toMillis
     //filter events for period
