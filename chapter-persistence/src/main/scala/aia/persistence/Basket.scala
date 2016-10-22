@@ -7,14 +7,14 @@ object Basket {
   def props = Props(new Basket)
   def name(shopperId: Long) = s"basket_${shopperId}"
 
-//<start id="persistence-basket-messages"/>
-  sealed trait Command extends Shopper.Command //<co id="extend_shopper_command"/>
+
+  sealed trait Command extends Shopper.Command
   case class Add(item: Item, shopperId: Long) extends Command
   case class RemoveItem(productId: String, shopperId: Long) extends Command
   case class UpdateItem(productId: String,
                         number: Int,
                         shopperId: Long) extends Command
-  case class Clear(shopperId: Long) extends Command //<co id="clear_basket_command"/>
+  case class Clear(shopperId: Long) extends Command
   case class Replace(items: Items, shopperId: Long) extends Command
   case class GetItems(shopperId: Long) extends Command
 
@@ -26,10 +26,10 @@ object Basket {
   case class ItemRemoved(productId: String) extends Event
   case class ItemUpdated(productId: String, number: Int) extends Event
   case class Replaced(items: Items) extends Event
-  case class Cleared(clearedItems: Items) extends Event //<co id="cleared_basket_event"/>
+  case class Cleared(clearedItems: Items) extends Event
 
   case class Snapshot(items: Items)
-//<end id="persistence-basket-messages"/>
+
 }
 
 class Basket extends PersistentActor
@@ -42,18 +42,18 @@ class Basket extends PersistentActor
 
   override def persistenceId = s"${self.path.name}"
 
-//<start id="persistence-basket-receiveRecover"/>
+
   def receiveRecover = {
     case event: Event =>
       nrEventsRecovered = nrEventsRecovered + 1
       updateState(event)
-    case SnapshotOffer(_, snapshot: Basket.Snapshot) => //<co id="recover_from_snapshot"/>
+    case SnapshotOffer(_, snapshot: Basket.Snapshot) =>
       log.info(s"Recovering baskets from snapshot: $snapshot for $persistenceId")
       items = snapshot.items
   }
-//<end id="persistence-basket-receiveRecover"/>
 
-//<start id="persistence-basket-receiveCommand"/>
+
+
   def receiveCommand = {
     case Add(item, _) =>
       persist(Added(item))(updateState)
@@ -85,21 +85,21 @@ class Basket extends PersistentActor
       persist(Cleared(items)){ e =>
         updateState(e)
         //basket is cleared after payment.
-        saveSnapshot(Basket.Snapshot(items)) //<co id="save_snapshot"/>
+        saveSnapshot(Basket.Snapshot(items))
       }
 
     case GetItems(_) =>
       sender() ! items
     case CountRecoveredEvents(_) =>
       sender() ! RecoveredEventsCount(nrEventsRecovered)
-    case SaveSnapshotSuccess(metadata) => //<co id="save_snapshot_success"/>
+    case SaveSnapshotSuccess(metadata) =>
       log.info(s"Snapshot saved with metadata $metadata")
-    case SaveSnapshotFailure(metadata, reason) => //<co id="save_snapshot_failure"/>
+    case SaveSnapshotFailure(metadata, reason) =>
       log.error(s"Failed to save snapshot: $metadata, $reason.")
   }
-  //<end id="persistence-basket-receiveCommand"/>
 
-  //<start id="persistence-basket-updateState"/>
+
+
   private val updateState: (Event => Unit) = {
     case Added(item)             => items = items.add(item)
     case ItemRemoved(id)         => items = items.removeItem(id)
@@ -107,5 +107,5 @@ class Basket extends PersistentActor
     case Replaced(newItems)      => items = newItems
     case Cleared(clearedItems)   => items = items.clear
   }
-  //<end id="persistence-basket-updateState"/>
+
 }

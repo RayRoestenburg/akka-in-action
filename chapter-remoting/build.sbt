@@ -13,10 +13,10 @@ libraryDependencies ++= {
   Seq(
     "com.typesafe.akka" %%  "akka-actor"              % akkaVersion,
     "com.typesafe.akka" %%  "akka-slf4j"              % akkaVersion,
-//<start id="remote_dependencies"/>
-    "com.typesafe.akka" %%  "akka-remote"             % akkaVersion, //<co id="remote"/>
-    "com.typesafe.akka" %%  "akka-multi-node-testkit" % akkaVersion % "test", //<co id="multinode"/>
-//<end id="remote_dependencies"/>
+
+    "com.typesafe.akka" %%  "akka-remote"             % akkaVersion,
+    "com.typesafe.akka" %%  "akka-multi-node-testkit" % akkaVersion % "test",
+
     "com.typesafe.akka" %%  "akka-testkit"                       % akkaVersion % "test",
     "org.scalatest"     %%  "scalatest"                          % "2.2.6"     % "test",
     "com.typesafe.akka" %%  "akka-http-core"                     % akkaVersion, 

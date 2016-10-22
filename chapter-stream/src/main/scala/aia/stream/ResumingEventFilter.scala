@@ -44,22 +44,22 @@ object ResumingEventFilter extends App with EventMarshalling {
     Framing.delimiter(ByteString("\n"), maxLine) 
       .map(_.decodeString("UTF8"))
 
-  //<start id="resume-parse"/>
+
   import akka.stream.ActorAttributes
   import akka.stream.Supervision
 
   import LogStreamProcessor.LogParseException
 
-  val decider : Supervision.Decider = { //<co id="parse_string_supervise_decider"/>
-    case _: LogParseException => Supervision.Resume //<co id="parse_string_supervise_resume"/>
+  val decider : Supervision.Decider = {
+    case _: LogParseException => Supervision.Resume
     case _                    => Supervision.Stop
   }
 
   val parse: Flow[String, Event, NotUsed] = 
     Flow[String].map(LogStreamProcessor.parseLineEx) 
       .collect { case Some(e) => e }
-      .withAttributes(ActorAttributes.supervisionStrategy(decider)) //<co id="parse_string_supervise_attributes"/>
-  //<end id="resume-parse"/>
+      .withAttributes(ActorAttributes.supervisionStrategy(decider))
+
 
   val filter: Flow[Event, Event, NotUsed] =   
     Flow[Event].filter(_.state == filterState)
@@ -70,7 +70,7 @@ object ResumingEventFilter extends App with EventMarshalling {
   implicit val system = ActorSystem() 
   implicit val ec = system.dispatcher
 
-  //<start id="graph-resume-parse"/>
+
   val graphDecider : Supervision.Decider = { 
     case _: LogParseException => Supervision.Resume
     case _                    => Supervision.Stop
@@ -79,11 +79,11 @@ object ResumingEventFilter extends App with EventMarshalling {
   import akka.stream.ActorMaterializerSettings
   implicit val materializer = ActorMaterializer(
     ActorMaterializerSettings(system)
-      .withSupervisionStrategy(graphDecider) //<co id="actor_materializer_settings_supervision_strategy"/>
+      .withSupervisionStrategy(graphDecider)
   )
-  //<end id="graph-resume-parse"/>
 
-  //<start id="composed-event-filter"/>
+
+
   val composedFlow: Flow[ByteString, ByteString, NotUsed] =  
     frame.via(parse)
       .via(filter)
@@ -96,5 +96,5 @@ object ResumingEventFilter extends App with EventMarshalling {
     println(s"Wrote ${result.count} bytes to '$outputFile'.")
     system.terminate()
   }  
-  //<end id="composed-event-filter"/>
+
 }

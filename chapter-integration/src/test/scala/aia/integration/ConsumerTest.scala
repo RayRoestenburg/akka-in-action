@@ -38,40 +38,40 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
 
   "Consumer" must {
     "pickup xml files" in {
-      //<start id="ch08-order-consumer-test-create"/>
+
       val probe = TestProbe()
       val camelUri = "file:messages"
       val consumer = system.actorOf(
         Props(new OrderConsumerXml(camelUri, probe.ref)))
-      //<end id="ch08-order-consumer-test-create"/>
 
-      //<start id="ch08-order-consumer-test-wait"/>
-      val camelExtention = CamelExtension(system) //<co id="ch08-order-consumer-test-0"/>
-      val activated = camelExtention.activationFutureFor( //<co id="ch08-order-consumer-test-1"/>
+
+
+      val camelExtention = CamelExtension(system)
+      val activated = camelExtention.activationFutureFor(
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
-      Await.ready(activated, 5 seconds) //<co id="ch08-order-consumer-test-2"/>
-      //<end id="ch08-order-consumer-test-wait"/>
-      //<start id="ch08-order-consumer-test"/>
+      Await.ready(activated, 5 seconds)
+
+
       val msg = new Order("me", "Akka in Action", 10)
       val xml = <order>
                   <customerId>{ msg.customerId }</customerId>
                   <productId>{ msg.productId }</productId>
                   <number>{ msg.number }</number>
-                </order> //<co id="ch08-order-consumer-test-3"/>
+                </order>
       val msgFile = new File(dir, "msg1.xml")
 
-      FileUtils.write(msgFile, xml.toString()) //<co id="ch08-order-consumer-test-4"/>
+      FileUtils.write(msgFile, xml.toString())
 
-      probe.expectMsg(msg) //<co id="ch08-order-consumer-test-5"/>
+      probe.expectMsg(msg)
 
       system.stop(consumer)
-      //<end id="ch08-order-consumer-test"/>
+
     }
     "pickup xml TCPConnection" in {
-      //<start id="ch08-order-consumer-test-tcp"/>
+
       val probe = TestProbe()
       val camelUri =
-        "mina:tcp://localhost:8888?textline=true&sync=false" //<co id="ch08-order-consumer-test-tcp-1"/>
+        "mina:tcp://localhost:8888?textline=true&sync=false"
       val consumer = system.actorOf(
         Props(new OrderConsumerXml(camelUri, probe.ref)))
       val activated = CamelExtension(system).activationFutureFor(
@@ -85,23 +85,23 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
                   <number>{ msg.number }</number>
                 </order>
 
-      val xmlStr = xml.toString().replace("\n", "") //<co id="ch08-order-consumer-test-tcp-2"/>
+      val xmlStr = xml.toString().replace("\n", "")
       val sock = new Socket("localhost", 8888)
       val ouputWriter = new PrintWriter(sock.getOutputStream, true)
-      ouputWriter.println(xmlStr) //<co id="ch08-order-consumer-test-tcp-3"/>
+      ouputWriter.println(xmlStr)
       ouputWriter.flush()
 
       probe.expectMsg(msg)
 
       ouputWriter.close()
       system.stop(consumer)
-      //<end id="ch08-order-consumer-test-tcp"/>
+
     }
     "confirm xml TCPConnection" in {
-      //<start id="ch08-order-consumer-test-confirm"/>
+
       val probe = TestProbe()
       val camelUri =
-        "mina:tcp://localhost:8887?textline=true" //<co id="ch08-order-consumer-test-confirm-1"/>
+        "mina:tcp://localhost:8887?textline=true"
       val consumer = system.actorOf(
         Props(new OrderConfirmConsumerXml(camelUri, probe.ref)))
       val activated = CamelExtension(system).activationFutureFor(
@@ -122,27 +122,27 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       ouputWriter.flush()
       val responseReader = new BufferedReader(
         new InputStreamReader(sock.getInputStream))
-      val response = responseReader.readLine() //<co id="ch08-order-consumer-test-confirm-2"/>
+      val response = responseReader.readLine()
       response must be("<confirm>OK</confirm>")
-      probe.expectMsg(msg) //<co id="ch08-order-consumer-test-confirm-3"/>
+      probe.expectMsg(msg)
 
       responseReader.close()
       ouputWriter.close()
       system.stop(consumer)
-      //<end id="ch08-order-consumer-test-confirm"/>
+
     }
     "pickup xml ActiveMQ" in {
       val probe = TestProbe()
 
-      //<start id="ch08-order-consumer-test-mq-add"/>
+
       val camelContext = CamelExtension(system).context
-      camelContext.addComponent("activemq", //<co id="ch08-order-consumer-test-mq-1"/>
+      camelContext.addComponent("activemq",
         ActiveMQComponent.activeMQComponent(
           "vm:(broker:(tcp://localhost:8899)?persistent=false)"))
-      //<end id="ch08-order-consumer-test-mq-add"/>
 
-      //<start id="ch08-order-consumer-test-mq"/>
-      val camelUri = "activemq:queue:xmlTest" //<co id="ch08-order-consumer-test-mq-2"/>
+
+
+      val camelUri = "activemq:queue:xmlTest"
       val consumer = system.actorOf(
         Props(new OrderConsumerXml(camelUri, probe.ref)))
 
@@ -161,11 +161,11 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       probe.expectMsg(msg)
 
       system.stop(consumer)
-      //<end id="ch08-order-consumer-test-mq"/>
-      //<start id="ch08-order-consumer-test-mq-broker"/>
+
+
       val brokers = BrokerRegistry.getInstance().getBrokers
       brokers.foreach { case (name, broker) => broker.stop() }
-      //<end id="ch08-order-consumer-test-mq-broker"/>
+
     }
     "pickup 100 xml files" in {
       val probe = TestProbe()
@@ -225,7 +225,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
 
   "The Producer" must {
     "send msg using TCPConnection" in {
-      //<start id="ch08-order-producer-test-simple-start"/>
+
       implicit val ExecutionContext = system.dispatcher
       val probe = TestProbe()
       val camelUri = "mina:tcp://localhost:8885?textline=true"
@@ -233,15 +233,15 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
         Props(new OrderConfirmConsumerXml(camelUri, probe.ref)))
 
       val producer = system.actorOf(
-        Props(new SimpleProducer(camelUri))) //<co id="ch08-order-producer-test-1"/>
+        Props(new SimpleProducer(camelUri)))
       val activatedCons = CamelExtension(system).activationFutureFor(
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
       val activatedProd = CamelExtension(system).activationFutureFor(
         producer)(timeout = 10 seconds, executor = system.dispatcher)
-      val camel = Future.sequence(List(activatedCons, activatedProd)) //<co id="ch08-order-producer-test-2"/>
+      val camel = Future.sequence(List(activatedCons, activatedProd))
       Await.result(camel, 5 seconds)
-      //<end id="ch08-order-producer-test-simple-start"/>
-      //<start id="ch08-order-producer-test-simple"/>
+
+
       val msg = new Order("me", "Akka in Action", 10)
       val xml = <order>
                   <customerId>{ msg.customerId }</customerId>
@@ -251,16 +251,16 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
 
       val xmlStr = xml.toString().replace("\n", "")
       val probeSend = TestProbe()
-      probeSend.send(producer,xmlStr) //<co id="ch08-order-producer-test-3"/>
+      probeSend.send(producer,xmlStr)
 
-      probe.expectMsg(msg) //<co id="ch08-order-producer-test-4"/>
+      probe.expectMsg(msg)
 
       val recvMsg = probeSend.expectMsgType[CamelMessage](3.seconds)
       recvMsg.body.asInstanceOf[String] must be ("<confirm>OK</confirm>")
 
       system.stop(producer)
       system.stop(consumer)
-      //<end id="ch08-order-producer-test-simple"/>
+
 
       val deac = CamelExtension(system).deactivationFutureFor(consumer)(timeout = 10 seconds, executor = system.dispatcher)
       Await.result(deac, 5 seconds)
@@ -292,7 +292,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       system.stop(consumer)
     }
     "receive confirmation when send Xml" in {
-      //<start id="ch08-order-producer-test-confirm"/>
+
       implicit val ExecutionContext = system.dispatcher
       val probe = TestProbe()
       val camelUri ="mina:tcp://localhost:9889?textline=true"
@@ -312,12 +312,12 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       val probeSend = TestProbe()
       val msg = new Order("me", "Akka in Action", 10)
       probeSend.send(producer, msg)
-      probe.expectMsg(msg) //<co id="ch08-order-producer3-test-1"/>
-      probeSend.expectMsg("OK") //<co id="ch08-order-producer3-test-2"/>
+      probe.expectMsg(msg)
+      probeSend.expectMsg("OK")
 
       system.stop(producer)
       system.stop(consumer)
-      //<end id="ch08-order-producer-test-confirm"/>
+
     }
   }
   def sendMQMessage(msg: String): Unit = {

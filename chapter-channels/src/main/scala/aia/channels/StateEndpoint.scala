@@ -31,28 +31,28 @@ class SystemMonitor extends Actor {
   }
 }
 
-//<start id="ch09-eventBus"/>
+
 import akka.event.ActorEventBus
 import akka.event.{ LookupClassification, EventBus }
 
-class OrderMessageBus extends EventBus //<co id="ch09-eventBus-1"/>
+class OrderMessageBus extends EventBus
   with LookupClassification
   with ActorEventBus {
 
-  type Event = Order //<co id="ch09-eventBus-2"/>
+  type Event = Order
   type Classifier = Boolean
   def mapSize = 2
 
-  protected def classify(event: OrderMessageBus#Event) = { //<co id="ch09-eventBus-3"/>
+  protected def classify(event: OrderMessageBus#Event) = {
     event.number > 1
   }
 
-  protected def publish(event: OrderMessageBus#Event, //<co id="ch09-eventBus-4"/>
+  protected def publish(event: OrderMessageBus#Event,
                         subscriber: OrderMessageBus#Subscriber) {
     subscriber ! event
   }
 }
-//<end id="ch09-eventBus"/>
+
 
 class MyEventBus extends EventBus with LookupClassification
   with ActorEventBus {

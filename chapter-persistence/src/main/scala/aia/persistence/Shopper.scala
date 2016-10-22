@@ -1,5 +1,5 @@
 package aia.persistence
-//<start id="persistence-shopper"/>
+
 
 import akka.actor._
 
@@ -8,7 +8,7 @@ object Shopper {
   def name(shopperId: Long) = shopperId.toString
 
   trait Command {
-    def shopperId: Long //<co id="shopper_command"/>
+    def shopperId: Long
   }
 
   case class PayBasket(shopperId: Long) extends Command
@@ -37,7 +37,7 @@ class Shopper extends Actor {
     case Wallet.Paid(_, shopperId) => basket ! Basket.Clear(shopperId)
   }
 }
-//<end id="persistence-shopper"/>
+
 
 
 // alternative PayBasket handling:

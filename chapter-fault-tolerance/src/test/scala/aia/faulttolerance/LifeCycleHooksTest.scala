@@ -12,15 +12,15 @@ class LifeCycleHooksTest extends TestKit(ActorSystem("LifCycleTest")) with WordS
 
   "The Child" must {
     "log lifecycle hooks" in {
-      //<start id="ch3-life-test"/>
-      val testActorRef = system.actorOf( //<co id="ch3-life-test-start" />
+
+      val testActorRef = system.actorOf(
         Props[LifeCycleHooks], "LifeCycleHooks")
-      testActorRef ! "restart" //<co id="ch3-life-test-restart" />
+      testActorRef ! "restart"
       testActorRef.tell("msg", testActor)
       expectMsg("msg")
-      system.stop(testActorRef) //<co id="ch3-life-test-stop" />
+      system.stop(testActorRef)
       Thread.sleep(1000)
-      //<end id="ch3-life-test"/>
+
 
     }
   }

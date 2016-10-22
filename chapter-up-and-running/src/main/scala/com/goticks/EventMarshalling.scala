@@ -1,17 +1,17 @@
 package com.goticks
 
 import spray.json._
-//<start id="ch02_rest_messages"/>
-case class EventDescription(tickets: Int) { //<co id="ch02_rest_event_decription"/>
+
+case class EventDescription(tickets: Int) {
   require(tickets > 0)
 }
 
-case class TicketRequest(tickets: Int) { //<co id="ch02_rest_ticket_request"/>
+case class TicketRequest(tickets: Int) {
   require(tickets > 0)
 }
 
-case class Error(message: String) //<co id="ch02_rest_error"/>
-//<end id="ch02_rest_messages"/>
+case class Error(message: String)
+
 
 trait EventMarshalling  extends DefaultJsonProtocol {
   import BoxOffice._

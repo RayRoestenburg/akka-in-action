@@ -9,12 +9,12 @@ class FilteringActorTest extends TestKit(ActorSystem("testsystem"))
   with MustMatchers
   with StopSystemAfterAll {
   "A Filtering Actor" must {
-    //<start id="ch02-filteringactor-test"/>
+
     "filter out particular messages" in {
       import FilteringActor._
       val props = FilteringActor.props(testActor, 5)
       val filter = system.actorOf(props, "filter-1")
-      filter ! Event(1) //<co id="ch02-filteringactor-send"/>
+      filter ! Event(1)
       filter ! Event(2)
       filter ! Event(1)
       filter ! Event(3)
@@ -23,14 +23,14 @@ class FilteringActorTest extends TestKit(ActorSystem("testsystem"))
       filter ! Event(5)
       filter ! Event(5)
       filter ! Event(6)
-      val eventIds = receiveWhile() { //<co id="ch02-filteringactor-receiveWhile"/>
+      val eventIds = receiveWhile() {
         case Event(id) if id <= 5 => id
       }
-      eventIds must be(List(1, 2, 3, 4, 5)) //<co id="ch02-filteringactor-assert-filter"/>
+      eventIds must be(List(1, 2, 3, 4, 5))
       expectMsg(Event(6))
     }
-    //<end id="ch02-filteringactor-test"/>
-    //<start id="ch02-filteringactor-test2"/>
+
+
     "filter out particular messages using expectNoMsg" in {
       import FilteringActor._
       val props = FilteringActor.props(testActor, 5)
@@ -52,10 +52,10 @@ class FilteringActorTest extends TestKit(ActorSystem("testsystem"))
       expectMsg(Event(5))
       expectNoMsg()
     }
-    //<end id="ch02-filteringactor-test2"/>
+
   }
 }
-//<start id="ch02-filteringactor-imp"/>
+
 object FilteringActor {
   def props(nextActor: ActorRef, bufferSize: Int) =
     Props(new FilteringActor(nextActor, bufferSize))
@@ -63,20 +63,20 @@ object FilteringActor {
 }
 
 class FilteringActor(nextActor: ActorRef,
-                     bufferSize: Int) extends Actor { //<co id="ch02-filteringactor-constructor"/>
+                     bufferSize: Int) extends Actor {
   import FilteringActor._
-  var lastMessages = Vector[Event]() //<co id="ch02-filteringactor-lastmessages"/>
+  var lastMessages = Vector[Event]()
   def receive = {
     case msg: Event =>
       if (!lastMessages.contains(msg)) {
         lastMessages = lastMessages :+ msg
-        nextActor ! msg //<co id="ch02-filteringactor-send-nextactor"/>
+        nextActor ! msg
         if (lastMessages.size > bufferSize) {
           // discard the oldest
-          lastMessages = lastMessages.tail //<co id="ch02-filteringactor-discard"/>
+          lastMessages = lastMessages.tail
         }
       }
   }
 }
 
-//<end id="ch02-filteringactor-imp"/>
+

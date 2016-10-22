@@ -33,50 +33,50 @@ trait OrderService {
 
   implicit def requestTimeout: Timeout
 
-  //<start id="routes"/>
-  val routes = getOrder ~ postOrders
-  //<end id="routes"/>
 
-  //<start id="getOrder"/>
-  def getOrder = get { //<co id="get_directive"/>
-    pathPrefix("orders" / IntNumber) { id => //<co id="extract_id"/>
-      onSuccess(processOrders.ask(OrderId(id))) { //<co id="onSuccess_get"/>
+  val routes = getOrder ~ postOrders
+
+
+
+  def getOrder = get {
+    pathPrefix("orders" / IntNumber) { id =>
+      onSuccess(processOrders.ask(OrderId(id))) {
         case result: TrackingOrder =>
-          complete(<statusResponse> //<co id="complete_get"/>
+          complete(<statusResponse>
             <id>{ result.id }</id>
             <status>{ result.status }</status>
           </statusResponse>)
         
         case result: NoSuchOrder => 
-          complete(StatusCodes.NotFound) //<co id="complete_get_not_found"/>
+          complete(StatusCodes.NotFound)
       }
     }
   }
-  //<end id="getOrder"/>
+
   
-  //<start id="postOrders"/>
-  def postOrders = post { //<co id="post_directive"/>
-    path("orders") { //<co id="post_orders_path"/>
-      entity(as[NodeSeq]) { xml => //<co id="entity_as_xml"/>
-        val order = toOrder(xml) //<co id="toOrder"/>
+
+  def postOrders = post {
+    path("orders") {
+      entity(as[NodeSeq]) { xml =>
+        val order = toOrder(xml)
         onSuccess(processOrders.ask(order)) {
           case result: TrackingOrder =>
-            complete( //<co id="completeWithConfirm"/>
+            complete(
               <confirm>
                 <id>{ result.id }</id>
                 <status>{ result.status }</status>
               </confirm>
             )
         
-          case result => //<co id="completeWithBadRequest"/>
+          case result =>
             complete(StatusCodes.BadRequest)
         }
       }
     }
   }  
-  //<end id="postOrders"/>
 
-  //<start id="toOrder"/>
+
+
   def toOrder(xml: NodeSeq): Order = {
     val order = xml \\ "order"
     val customer = (order \\ "customerId").text
@@ -84,5 +84,5 @@ trait OrderService {
     val number = (order \\ "number").text.toInt
     new Order(customer, productId, number)
   }
-  //<end id="toOrder"/>
+
 }

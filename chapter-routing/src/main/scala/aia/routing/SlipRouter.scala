@@ -3,7 +3,7 @@ package aia.routing
 import akka.actor.{ Props, ActorRef, Actor }
 import scala.collection.mutable.ListBuffer
 
-//<start id="ch09-routing-slip-msg"/>
+
 object CarOptions extends Enumeration {
   val CAR_COLOR_GRAY, NAVIGATION, PARKING_SENSORS = Value
 }
@@ -12,32 +12,32 @@ case class Order(options: Seq[CarOptions.Value])
 case class Car(color: String = "",
                hasNavigation: Boolean = false,
                hasParkingSensors: Boolean = false)
-//<end id="ch09-routing-slip-msg"/>
 
-//<start id="ch09-routing-slip-slip"/>
-case class RouteSlipMessage(routeSlip: Seq[ActorRef], //<co id="ch09-routing-slip-slip-1" />
+
+
+case class RouteSlipMessage(routeSlip: Seq[ActorRef],
                             message: AnyRef)
 
 trait RouteSlip {
 
   def sendMessageToNextTask(routeSlip: Seq[ActorRef],
                             message: AnyRef) {
-    val nextTask = routeSlip.head //<co id="ch09-routing-slip-slip-2" />
+    val nextTask = routeSlip.head
     val newSlip = routeSlip.tail
-    if (newSlip.isEmpty) { //<co id="ch09-routing-slip-slip-3" />
+    if (newSlip.isEmpty) {
       nextTask ! message
     } else {
 
-      nextTask ! RouteSlipMessage( //<co id="ch09-routing-slip-slip-4" />
+      nextTask ! RouteSlipMessage(
         routeSlip = newSlip,
         message = message)
     }
   }
 }
-//<end id="ch09-routing-slip-slip"/>
 
-//<start id="ch09-routing-slip-tasks"/>
-class PaintCar(color: String) extends Actor with RouteSlip { //<co id="ch09-routing-slip-task-1" />
+
+
+class PaintCar(color: String) extends Actor with RouteSlip {
   def receive = {
     case RouteSlipMessage(routeSlip, car: Car) => {
       sendMessageToNextTask(routeSlip,
@@ -46,7 +46,7 @@ class PaintCar(color: String) extends Actor with RouteSlip { //<co id="ch09-rout
   }
 }
 
-class AddNavigation() extends Actor with RouteSlip { //<co id="ch09-routing-slip-task-2" />
+class AddNavigation() extends Actor with RouteSlip {
   def receive = {
     case RouteSlipMessage(routeSlip, car: Car) => {
       sendMessageToNextTask(routeSlip,
@@ -56,31 +56,31 @@ class AddNavigation() extends Actor with RouteSlip { //<co id="ch09-routing-slip
 }
 
 class AddParkingSensors() extends Actor with RouteSlip {
-  def receive = { //<co id="ch09-routing-slip-task-3" />
+  def receive = {
     case RouteSlipMessage(routeSlip, car: Car) => {
       sendMessageToNextTask(routeSlip,
         car.copy(hasParkingSensors = true))
     }
   }
 }
-//<end id="ch09-routing-slip-tasks"/>
 
-//<start id="ch09-routing-slip-router"/>
+
+
 class SlipRouter(endStep: ActorRef) extends Actor with RouteSlip {
-  val paintBlack = context.actorOf( //<co id="ch09-routing-slip-router-1" />
+  val paintBlack = context.actorOf(
     Props(new PaintCar("black")), "paintBlack")
-  val paintGray = context.actorOf( //<co id="ch09-routing-slip-router-2" />
+  val paintGray = context.actorOf(
     Props(new PaintCar("gray")), "paintGray")
-  val addNavigation = context.actorOf( //<co id="ch09-routing-slip-router-3" />
+  val addNavigation = context.actorOf(
     Props[AddNavigation], "navigation")
-  val addParkingSensor = context.actorOf( //<co id="ch09-routing-slip-router-4" />
+  val addParkingSensor = context.actorOf(
     Props[AddParkingSensors], "parkingSensors")
 
   def receive = {
     case order: Order => {
-      val routeSlip = createRouteSlip(order.options) //<co id="ch09-routing-slip-router-5" />
+      val routeSlip = createRouteSlip(order.options)
 
-      sendMessageToNextTask(routeSlip, new Car) //<co id="ch09-routing-slip-router-6" />
+      sendMessageToNextTask(routeSlip, new Car)
     }
   }
 
@@ -92,7 +92,7 @@ class SlipRouter(endStep: ActorRef) extends Actor with RouteSlip {
     if (!options.contains(CarOptions.CAR_COLOR_GRAY)) {
       routeSlip += paintBlack
     }
-    options.foreach { //<co id="ch09-routing-slip-router-7" />
+    options.foreach {
       case CarOptions.CAR_COLOR_GRAY  => routeSlip += paintGray
       case CarOptions.NAVIGATION      => routeSlip += addNavigation
       case CarOptions.PARKING_SENSORS => routeSlip += addParkingSensor
@@ -103,4 +103,3 @@ class SlipRouter(endStep: ActorRef) extends Actor with RouteSlip {
   }
 }
 
-//<end id="ch09-routing-slip-router"/>

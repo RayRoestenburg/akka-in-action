@@ -19,7 +19,7 @@ class AggregatorTest
 
   "The Agregator" must {
     "aggregate two messages" in {
-      //<start id="ch7-aggregator-test"/>
+
       val endProbe = TestProbe()
       val actorRef = system.actorOf(
         Props(new Aggregator(1 second, endProbe.ref)))
@@ -28,58 +28,13 @@ class AggregatorTest
         photoStr,
         Some(new Date()),
         None)
-      actorRef ! msg1 //<co id="ch07-aggregate-test-1" />
+      actorRef ! msg1
 
       val msg2 = PhotoMessage("id1",
         photoStr,
         None,
         Some(60))
-      actorRef ! msg2 //<co id="ch07-aggregate-test-2" />
-
-      val combinedMsg = PhotoMessage("id1",
-        photoStr,
-        msg1.creationTime,
-        msg2.speed)
-
-      endProbe.expectMsg(combinedMsg) //<co id="ch07-aggregate-test-3" />
-      //<end id="ch7-aggregator-test"/>
-    }
-    "send message after timeout" in {
-      //<start id="ch7-aggregator-test-timeout"/>
-      val endProbe = TestProbe()
-      val actorRef = system.actorOf(
-        Props(new Aggregator(1 second, endProbe.ref)))
-      val photoStr = ImageProcessing.createPhotoString( //<co id="ch07-aggregate-test2-1" />
-        new Date(), 60)
-      val msg1 = PhotoMessage("id1",
-        photoStr,
-        Some(new Date()),
-        None)
-      actorRef ! msg1 //<co id="ch07-aggregate-test2-2" />
-
-      endProbe.expectMsg(msg1) //<co id="ch07-aggregate-test2-3" />
-      //<end id="ch7-aggregator-test-timeout"/>
-    }
-    "aggregate two messages when restarting" in {
-      //<start id="ch7-aggregator-test-restart"/>
-      val endProbe = TestProbe()
-      val actorRef = system.actorOf(
-        Props(new Aggregator(1 second, endProbe.ref)))
-      val photoStr = ImageProcessing.createPhotoString(new Date(), 60)
-
-      val msg1 = PhotoMessage("id1",
-        photoStr,
-        Some(new Date()),
-        None)
-      actorRef ! msg1 //<co id="ch07-aggregate-test3-1" />
-
-      actorRef ! new IllegalStateException("restart") //<co id="ch07-aggregate-test3-2" />
-
-      val msg2 = PhotoMessage("id1",
-        photoStr,
-        None,
-        Some(60))
-      actorRef ! msg2 //<co id="ch07-aggregate-test3-3" />
+      actorRef ! msg2
 
       val combinedMsg = PhotoMessage("id1",
         photoStr,
@@ -87,7 +42,52 @@ class AggregatorTest
         msg2.speed)
 
       endProbe.expectMsg(combinedMsg)
-      //<end id="ch7-aggregator-test-restart"/>
+
+    }
+    "send message after timeout" in {
+
+      val endProbe = TestProbe()
+      val actorRef = system.actorOf(
+        Props(new Aggregator(1 second, endProbe.ref)))
+      val photoStr = ImageProcessing.createPhotoString(
+        new Date(), 60)
+      val msg1 = PhotoMessage("id1",
+        photoStr,
+        Some(new Date()),
+        None)
+      actorRef ! msg1
+
+      endProbe.expectMsg(msg1)
+
+    }
+    "aggregate two messages when restarting" in {
+
+      val endProbe = TestProbe()
+      val actorRef = system.actorOf(
+        Props(new Aggregator(1 second, endProbe.ref)))
+      val photoStr = ImageProcessing.createPhotoString(new Date(), 60)
+
+      val msg1 = PhotoMessage("id1",
+        photoStr,
+        Some(new Date()),
+        None)
+      actorRef ! msg1
+
+      actorRef ! new IllegalStateException("restart")
+
+      val msg2 = PhotoMessage("id1",
+        photoStr,
+        None,
+        Some(60))
+      actorRef ! msg2
+
+      val combinedMsg = PhotoMessage("id1",
+        photoStr,
+        msg1.creationTime,
+        msg2.speed)
+
+      endProbe.expectMsg(combinedMsg)
+
     }
   }
 }

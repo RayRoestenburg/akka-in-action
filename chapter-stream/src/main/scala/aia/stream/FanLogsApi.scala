@@ -34,35 +34,35 @@ class FanLogsApi(
   implicit val executionContext: ExecutionContext, 
   val materializer: ActorMaterializer
 ) extends EventMarshalling {
-  def logFile(id: String) = logsDir.resolve(id) //<co id="logFile"/>
+  def logFile(id: String) = logsDir.resolve(id)
 
-  //<start id="processStates"/>
+
   import akka.stream.{ FlowShape, Graph } 
   import akka.stream.scaladsl.{ Broadcast, GraphDSL, RunnableGraph }
   
   type FlowLike = Graph[FlowShape[Event, ByteString], NotUsed]
 
-  def processStates(logId: String): FlowLike = { //<co id="equalToFlow"/>
+  def processStates(logId: String): FlowLike = {
     val jsFlow = LogJson.jsonOutFlow
-    Flow.fromGraph( //<co id="fromGraph"/>
-      GraphDSL.create() { implicit builder => //<co id="create_with_builder"/>
-      import GraphDSL.Implicits._ //<co id="pull_in_dsl"/>
+    Flow.fromGraph(
+      GraphDSL.create() { implicit builder =>
+      import GraphDSL.Implicits._
       // all logs, ok, warning, error, critical, so 5 outputs
-      val bcast = builder.add(Broadcast[Event](5)) //<co id="add_broadcast_node"/>
-      val js = builder.add(jsFlow) //<co id="add_identity_node"/>
+      val bcast = builder.add(Broadcast[Event](5))
+      val js = builder.add(jsFlow)
 
       val ok = Flow[Event].filter(_.state == Ok) 
       val warning = Flow[Event].filter(_.state == Warning)
       val error = Flow[Event].filter(_.state == Error)
       val critical = Flow[Event].filter(_.state == Critical)
 
-      bcast ~> js.in //<co id="connect_bcast_to_direct_json_flow"/>
-      bcast ~> ok       ~> jsFlow ~> logFileSink(logId, Ok) //<co id="add_edge"/>
+      bcast ~> js.in
+      bcast ~> ok       ~> jsFlow ~> logFileSink(logId, Ok)
       bcast ~> warning  ~> jsFlow ~> logFileSink(logId, Warning)
       bcast ~> error    ~> jsFlow ~> logFileSink(logId, Error)
       bcast ~> critical ~> jsFlow ~> logFileSink(logId, Critical)
 
-      FlowShape(bcast.in, js.out) //<co id="flow_shape"/>
+      FlowShape(bcast.in, js.out)
     })
   }
 
@@ -72,9 +72,9 @@ class FanLogsApi(
     FileIO.toPath(logStateFile(logId, state), Set(CREATE, WRITE, APPEND))
   def logStateFile(logId: String, state: State) = 
     logFile(s"$logId-${State.norm(state)}")  
-  //<end id="processStates"/>
 
-  //<start id="mergeNotOk"/>
+
+
   import akka.stream.SourceShape
   import akka.stream.scaladsl.{ GraphDSL, Merge }
 
@@ -86,7 +86,7 @@ class FanLogsApi(
     val critical = logFileSource(logId, Critical)
       .via(LogJson.jsonFramed(maxJsObject))
 
-    Source.fromGraph( //<co id="fromGraph"/>
+    Source.fromGraph(
       GraphDSL.create() { implicit builder => 
       import GraphDSL.Implicits._
 
@@ -98,10 +98,10 @@ class FanLogsApi(
       warningShape  ~> merge
       errorShape    ~> merge
       criticalShape ~> merge
-      SourceShape(merge.out) //<co id="sourceShape"/>
+      SourceShape(merge.out)
     })
   }
-  //<end id="mergeNotOk"/>
+
   
   def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
   def logFileSink(logId: String) = 
@@ -114,7 +114,7 @@ class FanLogsApi(
     getRoute ~ 
     deleteRoute
   
-  implicit val unmarshaller = EventUnmarshaller.create(maxLine, maxJsObject) //<co id="implicit_unmarshaller"/>
+  implicit val unmarshaller = EventUnmarshaller.create(maxLine, maxJsObject)
 
   implicit val jsonStreamingSupport = EntityStreamingSupport.json()
 
@@ -124,11 +124,11 @@ class FanLogsApi(
         post {
           entity(asSourceOf[Event]) { src =>
             onComplete(
-            //<start id="postRoute"/>
+
               src.via(processStates(logId))
                 .toMat(logFileSink(logId))(Keep.right)
                 .run()
-            //<end id="postRoute"/>
+
             ) {
             // Handling Future result omitted here, done the same as before.
               case Success(IOResult(count, Success(Done))) =>
@@ -149,16 +149,16 @@ class FanLogsApi(
       }
     }
 
-  implicit val marshaller = LogEntityMarshaller.create(maxJsObject) //<co id="implicit_marshaller"/>
+  implicit val marshaller = LogEntityMarshaller.create(maxJsObject)
 
   def getRoute = 
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         get { 
-          extractRequest { req => //<co id="extract_request"/>
+          extractRequest { req =>
             if(Files.exists(logFile(logId))) {
               val src = logFileSource(logId) 
-              complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
+              complete(Marshal(src).toResponseFor(req))
             } else {
               complete(StatusCodes.NotFound)
             }
@@ -167,7 +167,7 @@ class FanLogsApi(
       }
     }
 
-  //<start id="getLogStateRoute"/>
+
   val StateSegment = Segment.flatMap {
     case State(state) => Some(state)
     case _ => None
@@ -177,10 +177,10 @@ class FanLogsApi(
     pathPrefix("logs" / Segment / StateSegment) { (logId, state) =>
       pathEndOrSingleSlash {
         get { 
-          extractRequest { req => //<co id="extract_request"/>
+          extractRequest { req =>
             if(Files.exists(logStateFile(logId, state))) {
               val src = logFileSource(logId, state) 
-              complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
+              complete(Marshal(src).toResponseFor(req))
             } else {
               complete(StatusCodes.NotFound)
             }
@@ -188,25 +188,25 @@ class FanLogsApi(
         }
       }
     }
-  //<end id="getLogStateRoute"/>
+
   
-  //<start id="mergeSources"/>
+
   import akka.stream.scaladsl.Merge
 
   def mergeSources[E](
-    sources: Vector[Source[E, _]] //<co id="sources_arg"/>
-  ): Option[Source[E, _]] = { //<co id="option_res"/>
+    sources: Vector[Source[E, _]]
+  ): Option[Source[E, _]] = {
     if(sources.size ==0) None
     else if(sources.size == 1) Some(sources(0))
     else {
-      Some(Source.combine( //<co id="simpler_api"/>
+      Some(Source.combine(
         sources(0), 
         sources(1), 
         sources.drop(2) : _*
-      )(Merge(_))) //<co id="simpler_api_fan_in"/>
+      )(Merge(_)))
     }
   } 
-  //<end id="mergeSources"/>
+
 
   def getFileSources[T](dir: Path): Vector[Source[ByteString, Future[IOResult]]] = {
     val dirStream = Files.newDirectoryStream(dir)
@@ -217,16 +217,16 @@ class FanLogsApi(
     } finally dirStream.close
   }
 
-  //<start id="getLogsRoute"/>
+
   def getLogsRoute =
     pathPrefix("logs") {
       pathEndOrSingleSlash {
         get {
           extractRequest { req => 
-            val sources = getFileSources(logsDir).map { src => //<co id="getFileSources"/>
-              src.via(LogJson.jsonFramed(maxJsObject)) //<co id="jsonFramed"/>
+            val sources = getFileSources(logsDir).map { src =>
+              src.via(LogJson.jsonFramed(maxJsObject))
             }            
-            mergeSources(sources) match { //<co id="merge"/>
+            mergeSources(sources) match {
               case Some(src) => 
                 complete(Marshal(src).toResponseFor(req))
               case None => 
@@ -236,9 +236,9 @@ class FanLogsApi(
         }
       }
     }
-  //<end id="getLogsRoute"/>
 
-  //<start id="getLogNotOkRoute"/>
+
+
   def getLogNotOkRoute =     
     pathPrefix("logs" / Segment /"not-ok") { logId =>
       pathEndOrSingleSlash {
@@ -249,7 +249,7 @@ class FanLogsApi(
         }
       }
     } 
-  //<end id="getLogNotOkRoute"/>
+
 
   def deleteRoute = 
     pathPrefix("logs" / Segment) { logId =>

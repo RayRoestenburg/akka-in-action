@@ -29,7 +29,7 @@ object TypedBasket {
        replyTo ! items
       case Add(item, productId) =>
         items = Items(items.list :+ item)
-      //case GetItems => //<co id="does_not_compile_typed"/>
+      //case GetItems =>
     }
   }
 }

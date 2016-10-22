@@ -5,17 +5,17 @@ import org.scalatest.WordSpecLike
 import akka.actor._
 
 
-//<start id="ch02-helloworld-test2"/>
+
 class Greeter02Test extends TestKit(ActorSystem("testsystem"))
   with WordSpecLike
   with StopSystemAfterAll {
 
   "The Greeter" must {
     "say Hello World! when a Greeting(\"World\") is sent to it" in {
-      val props = Greeter02.props(Some(testActor)) //<co id="ch02-helloworld-test2-add-listener"/>
+      val props = Greeter02.props(Some(testActor))
       val greeter = system.actorOf(props, "greeter02-1")
       greeter ! Greeting("World")
-      expectMsg("Hello World!") //<co id="ch02-helloworld-test2-expectMsg"/>
+      expectMsg("Hello World!")
     }
     "say something else and see what happens" in {
       val props = Greeter02.props(Some(testActor))
@@ -26,19 +26,19 @@ class Greeter02Test extends TestKit(ActorSystem("testsystem"))
     }
   }
 }
-//<end id="ch02-helloworld-test2"/>
-//<start id="ch02-helloworld-imp2"/>
+
+
 object Greeter02 {
   def props(listener: Option[ActorRef] = None) =
     Props(new Greeter02(listener))
 }
-class Greeter02(listener: Option[ActorRef]) //<co id="ch02-helloworld-imp2-constructor"/>
+class Greeter02(listener: Option[ActorRef])
   extends Actor with ActorLogging {
   def receive = {
     case Greeting(who) =>
       val message = "Hello " + who + "!"
       log.info(message)
-      listener.foreach(_ ! message) //<co id="ch02-helloworld-imp2-send-to-listener"/>
+      listener.foreach(_ ! message)
   }
 }
-//<end id="ch02-helloworld-imp2"/>
+

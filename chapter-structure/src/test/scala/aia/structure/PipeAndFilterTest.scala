@@ -19,27 +19,27 @@ class PipeAndFilterTest
 
   "The pipe and filter" must {
     "filter messages in configuration 1" in {
-      //<start id="ch7-pipe-test1"/>
+
       val endProbe = TestProbe()
-      val speedFilterRef = system.actorOf( //<co id="ch07-pipe-test-1" />
+      val speedFilterRef = system.actorOf(
         Props(new SpeedFilter(50, endProbe.ref)))
       val licenseFilterRef = system.actorOf(
         Props(new LicenseFilter(speedFilterRef)))
-      val msg = new Photo("123xyz", 60) //<co id="ch07-pipe-test-2" />
+      val msg = new Photo("123xyz", 60)
       licenseFilterRef ! msg
       endProbe.expectMsg(msg)
 
-      licenseFilterRef ! new Photo("", 60) //<co id="ch07-pipe-test-3" />
+      licenseFilterRef ! new Photo("", 60)
       endProbe.expectNoMsg(1 second)
 
-      licenseFilterRef ! new Photo("123xyz", 49) //<co id="ch07-pipe-test-4" />
+      licenseFilterRef ! new Photo("123xyz", 49)
       endProbe.expectNoMsg(1 second)
-      //<end id="ch7-pipe-test1"/>
+
     }
     "filter messages in configuration 2" in {
-      //<start id="ch7-pipe-test2"/>
+
       val endProbe = TestProbe()
-      val licenseFilterRef = system.actorOf( //<co id="ch07-pipe-test-5" />
+      val licenseFilterRef = system.actorOf(
         Props(new LicenseFilter(endProbe.ref)))
       val speedFilterRef = system.actorOf(
         Props(new SpeedFilter(50, licenseFilterRef)))
@@ -52,7 +52,7 @@ class PipeAndFilterTest
 
       speedFilterRef ! new Photo("123xyz", 49)
       endProbe.expectNoMsg(1 second)
-      //<end id="ch7-pipe-test2"/>
+
     }
   }
 }

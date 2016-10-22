@@ -7,11 +7,11 @@ import akka.actor._
 import akka.dispatch.Dispatchers
 import akka.routing._
 
-//<start id="ch09-routing-perf-msg"/>
+
 case class PerformanceRoutingMessage(photo: String,
                                      license: Option[String],
-                                     processedBy: Option[String]) //<co id="ch09-routing-perf-1" />
-//<end id="ch09-routing-perf-msg"/>
+                                     processedBy: Option[String])
+
 
 case class SetService(id: String, serviceTime: FiniteDuration)
 
@@ -30,13 +30,13 @@ class GetLicense(pipe: ActorRef, initialServiceTime: FiniteDuration = 0 millis)
       Thread.sleep(serviceTime.toMillis)
       pipe ! msg.copy(
         license = ImageProcessing.getLicense(msg.photo),
-        processedBy = Some(id) //<co id="ch09-routing-perf-2" />
+        processedBy = Some(id)
         )
     }
   }
 }
 
-//<start id="ch09-routing-msgact"/>
+
 class RedirectActor(pipe: ActorRef) extends Actor {
   println("RedirectActor instance created")
   def receive = {
@@ -45,20 +45,20 @@ class RedirectActor(pipe: ActorRef) extends Actor {
     }
   }
 }
-//<end id="ch09-routing-msgact"/>
 
-//<start id="ch09-routing-msg"/>
+
+
 class SpeedRouterLogic(minSpeed: Int, normalFlowPath: String, cleanUpPath: String)
-  extends RoutingLogic { //<co id="ch09-routing-msg-1" />
+  extends RoutingLogic {
 
   def select(message: Any, routees: immutable.IndexedSeq[Routee]): Routee = {
 
     message match {
-      case msg: Photo => //<co id="ch09-routing-msg-6" />
+      case msg: Photo =>
         if (msg.speed > minSpeed)
-          findRoutee(routees, normalFlowPath) //<co id="ch09-routing-msg-7" />
+          findRoutee(routees, normalFlowPath)
         else
-          findRoutee(routees, cleanUpPath) //<co id="ch09-routing-msg-8" />
+          findRoutee(routees, cleanUpPath)
     }
   }
 
@@ -91,46 +91,19 @@ case class SpeedRouterPool(minSpeed: Int, normalFlow: Props, cleanUp: Props) ext
     SeveralRoutees(immutable.IndexedSeq[Routee](ActorRefRoutee(normal), ActorRefRoutee(clean)))
   }
 }
-//<end id="ch09-routing-msg"/>
 
-//<start id="ch09-routing-state"/>
+
+
 case class RouteStateOn()
 case class RouteStateOff()
 
 class SwitchRouter(normalFlow: ActorRef, cleanUp: ActorRef)
   extends Actor with ActorLogging {
 
-  def on: Receive = { //<co id="ch09-routing-state-1" />
-    case RouteStateOn =>
-      log.warning("Received on while already in on state")
-    case RouteStateOff => context.become(off) //<co id="ch09-routing-state-2" />
-    case msg: AnyRef => {
-      normalFlow ! msg //<co id="ch09-routing-state-3" />
-    }
-  }
-  def off: Receive = { //<co id="ch09-routing-state-4" />
-    case RouteStateOn => context.become(on) //<co id="ch09-routing-state-5" />
-    case RouteStateOff =>
-      log.warning("Received off while already in off state")
-    case msg: AnyRef => {
-      cleanUp ! msg //<co id="ch09-routing-state-6" />
-    }
-  }
-  def receive = {
-    case msg: AnyRef => off(msg) //<co id="ch09-routing-state-7" />
-  }
-}
-//<end id="ch09-routing-state"/>
-
-//<start id="ch09-routing-state2"/>
-
-class SwitchRouter2(normalFlow: ActorRef, cleanUp: ActorRef)
-  extends Actor with ActorLogging {
-
   def on: Receive = {
     case RouteStateOn =>
       log.warning("Received on while already in on state")
-    case RouteStateOff => context.unbecome() //<co id="ch09-routing-state2-1" />
+    case RouteStateOff => context.become(off)
     case msg: AnyRef => {
       normalFlow ! msg
     }
@@ -147,4 +120,31 @@ class SwitchRouter2(normalFlow: ActorRef, cleanUp: ActorRef)
     case msg: AnyRef => off(msg)
   }
 }
-//<end id="ch09-routing-state2"/>
+
+
+
+
+class SwitchRouter2(normalFlow: ActorRef, cleanUp: ActorRef)
+  extends Actor with ActorLogging {
+
+  def on: Receive = {
+    case RouteStateOn =>
+      log.warning("Received on while already in on state")
+    case RouteStateOff => context.unbecome()
+    case msg: AnyRef => {
+      normalFlow ! msg
+    }
+  }
+  def off: Receive = {
+    case RouteStateOn => context.become(on)
+    case RouteStateOff =>
+      log.warning("Received off while already in off state")
+    case msg: AnyRef => {
+      cleanUp ! msg
+    }
+  }
+  def receive = {
+    case msg: AnyRef => off(msg)
+  }
+}
+

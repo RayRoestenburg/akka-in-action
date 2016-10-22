@@ -47,14 +47,14 @@ class MonitorMailboxTest extends WordSpecLike with BeforeAndAfterAll
     }
 
     "send statistics with default" in {
-      //<start id="ch14-MonitorMailbox-test"/>
+
       val statProbe = TestProbe()
       system.eventStream.subscribe(
         statProbe.ref,
         classOf[MailboxStatistics])
       val testActor = system.actorOf(Props(
-        new ProcessTestActor(1.second)), "monitorActor2") //<co id="ch14-MonitorMailbox-test-1" />
-      statProbe.send(testActor, "message") //<co id="ch14-MonitorMailbox-test-2" />
+        new ProcessTestActor(1.second)), "monitorActor2")
+      statProbe.send(testActor, "message")
       statProbe.send(testActor, "message2")
       statProbe.send(testActor, "message3")
       val stat = statProbe.expectMsgType[MailboxStatistics]
@@ -65,9 +65,9 @@ class MonitorMailboxTest extends WordSpecLike with BeforeAndAfterAll
       stat2.queueSize must (be(2) or be(1))
       val stat3 = statProbe.expectMsgType[MailboxStatistics]
 
-      stat3.queueSize must (be(3) or be(2)) //<co id="ch14-MonitorMailbox-test-3" />
+      stat3.queueSize must (be(3) or be(2))
 
-      //<end id="ch14-MonitorMailbox-test"/>
+
       Thread.sleep(2000)
       system.stop(testActor)
       system.eventStream.unsubscribe(statProbe.ref)

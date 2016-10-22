@@ -12,38 +12,38 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 
 import com.typesafe.config.{ Config, ConfigFactory } 
-//<start id="order_service_app"/>
+
 object OrderServiceApp extends App
-    with RequestTimeout { //<co id="request_timeout"/>
+    with RequestTimeout {
   val config = ConfigFactory.load() 
   val host = config.getString("http.host")
-  val port = config.getInt("http.port") //<co id="from_config"/>
+  val port = config.getInt("http.port")
 
   implicit val system = ActorSystem() 
   implicit val ec = system.dispatcher
 
   val processOrders = system.actorOf(
     Props(new ProcessOrders), "process-orders"
-  ) //<co id="process_orders"/>
+  )
 
   val api = new OrderServiceApi(system, 
     requestTimeout(config), 
-    processOrders).routes //<co id="routes"/>
+    processOrders).routes
  
   implicit val materializer = ActorMaterializer()
   val bindingFuture: Future[ServerBinding] =
-    Http().bindAndHandle(api, host, port) //<co id="bind_routes"/>
+    Http().bindAndHandle(api, host, port)
  
-  val log =  Logging(system.eventStream, "order-service") //<co id="logging"/>
+  val log =  Logging(system.eventStream, "order-service")
   bindingFuture.map { serverBinding =>
-    log.info(s"Bound to ${serverBinding.localAddress} ") //<co id="success"/>
+    log.info(s"Bound to ${serverBinding.localAddress} ")
   }.onFailure { 
     case ex: Exception =>
       log.error(ex, "Failed to bind to {}:{}!", host, port)
-      system.terminate() //<co id="failed_to_bind"/>
+      system.terminate()
   }
 }
-//<end id="order_service_app"/>
+
 
 trait RequestTimeout {
   import scala.concurrent.duration._

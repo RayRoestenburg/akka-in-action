@@ -7,16 +7,16 @@ case class ActorStatistics(receiver: String,
                            entryTime: Long,
                            exitTime: Long)
 
-//<start id="ch14-MonitorActor"/>
+
 trait MonitorActor extends Actor {
 
   abstract override def receive = {
     case m: Any => {
       val start = System.currentTimeMillis()
-      super.receive(m) //<co id="ch14-MonitorActor-1" />
+      super.receive(m)
       val end = System.currentTimeMillis()
 
-      val stat = ActorStatistics( //<co id="ch14-MonitorActor-2" />
+      val stat = ActorStatistics(
         self.toString(),
         sender.toString(),
         start,
@@ -26,4 +26,3 @@ trait MonitorActor extends Actor {
   }
 }
 
-//<end id="ch14-MonitorActor"/>

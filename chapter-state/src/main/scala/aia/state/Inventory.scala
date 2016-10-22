@@ -120,7 +120,7 @@ class Inventory(publisher: ActorRef) extends Actor
   }
 }
 
-//<start id="ch10-fsm-Publisher"/>
+
 class Publisher(totalNrBooks: Int, nrBooksPerRequest: Int)
   extends Actor {
 
@@ -128,16 +128,16 @@ class Publisher(totalNrBooks: Int, nrBooksPerRequest: Int)
   def receive = {
     case PublisherRequest => {
       if (nrLeft == 0)
-        sender() ! BookSupplySoldOut //<co id="ch10-fsm-Publisher-1"/>
+        sender() ! BookSupplySoldOut
       else {
         val supply = min(nrBooksPerRequest, nrLeft)
         nrLeft -= supply
-        sender() ! new BookSupply(supply) //<co id="ch10-fsm-Publisher-2"/>
+        sender() ! new BookSupply(supply)
       }
     }
   }
 }
-//<end id="ch10-fsm-Publisher"/>
+
 
 class InventoryWithTimer(publisher: ActorRef) extends Actor
   with FSM[State, StateData] {

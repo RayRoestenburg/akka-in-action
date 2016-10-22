@@ -10,7 +10,7 @@ import akka.stream.scaladsl.{ Source, FileIO, Framing }
 
 import scala.concurrent.duration.FiniteDuration
 
-//<start id="event"/>
+
 case class Event(
   host: String,
   service: String,
@@ -20,7 +20,7 @@ case class Event(
   tag: Option[String] = None, 
   metric: Option[Double] = None
 )
-//<end id="event"/>
+
 
 sealed trait State
 case object Critical extends State

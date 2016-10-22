@@ -1,18 +1,18 @@
 package aia.persistence
 
-//<start id="persistence-basket-event-serializer"/>
+
 import akka.serialization._
 import spray.json._
 
 class BasketEventSerializer extends Serializer {
   import JsonFormats._
 
-  val includeManifest: Boolean = false //<co id="not_including_manifest"/>
-  val identifier = 123678213 //<co id="unique_id_serializer"/>
+  val includeManifest: Boolean = false
+  val identifier = 123678213
 
   def toBinary(obj: AnyRef): Array[Byte] = {
     obj match {
-      case e: Basket.Event => //<co id="match_basket_event_toBinary"/>
+      case e: Basket.Event =>
         BasketEventFormat.write(e).compactPrint.getBytes
       case msg =>
         throw new Exception(s"Cannot serialize $msg with ${this.getClass}")
@@ -21,13 +21,13 @@ class BasketEventSerializer extends Serializer {
 
   def fromBinary(bytes: Array[Byte],
                  manifest: Option[Class[_]]): AnyRef = {
-    val jsonAst = new String(bytes).parseJson//<co id="parse_json_from_bytes"/>
-    BasketEventFormat.read(jsonAst) //<co id="read_json_format"/>
+    val jsonAst = new String(bytes).parseJson
+    BasketEventFormat.read(jsonAst)
   }
 }
-//<end id="persistence-basket-event-serializer"/>
 
-//<start id="persistence-basket-snapshot-serializer"/>
+
+
 class BasketSnapshotSerializer extends Serializer {
   import JsonFormats._
 
@@ -47,7 +47,7 @@ class BasketSnapshotSerializer extends Serializer {
     jsonStr.parseJson.convertTo[Basket.Snapshot]
   }
 }
-//<end id="persistence-basket-snapshot-serializer"/>
+
 
 object JsonFormats extends DefaultJsonProtocol {
   implicit val itemFormat: RootJsonFormat[Item] =
@@ -72,7 +72,7 @@ object JsonFormats extends DefaultJsonProtocol {
   implicit val snapshotEventFormat: RootJsonFormat[Basket.Snapshot] =
     jsonFormat1(Basket.Snapshot)
 
-  //<start id="persistence-basket-event-format"/>
+
   implicit object BasketEventFormat
       extends RootJsonFormat[Basket.Event] {
     import Basket._
@@ -113,7 +113,7 @@ object JsonFormats extends DefaultJsonProtocol {
       }
     }
   }
-  //<end id="persistence-basket-event-format"/>
+
 
 }
 

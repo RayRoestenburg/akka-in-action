@@ -1,15 +1,15 @@
-enablePlugins(JavaServerAppPackaging) //<co id="example-enable-sbt-native-packager"/>
+enablePlugins(JavaServerAppPackaging) 
 
 name := "goticks"
 
 version := "1.0"
 
-organization := "com.goticks" //<co id="example-app-info"/>
+organization := "com.goticks" 
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.9" //<co id="akkaVersion"/>
+  val akkaVersion = "2.4.9" 
   Seq(
-    "com.typesafe.akka" %% "akka-actor"      % akkaVersion, //<co id="actorDep"/>
+    "com.typesafe.akka" %% "akka-actor"      % akkaVersion, 
     "com.typesafe.akka" %% "akka-http-core"  % akkaVersion, 
     "com.typesafe.akka" %% "akka-http-experimental"  % akkaVersion, 
     "com.typesafe.akka" %% "akka-http-spray-json-experimental"  % akkaVersion, 

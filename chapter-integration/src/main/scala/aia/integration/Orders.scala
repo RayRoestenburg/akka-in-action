@@ -6,9 +6,9 @@ import net.liftweb.json.{ Serialization, DefaultFormats }
 import xml.XML
 import scala.concurrent.duration._
 
-//<start id="ch08-order-msg"/>
+
 case class Order(customerId: String, productId: String, number: Int)
-//<end id="ch08-order-msg"/>
+
 
 class OrderConsumerJson(uri: String, next: ActorRef)
   extends Consumer {
@@ -26,14 +26,14 @@ class OrderConsumerJson(uri: String, next: ActorRef)
   }
 }
 
-//<start id="ch08-order-consumer"/>
-class OrderConsumerXml(uri: String, next: ActorRef)
-  extends Consumer { //<co id="ch08-order-consumer-1"/>
 
-  def endpointUri = uri //<co id="ch08-order-consumer-2"/>
+class OrderConsumerXml(uri: String, next: ActorRef)
+  extends Consumer {
+
+  def endpointUri = uri
 
   def receive = {
-    case msg: CamelMessage => { //<co id="ch08-order-consumer-3"/>
+    case msg: CamelMessage => {
       val content = msg.bodyAs[String]
       val xml = XML.loadString(content)
       val order = xml \\ "order"
@@ -44,9 +44,9 @@ class OrderConsumerXml(uri: String, next: ActorRef)
     }
   }
 }
-//<end id="ch08-order-consumer"/>
 
-//<start id="ch08-order-consumer2"/>
+
+
 class OrderConfirmConsumerXml(uri: String, next: ActorRef)
   extends Consumer {
 
@@ -62,7 +62,7 @@ class OrderConfirmConsumerXml(uri: String, next: ActorRef)
         val productId = (order \\ "productId").text
         val number = (order \\ "number").text.toInt
         next ! new Order(customer, productId, number)
-        sender() ! "<confirm>OK</confirm>" //<co id="ch08-order-consumer2-1"/>
+        sender() ! "<confirm>OK</confirm>"
       } catch {
         case ex: Exception =>
           sender() ! "<confirm>%s</confirm>".format(ex.getMessage)
@@ -70,19 +70,19 @@ class OrderConfirmConsumerXml(uri: String, next: ActorRef)
     }
   }
 }
-//<end id="ch08-order-consumer2"/>
 
-//<start id="ch08-order-producer1"/>
+
+
 class SimpleProducer(uri: String) extends Producer {
   def endpointUri = uri
 }
-//<end id="ch08-order-producer1"/>
-//<start id="ch08-order-producer2"/>
+
+
 class OrderProducerXml(uri: String) extends Producer {
   def endpointUri = uri
-  override def oneway: Boolean = true //<co id="ch08-order-producer2-1"/>
+  override def oneway: Boolean = true
 
-  override protected def transformOutgoingMessage(message: Any): Any = //<co id="ch08-order-producer2-2"/>
+  override protected def transformOutgoingMessage(message: Any): Any =
     message match {
       case msg: Order => {
         val xml = <order>
@@ -90,13 +90,13 @@ class OrderProducerXml(uri: String) extends Producer {
                     <productId>{ msg.productId }</productId>
                     <number>{ msg.number }</number>
                   </order>
-        xml.toString().replace("\n", "") //<co id="ch08-order-producer2-3"/>
+        xml.toString().replace("\n", "")
       }
       case other => message
     }
 } 
-//<end id="ch08-order-producer2"/>
-//<start id="ch08-order-producer3"/>
+
+
 class OrderConfirmProducerXml(uri: String) extends Producer {
   def endpointUri = uri
   override def oneway: Boolean = false
@@ -114,7 +114,7 @@ class OrderConfirmProducerXml(uri: String) extends Producer {
       case other => message
     }
 
-  override def transformResponse(message: Any): Any = //<co id="ch08-order-producer3-1"/>
+  override def transformResponse(message: Any): Any =
     message match {
       case msg: CamelMessage => {
         try {
@@ -130,4 +130,4 @@ class OrderConfirmProducerXml(uri: String) extends Producer {
       case other => message
     }
 }
-//<end id="ch08-order-producer3"/>
+

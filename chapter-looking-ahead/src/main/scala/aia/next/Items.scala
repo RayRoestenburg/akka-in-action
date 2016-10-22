@@ -1,9 +1,9 @@
 package aia.next
 
-//<start id="persistence-basket-items"/>
+
 case class Items(list: List[Item]) {
   // more code for working with the item..
-//<end id="persistence-basket-items"/>
+
   import Items._
   def add(newItem: Item) = Items.aggregate(list :+ newItem)
   def add(items: Items) = Items.aggregate(list ++ items.list)
@@ -22,10 +22,10 @@ case class Items(list: List[Item]) {
   }
   def clear = Items()
 }
-//<start id="persistence-basket-item"/>
+
 case class Item(productId: String, number: Int, unitPrice: BigDecimal) {
   // more code for working with the item..
-//<end id="persistence-basket-item"/>
+
   /*
    * Adds the number of items
    * if productId of the item argument is equal to this item's productId

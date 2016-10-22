@@ -36,10 +36,10 @@ object BidiEventFilter extends App with EventMarshalling {
       System.exit(1)
   }
 
-  //<start id="event-bidi-flow"/>
+
   val inFlow: Flow[ByteString, Event, NotUsed] = 
     if(args(0).toLowerCase == "json") {
-      JsonFraming.objectScanner(maxJsonObject) //<co id="json-framing"/>
+      JsonFraming.objectScanner(maxJsonObject)
       .map(_.decodeString("UTF8").parseJson.convertTo[Event])
     } else {
       Framing.delimiter(ByteString("\n"), maxLine)
@@ -53,11 +53,11 @@ object BidiEventFilter extends App with EventMarshalling {
       Flow[Event].map(event => ByteString(event.toJson.compactPrint))
     } else {
       Flow[Event].map{ event => 
-        ByteString(LogStreamProcessor.logLine(event)) //<co id="log_out"/>
+        ByteString(LogStreamProcessor.logLine(event))
       }
     }
   val bidiFlow = BidiFlow.fromFlows(inFlow, outFlow)
-  //<end id="event-bidi-flow"/>
+
     
   val source: Source[ByteString, Future[IOResult]] = 
     FileIO.fromPath(inputFile)
@@ -65,12 +65,12 @@ object BidiEventFilter extends App with EventMarshalling {
   val sink: Sink[ByteString, Future[IOResult]] = 
     FileIO.toPath(outputFile, Set(CREATE, WRITE, APPEND))
   
-  //<start id="event-bidi-filter"/>
+
   val filter: Flow[Event, Event, NotUsed] =   
     Flow[Event].filter(_.state == filterState)
 
-  val flow = bidiFlow.join(filter) //<co id="join-bidi"/>
-  //<end id="event-bidi-filter"/>
+  val flow = bidiFlow.join(filter)
+
 
   val runnableGraph: RunnableGraph[Future[IOResult]] = 
     source.via(flow).toMat(sink)(Keep.right)
