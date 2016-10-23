@@ -32,7 +32,6 @@ abstract class PersistenceSpec(system: ActorSystem) extends TestKit(system)
       watch(actor)
       system.stop(actor)
       expectTerminated(actor)
-      println(s"TERMINATED $actor")
     }
   }
 }
