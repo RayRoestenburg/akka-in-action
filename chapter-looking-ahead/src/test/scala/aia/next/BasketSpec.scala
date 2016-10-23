@@ -9,7 +9,7 @@ import org.scalatest._
 class BasketSpec extends PersistenceSpec(ActorSystem("test"))
     with PersistenceCleanup {
 
-  val shopperId = 2L
+  val shopperId = 5L
   val macbookPro = Item("Apple Macbook Pro", 1, BigDecimal(2499.99))
   val displays = Item("4K Display", 3, BigDecimal(2499.99))
 
@@ -32,7 +32,7 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
       import scala.concurrent.Future
       import scala.concurrent.duration._
       import scala.concurrent.Await
-
+      
       implicit val timeout = akka.util.Timeout(1 second)
 
       val macbookPro =
@@ -41,11 +41,11 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
         TypedBasket.Item("4K Display", 3, BigDecimal(2499.99))
 
       val sys: ActorSystem[TypedBasket.Command] =
-        ActorSystem("typed-basket", Props(TypedBasket.basketBehavior))
-
+        ActorSystem("typed-basket", TypedBasket.basketBehavior)
       sys ! TypedBasket.Add(macbookPro, shopperId)
       sys ! TypedBasket.Add(displays, shopperId)
 
+      implicit def scheduler = sys.scheduler
       val items: Future[TypedBasket.Items] =
         sys ? (TypedBasket.GetItems(shopperId, _))
 

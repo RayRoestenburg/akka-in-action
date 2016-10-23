@@ -22,8 +22,8 @@ class LocalShoppersSpec extends PersistenceSpec(ActorSystem("test"))
       system.eventStream.subscribe(probe.ref, classOf[Wallet.Paid])
 
       val shoppers = system.actorOf(LocalShoppers.props, LocalShoppers.name)
-      val shopperId1 = 1
-      val shopperId2 = 2
+      val shopperId1 = 8
+      val shopperId2 = 9
 
       shoppers ! Basket.Add(appleMouse, shopperId1)
       shoppers ! Basket.Add(appleKeyboard, shopperId1)

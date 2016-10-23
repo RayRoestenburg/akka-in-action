@@ -34,7 +34,9 @@ class Shopper extends Actor {
 
     case PayBasket(shopperId) => basket ! Basket.GetItems(shopperId)
     case Items(list) => wallet ! Wallet.Pay(list, shopperId)
-    case Wallet.Paid(_, shopperId) => basket ! Basket.Clear(shopperId)
+    case paid: Wallet.Paid => 
+      basket ! Basket.Clear(paid.shopperId)
+      context.system.eventStream.publish(paid)
   }
 }
 

@@ -1,8 +1,9 @@
 package aia.faulttolerance
 
-import org.scalatest.{WordSpecLike, BeforeAndAfterAll}
-import akka.testkit.TestKit
+import aia.faulttolerance.LifeCycleHooks.{ForceRestart, SampleMessage}
 import akka.actor._
+import akka.testkit.TestKit
+import org.scalatest.{BeforeAndAfterAll, WordSpecLike}
 
 class LifeCycleHooksTest extends TestKit(ActorSystem("LifCycleTest")) with WordSpecLike with BeforeAndAfterAll {
 
@@ -12,15 +13,14 @@ class LifeCycleHooksTest extends TestKit(ActorSystem("LifCycleTest")) with WordS
 
   "The Child" must {
     "log lifecycle hooks" in {
-
       val testActorRef = system.actorOf(
         Props[LifeCycleHooks], "LifeCycleHooks")
-      testActorRef ! "restart"
-      testActorRef.tell("msg", testActor)
-      expectMsg("msg")
+      watch(testActorRef)
+      testActorRef ! ForceRestart
+      testActorRef.tell(SampleMessage, testActor)
+      expectMsg(SampleMessage)
       system.stop(testActorRef)
-      Thread.sleep(1000)
-
+      expectTerminated(testActorRef)
 
     }
   }

@@ -1,42 +1,53 @@
 package aia.faulttolerance
 
+import aia.faulttolerance.LifeCycleHooks.{ForceRestart, ForceRestartException}
 import akka.actor._
 
+object LifeCycleHooks {
+
+  object SampleMessage
+
+  object ForceRestart
+
+  private class ForceRestartException extends IllegalArgumentException("force restart")
+
+}
+
 class LifeCycleHooks extends Actor with ActorLogging {
-  println("Constructor")
+  log.info("Constructor")
 
   override def preStart(): Unit = {
-    println("preStart")
+    log.info("preStart")
   }
 
 
 
   override def postStop(): Unit = {
-    println("postStop")
+    log.info("postStop")
   }
 
 
 
   override def preRestart(reason: Throwable,
                           message: Option[Any]): Unit = {
-    println("preRestart")
+    log.info(s"preRestart. Reason: $reason when handling message: $message")
     super.preRestart(reason, message)
   }
 
 
 
   override def postRestart(reason: Throwable): Unit = {
-    println("postRestart")
+    log.info("postRestart")
     super.postRestart(reason)
 
   }
 
 
   def receive = {
-    case "restart" =>
-      throw new IllegalStateException("force restart")
+    case ForceRestart =>
+      throw new ForceRestartException
     case msg: AnyRef =>
-      println("Receive")
+      log.info(s"Received: '$msg'. Sending back")
       sender() ! msg
   }
 }

@@ -12,6 +12,7 @@ import scala.language.postfixOps
 class AggregatorTest
   extends TestKit(ActorSystem("AggregatorTest"))
   with WordSpecLike with BeforeAndAfterAll {
+  val timeout = 2 seconds
 
   protected override def afterAll(): Unit = {
     system.terminate()
@@ -22,7 +23,7 @@ class AggregatorTest
 
       val endProbe = TestProbe()
       val actorRef = system.actorOf(
-        Props(new Aggregator(1 second, endProbe.ref)))
+        Props(new Aggregator(timeout, endProbe.ref)))
       val photoStr = ImageProcessing.createPhotoString(new Date(), 60)
       val msg1 = PhotoMessage("id1",
         photoStr,
@@ -48,7 +49,7 @@ class AggregatorTest
 
       val endProbe = TestProbe()
       val actorRef = system.actorOf(
-        Props(new Aggregator(1 second, endProbe.ref)))
+        Props(new Aggregator(timeout, endProbe.ref)))
       val photoStr = ImageProcessing.createPhotoString(
         new Date(), 60)
       val msg1 = PhotoMessage("id1",
@@ -64,7 +65,7 @@ class AggregatorTest
 
       val endProbe = TestProbe()
       val actorRef = system.actorOf(
-        Props(new Aggregator(1 second, endProbe.ref)))
+        Props(new Aggregator(timeout, endProbe.ref)))
       val photoStr = ImageProcessing.createPhotoString(new Date(), 60)
 
       val msg1 = PhotoMessage("id1",

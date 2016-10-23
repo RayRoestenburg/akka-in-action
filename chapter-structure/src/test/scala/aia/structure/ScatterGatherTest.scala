@@ -14,6 +14,8 @@ class ScatterGatherTest
   with WordSpecLike
   with BeforeAndAfterAll {
 
+  val timeout = 2 seconds
+
   override def afterAll(): Unit = {
     system.terminate()
   }
@@ -23,7 +25,7 @@ class ScatterGatherTest
 
       val endProbe = TestProbe()
       val aggregateRef = system.actorOf(
-        Props(new Aggregator(1 second, endProbe.ref)))
+        Props(new Aggregator(timeout, endProbe.ref)))
       val speedRef = system.actorOf(
         Props(new GetSpeed(aggregateRef)))
       val timeRef = system.actorOf(
