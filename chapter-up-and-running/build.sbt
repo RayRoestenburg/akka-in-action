@@ -1,4 +1,4 @@
-enablePlugins(JavaServerAppPackaging) //<co id="example-enable-sbt-native-packager"/>
+enablePlugins(JavaServerAppPackaging)
 
 name := "goticks"
 
