@@ -24,7 +24,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import spray.json._
 
-//<start id="logsApi"/>
+
 class LogsApi(
   val logsDir: Path, 
   val maxLine: Int
@@ -32,9 +32,9 @@ class LogsApi(
   implicit val executionContext: ExecutionContext, 
   val materializer: ActorMaterializer
 ) extends EventMarshalling {
-  def logFile(id: String) = logsDir.resolve(id) //<co id="logFile"/>
+  def logFile(id: String) = logsDir.resolve(id)
 // route logic follows..
-//<end id="logsApi"/>
+
   
   val inFlow = Framing.delimiter(ByteString("\n"), maxLine)
     .map(_.decodeString("UTF8"))
@@ -46,43 +46,43 @@ class LogsApi(
   }
   val bidiFlow = BidiFlow.fromFlows(inFlow, outFlow)
 
-  //<start id="logs_app_flow"/>
+
   import java.nio.file.StandardOpenOption
   import java.nio.file.StandardOpenOption._
 
-  val logToJsonFlow = bidiFlow.join(Flow[Event]) //<co id="logs_app_join"/>
+  val logToJsonFlow = bidiFlow.join(Flow[Event])
   
   def logFileSink(logId: String) = 
     FileIO.toPath(logFile(logId), Set(CREATE, WRITE, APPEND))
   def logFileSource(logId: String) = FileIO.fromPath(logFile(logId))
-  //<end id="logs_app_flow"/>
 
-  //<start id="logRoute"/>
+
+
   def routes: Route = postRoute ~ getRoute ~ deleteRoute
 
-  //<end id="logRoute"/>
+
   
-  //<start id="postRoute"/>
+
   def postRoute = 
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         post {
-          entity(as[HttpEntity]) { entity => //<co id="logRoutePostEntity"/>
+          entity(as[HttpEntity]) { entity =>
             onComplete(
               entity 
-                .dataBytes //<co id="logRoutePostDataBytes"/>
-                .via(logToJsonFlow) //<co id="logRoutePostFlow"/>
-                .toMat(logFileSink(logId))(Keep.right) //<co id="logRoutePostSink"/>
+                .dataBytes
+                .via(logToJsonFlow)
+                .toMat(logFileSink(logId))(Keep.right)
                 .run()
             ) {
-              case Success(IOResult(count, Success(Done))) => //<co id="logRoutePostSuccess"/>
+              case Success(IOResult(count, Success(Done))) =>
                 complete((StatusCodes.OK, LogReceipt(logId, count)))
-              case Success(IOResult(count, Failure(e))) => //<co id="logRoutePostIOFailure"/>
+              case Success(IOResult(count, Failure(e))) =>
                 complete((
                   StatusCodes.BadRequest, 
                   ParseError(logId, e.getMessage)
                 ))
-              case Failure(e) => //<co id="logRoutePostFailure"/>
+              case Failure(e) =>
                 complete((
                   StatusCodes.BadRequest, 
                   ParseError(logId, e.getMessage)
@@ -92,17 +92,17 @@ class LogsApi(
         } 
       }
     }
-    //<end id="postRoute"/>
 
-  //<start id="getRoute"/>
+
+
   def getRoute = 
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         get { 
           if(Files.exists(logFile(logId))) {
-            val src = logFileSource(logId) //<co id="logRouteGetSource"/>
+            val src = logFileSource(logId)
             complete(
-              HttpEntity(ContentTypes.`application/json`, src) //<co id="logRouteGetComplete"/>
+              HttpEntity(ContentTypes.`application/json`, src)
             )
           } else {
             complete(StatusCodes.NotFound)
@@ -110,7 +110,7 @@ class LogsApi(
         }
       }
     }
-  //<end id="getRoute"/>
+
 
   def deleteRoute = 
     pathPrefix("logs" / Segment) { logId =>

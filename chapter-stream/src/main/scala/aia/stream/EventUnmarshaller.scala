@@ -16,34 +16,34 @@ import akka.http.scaladsl.model._
 
 import akka.util.ByteString
 import spray.json._
-//<start id="unmarshaller"/>
+
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
 
 object EventUnmarshaller extends EventMarshalling {
-  val supported = Set[ContentTypeRange]( //<co id="supported"/>
+  val supported = Set[ContentTypeRange](
     ContentTypes.`text/plain(UTF-8)`, 
     ContentTypes.`application/json`
   )
 
   def create(maxLine: Int, maxJsonObject: Int) = {
-    new Unmarshaller[HttpEntity, Source[Event, _]] { //<co id="custom_unmarshaller"/>
+    new Unmarshaller[HttpEntity, Source[Event, _]] {
       def apply(entity: HttpEntity)(implicit ec: ExecutionContext, 
-        materializer: Materializer): Future[Source[Event, _]] = { //<co id="apply"/>
+        materializer: Materializer): Future[Source[Event, _]] = {
 
-        val future = entity.contentType match { //<co id="contentType"/>
+        val future = entity.contentType match {
           case ContentTypes.`text/plain(UTF-8)` => 
-            Future.successful(LogJson.textInFlow(maxLine)) //<co id="textInFlow"/>
+            Future.successful(LogJson.textInFlow(maxLine))
           case ContentTypes.`application/json` =>
-            Future.successful(LogJson.jsonInFlow(maxJsonObject)) //<co id="jsonInFlow"/>
+            Future.successful(LogJson.jsonInFlow(maxJsonObject))
           case other => 
             Future.failed(
-              new UnsupportedContentTypeException(supported) //<co id="non_exhaust"/>
+              new UnsupportedContentTypeException(supported)
             )
         }
-        future.map(flow => entity.dataBytes.via(flow))(ec)  //<co id="map_future"/>
+        future.map(flow => entity.dataBytes.via(flow))(ec)
       } 
-    }.forContentTypes(supported.toList:_*) //<co id="constrain"/>
+    }.forContentTypes(supported.toList:_*)
   }
 }
-//<end id="unmarshaller"/>
+

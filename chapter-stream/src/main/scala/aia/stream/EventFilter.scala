@@ -42,43 +42,43 @@ object EventFilter extends App with EventMarshalling {
     FileIO.toPath(outputFile, Set(CREATE, WRITE, APPEND))
 
   // not used, just to show alternatively defining the entire flow
-  //<start id="event-filter"/>
-  val flow: Flow[ByteString, ByteString, NotUsed] =  //<co id="event_filter_flow_def"/>
-    Framing.delimiter(ByteString("\n"), maxLine) //<co id="event_filter_framing"/>
-      .map(_.decodeString("UTF8")) //<co id="event_filter_framing"/>
-      .map(LogStreamProcessor.parseLineEx) //<co id="event_filter_parse"/>
+
+  val flow: Flow[ByteString, ByteString, NotUsed] =
+    Framing.delimiter(ByteString("\n"), maxLine)
+      .map(_.decodeString("UTF8"))
+      .map(LogStreamProcessor.parseLineEx)
       .collect { case Some(e) => e }
-      .filter(_.state == filterState) //<co id="event_filter_filter"/>
-      .map(event => ByteString(event.toJson.compactPrint)) //<co id="event_filter_serialize"/>
-  //<end id="event-filter"/>
+      .filter(_.state == filterState)
+      .map(event => ByteString(event.toJson.compactPrint))
 
-  //<start id="frame-flow"/>
+
+
   val frame: Flow[ByteString, String, NotUsed] =  
-    Framing.delimiter(ByteString("\n"), maxLine) //<co id="create_frame_flow"/>
-      .map(_.decodeString("UTF8")) //<co id="frame_map"/>
-  //<end id="frame-flow"/>
-  
-  //<start id="parse-flow"/>
-  val parse: Flow[String, Event, NotUsed] = 
-    Flow[String].map(LogStreamProcessor.parseLineEx) //<co id="parse_string"/>
-      .collect { case Some(e) => e } //<co id="collect"/>
-  //<end id="parse-flow"/>
+    Framing.delimiter(ByteString("\n"), maxLine)
+      .map(_.decodeString("UTF8"))
 
-  //<start id="filter-flow"/>
+  
+
+  val parse: Flow[String, Event, NotUsed] = 
+    Flow[String].map(LogStreamProcessor.parseLineEx)
+      .collect { case Some(e) => e }
+
+
+
   val filter: Flow[Event, Event, NotUsed] =   
     Flow[Event].filter(_.state == filterState)
-  //<end id="filter-flow"/>
+
   
-  //<start id="serialize-flow"/>
+
   val serialize: Flow[Event, ByteString, NotUsed] =  
-    Flow[Event].map(event => ByteString(event.toJson.compactPrint)) //<co id="event_filter_serialize"/>
-  //<end id="serialize-flow"/>
+    Flow[Event].map(event => ByteString(event.toJson.compactPrint))
+
 
   implicit val system = ActorSystem() 
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  //<start id="composed-event-filter"/>
+
   val composedFlow: Flow[ByteString, ByteString, NotUsed] =  
     frame.via(parse)
       .via(filter)
@@ -92,5 +92,5 @@ object EventFilter extends App with EventMarshalling {
     println(s"Wrote ${result.count} bytes to '$outputFile'.")
     system.terminate()
   }  
-  //<end id="composed-event-filter"/>
+
 }

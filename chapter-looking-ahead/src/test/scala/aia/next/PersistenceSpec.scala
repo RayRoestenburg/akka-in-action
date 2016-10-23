@@ -1,5 +1,5 @@
 package akka.testkit
-//<start id="persistence-persistence_spec"/>
+
 
 import java.io.File
 import com.typesafe.config._
@@ -48,4 +48,4 @@ trait PersistenceCleanup {
     storageLocations.foreach(dir => Try(FileUtils.deleteDirectory(dir)))
   }
 }
-//<end id="persistence-persistence_spec"/>
+

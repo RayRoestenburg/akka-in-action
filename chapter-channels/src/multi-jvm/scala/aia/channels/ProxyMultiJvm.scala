@@ -10,7 +10,7 @@ import akka.actor.{Props, Actor}
 /**
  * Hooks up MultiNodeSpec with ScalaTest
  */
-//<start id="ch09-proxy-config-test"/>
+
 import akka.remote.testkit.MultiNodeSpecCallbacks
 import akka.remote.testkit.MultiNodeConfig
 import akka.remote.testkit.MultiNodeSpec
@@ -28,17 +28,17 @@ trait STMultiNodeSpec
 
 
 object ReliableProxySampleConfig extends MultiNodeConfig {
-  val client = role("Client")                              //<co id="ch09-proxy-config-test-1"/>
-  val server = role("Server")                              //<co id="ch09-proxy-config-test-2"/>
-  testTransport(on = true)                                 //<co id="ch09-proxy-config-test-3"/>
+  val client = role("Client")
+  val server = role("Server")
+  testTransport(on = true)
 }
 
 class ReliableProxySampleSpecMultiJvmNode1 extends ReliableProxySample
 class ReliableProxySampleSpecMultiJvmNode2 extends ReliableProxySample
 
-//<end id="ch09-proxy-config-test"/>
 
-//<start id="ch09-proxy-test"/>
+
+
 import akka.remote.transport.ThrottlerTransportAdapter.Direction
 import scala.concurrent.duration._
 import concurrent.Await
@@ -64,32 +64,32 @@ class ReliableProxySample
       runOn(client) {
         enterBarrier("deployed")
         val pathToEcho = node(server) / "user" / "echo"
-        val echo = system.actorSelection(pathToEcho)    //<co id="ch09-proxy-test-1"/>
+        val echo = system.actorSelection(pathToEcho)
         val proxy = system.actorOf(
-          ReliableProxy.props(pathToEcho, 500.millis), "proxy")        //<co id="ch09-proxy-test-2"/>
+          ReliableProxy.props(pathToEcho, 500.millis), "proxy")
 
-        proxy ! "message1"                                            //<co id="ch09-proxy-test-3"/>
+        proxy ! "message1"
         expectMsg("message1")
         Await.ready(
-          testConductor.blackhole( client, server, Direction.Both),    //<co id="ch09-proxy-test-4"/>
+          testConductor.blackhole( client, server, Direction.Both),
           1 second)
 
-        echo ! "DirectMessage"                                         //<co id="ch09-proxy-test-5"/>
+        echo ! "DirectMessage"
         proxy ! "ProxyMessage"
         expectNoMsg(3 seconds)
 
         Await.ready(
-          testConductor.passThrough( client, server, Direction.Both),  //<co id="ch09-proxy-test-6"/>
+          testConductor.passThrough( client, server, Direction.Both),
           1 second)
 
-        expectMsg("ProxyMessage")                                      //<co id="ch09-proxy-test-7"/>
+        expectMsg("ProxyMessage")
 
-        echo ! "DirectMessage2"                                        //<co id="ch09-proxy-test-8"/>
+        echo ! "DirectMessage2"
         expectMsg("DirectMessage2")
       }
 
       runOn(server) {
-        system.actorOf(Props(new Actor {                               //<co id="ch09-proxy-test-9"/>
+        system.actorOf(Props(new Actor {
           def receive = {
             case msg: AnyRef => {
               sender() ! msg
@@ -103,4 +103,4 @@ class ReliableProxySample
     }
   }
 }
-//<end id="ch09-proxy-test"/>
+

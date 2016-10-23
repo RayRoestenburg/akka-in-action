@@ -7,11 +7,11 @@ import concurrent.duration._
 import akka.util.Timeout
 //import concurrent.ExecutionContext.Implicits.global
 
-//<start id="ch10-agent-state"/>
+
 case class BookStatistics(val nameBook: String, nrSold: Int)
 case class StateBookStatistics(val sequence: Long,
                             books: Map[String, BookStatistics])
-//<end id="ch10-agent-state"/>
+
 
 class BookStatisticsMgr(system: ActorSystem) {
   implicit val ex = system.dispatcher //todo: change chapter 2.2 =>2.3

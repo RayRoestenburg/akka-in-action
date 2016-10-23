@@ -14,32 +14,32 @@ class RouteSlipTest
 
   "The Router" must {
     "route messages correctly" in {
-      //<start id="ch09-routing-slip-test1"/>
+
       val probe = TestProbe()
-      val router = system.actorOf( //<co id="ch09-routing-slip-test1-1" />
+      val router = system.actorOf(
         Props(new SlipRouter(probe.ref)), "SlipRouter")
 
       val minimalOrder = new Order(Seq())
-      router ! minimalOrder //<co id="ch09-routing-slip-test1-2" />
+      router ! minimalOrder
       val defaultCar = new Car(
         color = "black",
         hasNavigation = false,
         hasParkingSensors = false)
-      probe.expectMsg(defaultCar) //<co id="ch09-routing-slip-test1-3" />
-      //<end id="ch09-routing-slip-test1"/>
+      probe.expectMsg(defaultCar)
 
-      //<start id="ch09-routing-slip-test2"/>
+
+
       val fullOrder = new Order(Seq(
         CarOptions.CAR_COLOR_GRAY,
         CarOptions.NAVIGATION,
         CarOptions.PARKING_SENSORS))
-      router ! fullOrder //<co id="ch09-routing-slip-test2-1" />
+      router ! fullOrder
       val carWithAllOptions = new Car(
         color = "gray",
         hasNavigation = true,
         hasParkingSensors = true)
-      probe.expectMsg(carWithAllOptions) //<co id="ch09-routing-slip-test2-2" />
-      //<end id="ch09-routing-slip-test2"/>
+      probe.expectMsg(carWithAllOptions)
+
 
       val msg = new Order(Seq(CarOptions.PARKING_SENSORS))
       router ! msg

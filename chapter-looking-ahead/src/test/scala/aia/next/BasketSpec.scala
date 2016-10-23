@@ -19,12 +19,12 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
       basket ! Basket.Add(macbookPro, shopperId)
       basket ! Basket.Add(displays, shopperId)
 
-      basket ! Basket.GetItems(shopperId)   //<co id="next_works_"/>
-      //basket ! Basket.GetItems            //<co id="next_does_not_work_no_error"/>
+      basket ! Basket.GetItems(shopperId)
+      //basket ! Basket.GetItems
       expectMsg(Items(macbookPro, displays))
       killActors(basket)
     }
-//<start id="typesafe_test"/>
+
     "return the items in a typesafe way" in {
       import akka.typed._
       import akka.typed.ScalaDSL._
@@ -51,9 +51,9 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
 
       val res = Await.result(items, 10 seconds)
       res should equal(TypedBasket.Items(Vector(macbookPro, displays)))
-      //sys ? Basket.GetItems            //<co id="does_not_compile"/>
+      //sys ? Basket.GetItems
       sys.terminate()
     }
-//<end id="typesafe_test"/>
+
   }
 }

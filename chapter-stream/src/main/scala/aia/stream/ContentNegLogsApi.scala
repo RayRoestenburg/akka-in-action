@@ -34,7 +34,7 @@ class ContentNegLogsApi(
   implicit val executionContext: ExecutionContext, 
   val materializer: ActorMaterializer
 ) extends EventMarshalling {
-  def logFile(id: String) = logsDir.resolve(id) //<co id="logFile"/>
+  def logFile(id: String) = logsDir.resolve(id)
   
   val outFlow = Flow[Event].map { event => 
     ByteString(event.toJson.compactPrint)
@@ -47,21 +47,21 @@ class ContentNegLogsApi(
 
   def routes: Route = postRoute ~ getRoute ~ deleteRoute
   
-  //<start id="postRoute"/>
-  implicit val unmarshaller = EventUnmarshaller.create(maxLine, maxJsObject) //<co id="implicit_unmarshaller"/>
+
+  implicit val unmarshaller = EventUnmarshaller.create(maxLine, maxJsObject)
 
   def postRoute = 
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         post {
-          entity(as[Source[Event, _]]) { src => //<co id="use_implicit_unmarshaller"/>
+          entity(as[Source[Event, _]]) { src =>
             onComplete(
               src.via(outFlow)
                 .toMat(logFileSink(logId))(Keep.right)
                 .run()
             ) {
             // Handling Future result omitted here, done the same as before.
-            //<end id="postRoute"/>
+
               case Success(IOResult(count, Success(Done))) =>
                 complete((StatusCodes.OK, LogReceipt(logId, count)))
               case Success(IOResult(count, Failure(e))) =>
@@ -80,17 +80,17 @@ class ContentNegLogsApi(
       }
     }
 
-  //<start id="getRoute"/>
-  implicit val marshaller = LogEntityMarshaller.create(maxJsObject) //<co id="implicit_marshaller"/>
+
+  implicit val marshaller = LogEntityMarshaller.create(maxJsObject)
 
   def getRoute = 
     pathPrefix("logs" / Segment) { logId =>
       pathEndOrSingleSlash {
         get { 
-          extractRequest { req => //<co id="extract_request"/>
+          extractRequest { req =>
             if(Files.exists(logFile(logId))) {
               val src = logFileSource(logId) 
-              complete(Marshal(src).toResponseFor(req)) //<co id="use_implicit_marshaller"/>
+              complete(Marshal(src).toResponseFor(req))
             } else {
               complete(StatusCodes.NotFound)
             }
@@ -98,7 +98,7 @@ class ContentNegLogsApi(
         }
       }
     }
-  //<end id="getRoute"/>
+
 
   def deleteRoute = 
     pathPrefix("logs" / Segment) { logId =>

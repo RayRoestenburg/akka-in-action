@@ -70,29 +70,29 @@ class EventStreamTest extends TestKit(ActorSystem("EventStreamTest"))
 
     }
     "unscribe messages" in {
-      //<start id="ch09-eventStream-test"/>
-      val DeliverOrder = TestProbe() //<co id="ch09-eventStream-test-1"/>
-      val giftModule = TestProbe() //<co id="ch09-eventStream-test-2"/>
 
-      system.eventStream.subscribe( //<co id="ch09-eventStream-test-3"/>
+      val DeliverOrder = TestProbe()
+      val giftModule = TestProbe()
+
+      system.eventStream.subscribe(
         DeliverOrder.ref,
         classOf[Order])
-      system.eventStream.subscribe( //<co id="ch09-eventStream-test-4"/>
+      system.eventStream.subscribe(
         giftModule.ref,
         classOf[Order])
 
       val msg = new Order("me", "Akka in Action", 3)
-      system.eventStream.publish(msg) //<co id="ch09-eventStream-test-5"/>
+      system.eventStream.publish(msg)
 
-      DeliverOrder.expectMsg(msg) //<co id="ch09-eventStream-test-6"/>
-      giftModule.expectMsg(msg) //<co id="ch09-eventStream-test-7"/>
+      DeliverOrder.expectMsg(msg)
+      giftModule.expectMsg(msg)
 
-      system.eventStream.unsubscribe(giftModule.ref) //<co id="ch09-eventStream-test-8"/>
+      system.eventStream.unsubscribe(giftModule.ref)
 
       system.eventStream.publish(msg)
       DeliverOrder.expectMsg(msg)
-      giftModule.expectNoMsg(3 seconds) //<co id="ch09-eventStream-test-9"/>
-      //<end id="ch09-eventStream-test"/>
+      giftModule.expectNoMsg(3 seconds)
+
     }
   }
   "MyEventBus" must {
@@ -111,24 +111,24 @@ class EventStreamTest extends TestKit(ActorSystem("EventStreamTest"))
   }
   "OrderMessageBus" must {
     "deliver Order messages" in {
-      //<start id="ch09-eventBus-test"/>
-      val bus = new OrderMessageBus //<co id="ch09-eventBus-test-1"/>
+
+      val bus = new OrderMessageBus
 
       val singleBooks = TestProbe()
-      bus.subscribe(singleBooks.ref, false) //<co id="ch09-eventBus-test-2"/>
+      bus.subscribe(singleBooks.ref, false)
       val multiBooks = TestProbe()
-      bus.subscribe(multiBooks.ref, true) //<co id="ch09-eventBus-test-3"/>
+      bus.subscribe(multiBooks.ref, true)
 
       val msg = new Order("me", "Akka in Action", 1)
-      bus.publish(msg) //<co id="ch09-eventBus-test-4"/>
+      bus.publish(msg)
       singleBooks.expectMsg(msg)
-      multiBooks.expectNoMsg(3 seconds) //<co id="ch09-eventBus-test-5"/>
+      multiBooks.expectNoMsg(3 seconds)
 
       val msg2 = new Order("me", "Akka in Action", 3)
-      bus.publish(msg2) //<co id="ch09-eventBus-test-6"/>
+      bus.publish(msg2)
       singleBooks.expectNoMsg(3 seconds)
       multiBooks.expectMsg(msg2)
-      //<end id="ch09-eventBus-test"/>
+
     }
     "deliver order messages when multiple subscriber" in {
       val bus = new OrderMessageBus

@@ -61,7 +61,7 @@ object CalculateStatistics {
     mailSummaries ++ actorSummaries
   }
 
-  //<start id="ch14-stats-actor"/>
+
   case class ActorSummary(utilization: Double,
                           averageServiceTime: Double)
 
@@ -80,18 +80,18 @@ object CalculateStatistics {
           if (event.entryTime < startTimePeriod) {
             (nr, total)
           } else {
-            (nr + 1, total + (event.exitTime - event.entryTime)) //<co id="ch14-stats-actor-1" />
+            (nr + 1, total + (event.exitTime - event.entryTime))
           }
         }
       }
       val totalUtilizationTime = events.foldLeft(0L) {
         case (total, event) => {
-          val entryTime = Math.max(event.entryTime, startTimePeriod) //<co id="ch14-stats-actor-2" />
+          val entryTime = Math.max(event.entryTime, startTimePeriod)
           val exitTime = Math.min(event.exitTime, endTimePeriod)
           total + (exitTime - entryTime)
         }
       }
-      val utilization = (totalUtilizationTime * 100) / period.toMillis //<co id="ch14-stats-actor-3" />
+      val utilization = (totalUtilizationTime * 100) / period.toMillis
       ActorSummary(utilization = utilization,
         averageServiceTime =
           if (nrProcess != 0)
@@ -99,9 +99,9 @@ object CalculateStatistics {
           else 0)
     }
   }
-  //<end id="ch14-stats-actor"/>
 
-  //<start id="ch14-stats-mailbox"/>
+
+
   case class MailboxSummary(maxQueueLength: Int,
                             arrivalRate: Double,
                             averageWaitTime: Double)
@@ -115,16 +115,16 @@ object CalculateStatistics {
     } else {
       val (maxQueue, totalWaitTime) = events.foldLeft((0, 0L)) {
         case ((max, total), event) => {
-          val newMax = Math.max(max, event.queueSize) //<co id="ch14-stats-mailbox-1" />
-          val newTotal = total + (event.exitTime - event.entryTime) //<co id="ch14-stats-mailbox-2" />
+          val newMax = Math.max(max, event.queueSize)
+          val newTotal = total + (event.exitTime - event.entryTime)
           (newMax, newTotal)
         }
       }
-      MailboxSummary(maxQueueLength = maxQueue, //<co id="ch14-stats-mailbox-3" />
+      MailboxSummary(maxQueueLength = maxQueue,
         arrivalRate = nrEvents / period.toSeconds,
         averageWaitTime = totalWaitTime / nrEvents)
     }
   }
-  //<end id="ch14-stats-mailbox"/>
+
 
 }

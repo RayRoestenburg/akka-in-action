@@ -24,7 +24,7 @@ import aia.persistence._
 class ShoppersService(val shoppers: ActorRef, val system: ActorSystem, val requestTimeout: Timeout) extends ShoppersRoutes {
   val executionContext = system.dispatcher
 }
-//<start id="persistence-shoppersRoutes"/>
+
 trait ShoppersRoutes extends ShopperMarshalling {
   def routes =
     deleteItem ~
@@ -47,7 +47,7 @@ trait ShoppersRoutes extends ShopperMarshalling {
       }
     }
   }
-//<end id="persistence-shoppersRoutes"/>
+
 
   def getBasket = {
     get {

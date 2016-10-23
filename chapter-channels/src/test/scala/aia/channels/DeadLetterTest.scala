@@ -30,42 +30,42 @@ class DeadLetterTest extends TestKit(ActorSystem("DeadLetterTest"))
       dead.recipient must be(system.deadLetters)
     }
     "catch deadLetter messages send to deadLetters" in {
-      //<start id="ch09-deadLetter-send-test"/>
+
       val deadLetterMonitor = TestProbe()
-      val actor = system.actorOf(Props[EchoActor], "echo") //<co id="ch09-deadLetter-send-test-1"/>
+      val actor = system.actorOf(Props[EchoActor], "echo")
 
       system.eventStream.subscribe(
         deadLetterMonitor.ref,
         classOf[DeadLetter])
 
       val msg = new Order("me", "Akka in Action", 1)
-      val dead = DeadLetter(msg, testActor, actor) //<co id="ch09-deadLetter-send-test-2"/>
+      val dead = DeadLetter(msg, testActor, actor)
       system.deadLetters ! dead
 
-      deadLetterMonitor.expectMsg(dead) //<co id="ch09-deadLetter-send-test-3"/>
+      deadLetterMonitor.expectMsg(dead)
 
       system.stop(actor)
-      //<end id="ch09-deadLetter-send-test"/>
+
     }
 
     "catch messages send to terminated Actor" in {
-      //<start id="ch09-deadLetter-test"/>
+
       val deadLetterMonitor = TestProbe()
 
-      system.eventStream.subscribe( //<co id="ch09-deadLetter-test-0"/>
+      system.eventStream.subscribe(
         deadLetterMonitor.ref,
         classOf[DeadLetter])
 
       val actor = system.actorOf(Props[EchoActor], "echo")
-      actor ! PoisonPill //<co id="ch09-deadLetter-test-1"/>
+      actor ! PoisonPill
       val msg = new Order("me", "Akka in Action", 1)
-      actor ! msg //<co id="ch09-deadLetter-test-2"/>
+      actor ! msg
 
-      val dead = deadLetterMonitor.expectMsgType[DeadLetter] //<co id="ch09-deadLetter-test-3"/>
+      val dead = deadLetterMonitor.expectMsgType[DeadLetter]
       dead.message must be(msg)
       dead.sender must be(testActor)
       dead.recipient must be(actor)
-      //<end id="ch09-deadLetter-test"/>
+
     }
 
   }

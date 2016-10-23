@@ -7,12 +7,12 @@ import scala.collection.mutable.ListBuffer
 import akka.actor._
 import java.text.SimpleDateFormat
 
-//<start id="ch7-photomsg"/>
+
 case class PhotoMessage(id: String,
                         photo: String,
                         creationTime: Option[Date] = None,
                         speed: Option[Int] = None)
-//<end id="ch7-photomsg"/>
+
 
 object ImageProcessing {
   val dateFormat = new SimpleDateFormat("ddMMyyyy HH:mm:ss.SSS")
@@ -47,7 +47,7 @@ object ImageProcessing {
     "%s|%s|%s".format(dateFormat.format(date), speed, license)
   }
 }
-//<start id="ch7-scatter-gather-tasks"/>
+
 class GetSpeed(pipe: ActorRef) extends Actor {
   def receive = {
     case msg: PhotoMessage => {
@@ -64,19 +64,19 @@ class GetTime(pipe: ActorRef) extends Actor {
     }
   }
 }
-//<end id="ch7-scatter-gather-tasks"/>
 
-//<start id="ch7-recipientList"/>
+
+
 class RecipientList(recipientList: Seq[ActorRef]) extends Actor {
   def receive = {
     case msg: AnyRef => recipientList.foreach(_ ! msg)
   }
 }
-//<end id="ch7-recipientList"/>
+
 
 case class TimeoutMessage(msg: PhotoMessage)
 
-//<start id="ch7-scatter-gather-aggregator"/>
+
 class Aggregator(timeout: FiniteDuration, pipe: ActorRef)
   extends Actor {
 
@@ -84,7 +84,7 @@ class Aggregator(timeout: FiniteDuration, pipe: ActorRef)
   implicit val ec = context.system.dispatcher
   override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
     super.preRestart(reason, message)
-    messages.foreach(self ! _) //<co id="ch07-scatter-gather-aggregator3-1" />
+    messages.foreach(self ! _)
     messages.clear()
   }
 
@@ -119,7 +119,6 @@ class Aggregator(timeout: FiniteDuration, pipe: ActorRef)
         case None => //message is already processed
       }
     }
-    case ex: Exception => throw ex //<co id="ch07-scatter-gather-aggregator3-2" />
+    case ex: Exception => throw ex
   }
 }
-//<end id="ch7-scatter-gather-aggregator"/>

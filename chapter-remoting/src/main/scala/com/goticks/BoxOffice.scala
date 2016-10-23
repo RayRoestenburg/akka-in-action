@@ -33,7 +33,7 @@ class BoxOffice(implicit timeout: Timeout) extends Actor {
 
   def receive = {
     case CreateEvent(name, tickets) =>
-      def create() = {  //<co id="ch02_create"/>
+      def create() = {
         val eventTickets = createTicketSeller(name)
         val newTickets = (1 to tickets).map { ticketId =>
           TicketSeller.Ticket(ticketId)

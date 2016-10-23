@@ -144,7 +144,7 @@ class InventoryTest extends TestKit(ActorSystem("InventoryTest"))
   }
   "InventoryTimer" must {
     "follow the flow" in {
-      //<start id="ch10-fsm-timer-test"/>
+
       val publisher = TestProbe()
       val inventory = system.actorOf(
         Props(new InventoryWithTimer(publisher.ref)))
@@ -160,11 +160,11 @@ class InventoryTest extends TestKit(ActorSystem("InventoryTest"))
       stateProbe.expectMsg(
         new Transition(inventory, WaitForRequests, WaitForPublisher))
       publisher.expectMsg(PublisherRequest)
-      stateProbe.expectMsg(6 seconds, //<co id="ch10-fsm-timer-test-1"/>
+      stateProbe.expectMsg(6 seconds,
         new Transition(inventory, WaitForPublisher, WaitForRequests))
       stateProbe.expectMsg(
         new Transition(inventory, WaitForRequests, WaitForPublisher))
-      //<end id="ch10-fsm-timer-test"/>
+
       system.stop(inventory)
     }
   }

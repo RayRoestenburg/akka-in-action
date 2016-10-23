@@ -332,10 +332,10 @@ class PerfRoutingTest
   }
     "The Router" must {
     "routes using roundrobin" in {
-      //<start id="ch09-routing-perf-test"/>
+
       val endProbe = TestProbe()
       val router = system.actorOf(
-        RoundRobinPool(5).props(                //<co id="ch09-routing-perf-test-1" />
+        RoundRobinPool(5).props(
           Props(new GetLicense(endProbe.ref, 250 millis))), "roundrobinRouter")
 
       val msg = PerformanceRoutingMessage(
@@ -343,21 +343,21 @@ class PerfRoutingTest
         None,
         None)
 
-      for (index <- 0 until 10) { //<co id="ch09-routing-perf-test-2" />
+      for (index <- 0 until 10) {
         router ! msg
       }
-      val processedMessages = endProbe.receiveN(10, 5 seconds).collect //<co id="ch09-routing-perf-test-3" />
+      val processedMessages = endProbe.receiveN(10, 5 seconds).collect
       { case m: PerformanceRoutingMessage => m }
       processedMessages.size must be(10)
 
-      val grouped = processedMessages.groupBy(_.processedBy) //<co id="ch09-routing-perf-test-4" />
+      val grouped = processedMessages.groupBy(_.processedBy)
       grouped.values.foreach(listProcessedByOneActor =>
-        listProcessedByOneActor must have size (2)) //<co id="ch09-routing-perf-test-5" />
-      //<end id="ch09-routing-perf-test"/>
+        listProcessedByOneActor must have size (2))
+
       system.stop(router)
     }
     "routes using smallest mailbox" in {
-      //<start id="ch09-routing-mailbox-test"/>
+
       val endProbe = TestProbe()
 
       val router = system.actorOf(SmallestMailboxPool(2).props(Props(
@@ -376,7 +376,7 @@ class PerfRoutingTest
         None)
 
       for (index <- 0 until 10) {
-        Thread.sleep(200) //<co id="ch09-routing-perf-test3-1" />
+        Thread.sleep(200)
         router ! msg
       }
       val processedMessages = endProbe.receiveN(10, 5 seconds).collect { case m: PerformanceRoutingMessage => m }
@@ -386,13 +386,13 @@ class PerfRoutingTest
         .getOrElse(Seq())
       val msgProcessedByActor2 = grouped.get(Some("500"))
         .getOrElse(Seq())
-      msgProcessedByActor1 must have size (7) //<co id="ch09-routing-perf-test3-2" />
-      msgProcessedByActor2 must have size (3) //<co id="ch09-routing-perf-test3-3" />
-      //<end id="ch09-routing-mailbox-test"/>
+      msgProcessedByActor1 must have size (7)
+      msgProcessedByActor2 must have size (3)
+
       system.stop(router)
     }
     "routes using smallest mailbox with addRoutee" in {
-      //<start id="ch09-routing-mailbox2-test"/>
+
       val endProbe = TestProbe()
 
       val router = system.actorOf(SmallestMailboxPool(0).props(Props(new GetLicense(endProbe.ref, 250 millis))), "smallestMailboxRouter-test2")
@@ -413,7 +413,7 @@ class PerfRoutingTest
         None)
 
       for (index <- 0 until 10) {
-        Thread.sleep(200) //<co id="ch09-routing-perf-test3b-1" />
+        Thread.sleep(200)
         router ! msg
       }
       val processedMessages = endProbe.receiveN(10, 5 seconds).collect { case m: PerformanceRoutingMessage => m }
@@ -423,13 +423,13 @@ class PerfRoutingTest
         .getOrElse(Seq())
       val msgProcessedByActor2 = grouped.get(Some("500"))
         .getOrElse(Seq())
-      msgProcessedByActor1 must have size (7) //<co id="ch09-routing-perf-test3b-2" />
-      msgProcessedByActor2 must have size (3) //<co id="ch09-routing-perf-test3b-3" />
-      //<end id="ch09-routing-mailbox2-test"/>
+      msgProcessedByActor1 must have size (7)
+      msgProcessedByActor2 must have size (3)
+
       system.stop(router)
     }
     "routes using balancedRouter" in {
-      //<start id="ch09-routing-dispatcher-test"/>
+
       val testSystem = ActorSystem("balancedRouter")
       val endProbe = TestProbe()(testSystem)
 
@@ -460,14 +460,14 @@ class PerfRoutingTest
       val msgProcessedByActor2 = grouped.get(Some("500"))
         .getOrElse(Seq())
 
-      msgProcessedByActor1.size must be(7 +- 1) //<co id="ch09-routing-perf-test4-4" />
-      msgProcessedByActor2.size must be(3 +- 1) //<co id="ch09-routing-perf-test4-5" />
+      msgProcessedByActor1.size must be(7 +- 1)
+      msgProcessedByActor2.size must be(3 +- 1)
       testSystem.terminate()
-      //<end id="ch09-routing-dispatcher-test"/>
+
       system.stop(router)
     }
     "create routes using BalancingPool and using direct" in {
-      //<start id="ch09-routing-dispatch-test"/>
+
       val testSystem = ActorSystem("balance",
         ConfigFactory.load("balance"))
       val endProbe = TestProbe()(testSystem)
@@ -499,7 +499,7 @@ class PerfRoutingTest
       msgProcessedByActor1.size must be(7 +- 1)
       msgProcessedByActor2.size must be(3 +- 1)
       testSystem.terminate()
-      //<end id="ch09-routing-dispatch-test"/>
+
       system.stop(router)
     }
   }

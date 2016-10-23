@@ -117,7 +117,7 @@ class WrongDynamicRouteeSizer(nrActors: Int, props: Props, router: ActorRef) ext
   }
 }
 
-//<start id="ch09-group-sizer-example"/>
+
 class DynamicRouteeSizer(nrActors: Int,
                          props: Props,
                          router: ActorRef) extends Actor {
@@ -125,7 +125,7 @@ class DynamicRouteeSizer(nrActors: Int,
   var childInstanceNr = 0
 
   //restart children
-  override def preStart(): Unit = {                                             //<co id="ch09-group-sizer-example-1" />
+  override def preStart(): Unit = {
     super.preStart()
     (0 until  nrChildren).map(nr => createRoutee())
   }
@@ -134,28 +134,28 @@ class DynamicRouteeSizer(nrActors: Int,
     childInstanceNr += 1
     val child = context.actorOf(props, "routee" + childInstanceNr)
     val selection = context.actorSelection(child.path)
-    router ! AddRoutee(ActorSelectionRoutee(selection))                 //<co id="ch09-group-sizer-example-2" />
+    router ! AddRoutee(ActorSelectionRoutee(selection))
     context.watch(child)
   }
 
   def receive = {
-    case PreferredSize(size) => {                                       //<co id="ch09-group-sizer-example-3" />
+    case PreferredSize(size) => {
       if (size < nrChildren) {
         //remove
         context.children.take(nrChildren - size).foreach(ref => {
           val selection = context.actorSelection(ref.path)
-          router ! RemoveRoutee(ActorSelectionRoutee(selection))        //<co id="ch09-group-sizer-example-4" />
+          router ! RemoveRoutee(ActorSelectionRoutee(selection))
         })
         router ! GetRoutees
       } else {
-        (nrChildren until size).map(nr => createRoutee())               //<co id="ch09-group-sizer-example-5" />
+        (nrChildren until size).map(nr => createRoutee())
       }
       nrChildren = size
     }
-    case routees: Routees => {                                          //<co id="ch09-group-sizer-example-6" />
+    case routees: Routees => {
       //translate Routees into a actorPath
       import collection.JavaConversions._
-      val active = routees.getRoutees.map{                              //<co id="ch09-group-sizer-example-7" />
+      val active = routees.getRoutees.map{
         case x: ActorRefRoutee => x.ref.path.toString
         case x: ActorSelectionRoutee => x.selection.pathString
       }
@@ -166,20 +166,20 @@ class DynamicRouteeSizer(nrActors: Int,
           active.remove(index)
         } else {
           //Child isn't used anymore by router
-          routee ! PoisonPill                                           //<co id="ch09-group-sizer-example-8" />
+          routee ! PoisonPill
         }
       }
       //active contains the terminated routees
-      for (terminated <- active) {                                      //<co id="ch09-group-sizer-example-9" />
+      for (terminated <- active) {
         val name = terminated.substring(terminated.lastIndexOf("/")+1)
         val child = context.actorOf(props, name)
         context.watch(child)
       }
     }
-    case Terminated(child) => router ! GetRoutees                       //<co id="ch09-group-sizer-example-10" />
+    case Terminated(child) => router ! GetRoutees
   }
 }
-//<end id="ch09-group-sizer-example"/>
+
 
 class DynamicRouteeSizer2(nrActors: Int, props: Props, router: ActorRef) extends Actor {
   var nrChildren = nrActors

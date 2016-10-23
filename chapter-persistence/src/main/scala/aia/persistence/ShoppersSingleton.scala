@@ -1,5 +1,5 @@
 package aia.persistence
-//<start id="persistence-shoppers-singleton"/>
+
 
 import akka.actor._
 import akka.cluster.singleton.ClusterSingletonManager
@@ -39,9 +39,9 @@ class ShoppersSingleton extends Actor {
     case command: Shopper.Command => shoppers forward command
   }
 }
-//<end id="persistence-shoppers-singleton"/>
 
-//<start id="persistence-shoppers-singleton-actor"/>
+
+
 object Shoppers {
   def props = Props(new Shoppers)
   def name = "shoppers"
@@ -74,4 +74,4 @@ class Shoppers extends PersistentActor
         .getOrElse(createShopper(shopperId))
   }
 }
-//<end id="persistence-shoppers-singleton-actor"/>
+

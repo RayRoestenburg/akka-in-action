@@ -23,7 +23,7 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
   "RestConsumer" must {
 
     "response when create" in {
-      //<start id="ch08-rest-camel-test1-build"/>
+
       val orderSystem = system.actorOf(Props[ProcessOrders])
       val camelUri =
         "jetty:http://localhost:8181/orderTest"
@@ -32,16 +32,16 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
       val activated = CamelExtension(system).activationFutureFor(
         consumer)
       Await.result(activated, 5 seconds)
-      //<end id="ch08-rest-camel-test1-build"/>
 
-      //<start id="ch08-rest-camel-test1-send"/>
+
+
       val xml = <order>
                   <customerId>me</customerId>
                   <productId>Akka in Action</productId>
                   <number>10</number>
                 </order>
 
-      val urlConnection = new URL("http://localhost:8181/orderTest") //<co id="ch08-rest-camel-test1-send-1"/>
+      val urlConnection = new URL("http://localhost:8181/orderTest")
       val conn = urlConnection.openConnection()
       conn.setDoOutput(true)
       conn.setRequestProperty(
@@ -49,39 +49,39 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
         "text/xml; charset=UTF-8")
 
       val writer = new OutputStreamWriter(conn.getOutputStream)
-      writer.write(xml.toString()) //<co id="ch08-rest-camel-test1-send-2"/>
+      writer.write(xml.toString())
       writer.flush()
-      //<end id="ch08-rest-camel-test1-send"/>
+
       //check result
-      //<start id="ch08-rest-camel-test1-recv"/>
+
       val reader = new BufferedReader(
         new InputStreamReader((conn.getInputStream)))
       val response = new StringBuffer()
       var line = reader.readLine()
-      while (line != null) { //<co id="ch08-rest-camel-test1-recv-1"/>
+      while (line != null) {
         response.append(line)
         line = reader.readLine()
       }
       writer.close()
       reader.close()
-      //<end id="ch08-rest-camel-test1-recv"/>
 
-      //<start id="ch08-rest-camel-test1-check"/>
-      conn.getHeaderField(null) must be("HTTP/1.1 200 OK") //<co id="ch08-rest-camel-test1-check-1"/>
 
-      val responseXml = XML.loadString(response.toString) //<co id="ch08-rest-camel-test1-check-2"/>
+
+      conn.getHeaderField(null) must be("HTTP/1.1 200 OK")
+
+      val responseXml = XML.loadString(response.toString)
       val confirm = responseXml \\ "confirm"
       (confirm \\ "id").text must be("1")
       (confirm \\ "status").text must be("received")
-      //<end id="ch08-rest-camel-test1-check"/>
 
-      //<start id="ch08-rest-camel-test1-close"/>
+
+
       system.stop(consumer)
       system.stop(orderSystem)
       Await.result(
         CamelExtension(system).deactivationFutureFor(consumer),
         5 seconds)
-      //<end id="ch08-rest-camel-test1-close"/>
+
     }
     "response when request status" in {
       val orderSystem = system.actorOf(Props[ProcessOrders])
@@ -128,11 +128,11 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
       (confirm \\ "id").text must be("1")
       (confirm \\ "status").text must be("received")
 
-      //<start id="ch08-rest-camel-test1-get"/>
+
       val url2 = "http://localhost:8181/orderTest?id=1"
       val urlConnection2 = new URL(url2)
       val conn2 = urlConnection2.openConnection()
-      //<end id="ch08-rest-camel-test1-get"/>
+
 
       //Get response
       val reader2 = new BufferedReader(
@@ -145,14 +145,14 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
       }
       reader2.close()
       //check response
-      //<start id="ch08-rest-camel-test1-getCheck"/>
+
       conn2.getHeaderField(null) must be("HTTP/1.1 200 OK")
 
       val responseXml2 = XML.loadString(response2.toString)
       val status = responseXml2 \\ "statusResponse"
       (status \\ "id").text must be("1")
       (status \\ "status").text must be("processing")
-      //<end id="ch08-rest-camel-test1-getCheck"/>
+
 
       system.stop(consumer)
       system.stop(orderSystem)
@@ -199,7 +199,7 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
         consumer)
       Await.result(activated, 5 seconds)
 
-      //<start id="ch08-rest-camel-test1-xml"/>
+
       val url = "http://localhost:8181/orderTest"
       val xml = """<order><customerId>customer1</customerId>
       <productId>Akka in action</productId>"""
@@ -209,20 +209,20 @@ class CamelRestTest extends TestKit(ActorSystem("CamelRestTest"))
       conn.setDoOutput(true)
       conn.setRequestProperty("Content-type",
         "text/xml; charset=UTF-8");
-      //<end id="ch08-rest-camel-test1-xml"/>
+
 
       val writer = new OutputStreamWriter(conn.getOutputStream)
       writer.write(xml)
       writer.flush()
       //check result
-      //<start id="ch08-rest-camel-test1-xmlCheck"/>
+
       val ex = the [IOException] thrownBy  {
         conn.getInputStream
       }
       ex.getMessage must be(
         "Server returned HTTP response code: 500 for URL: " +
           "http://localhost:8181/orderTest")
-      //<end id="ch08-rest-camel-test1-xmlCheck"/>
+
 
       writer.close()
       system.stop(consumer)
