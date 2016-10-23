@@ -167,7 +167,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       brokers.foreach { case (name, broker) => broker.stop() }
       //<end id="ch08-order-consumer-test-mq-broker"/>
     }
-    "pickup 100 xml files" in {
+    "pickup 2 xml files" in {
       val probe = TestProbe()
       val camelUri = "file:messages"
       val consumer = system.actorOf(
@@ -176,7 +176,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
         consumer)(timeout = 10 seconds, executor = system.dispatcher)
       Await.ready(activated, 5 seconds)
 
-      for (nr <- 1 until 100) {
+      for (nr <- 1 until 2) {
         val msg = new Order("me", "Akka in Action", nr)
         val xml = <order>
                     <customerId>{ msg.customerId }</customerId>
@@ -190,7 +190,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       }
       system.stop(consumer)
     }
-    "pickup 100 xml TCPConnection" in {
+    "pickup 2 xml TCPConnection" in {
       val probe = TestProbe()
       val camelUri =
         "mina:tcp://localhost:8886?textline=true&sync=false"
@@ -203,7 +203,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
       val sock = new Socket("localhost", 8886)
       val ouputWriter = new PrintWriter(sock.getOutputStream, true)
 
-      for (nr <- 1 until 100) {
+      for (nr <- 1 until 2) {
         val msg = new Order("me", "Akka in Action", nr)
         val xml = <order>
                     <customerId>{ msg.customerId }</customerId>

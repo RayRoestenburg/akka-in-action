@@ -9,7 +9,7 @@ import org.scalatest._
 class BasketSpec extends PersistenceSpec(ActorSystem("test"))
     with PersistenceCleanup {
 
-  val shopperId = 2L
+  val shopperId = 5L
   val macbookPro = Item("Apple Macbook Pro", 1, BigDecimal(2499.99))
   val displays = Item("4K Display", 3, BigDecimal(2499.99))
 

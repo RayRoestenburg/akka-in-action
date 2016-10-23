@@ -13,6 +13,8 @@ class PipeAndFilterTest
   with WordSpecLike
   with BeforeAndAfterAll {
 
+  val timeout = 2 seconds
+
   override def afterAll(): Unit = {
     system.terminate()
   }
@@ -30,10 +32,10 @@ class PipeAndFilterTest
       endProbe.expectMsg(msg)
 
       licenseFilterRef ! new Photo("", 60) //<co id="ch07-pipe-test-3" />
-      endProbe.expectNoMsg(1 second)
+      endProbe.expectNoMsg(timeout)
 
       licenseFilterRef ! new Photo("123xyz", 49) //<co id="ch07-pipe-test-4" />
-      endProbe.expectNoMsg(1 second)
+      endProbe.expectNoMsg(timeout)
       //<end id="ch7-pipe-test1"/>
     }
     "filter messages in configuration 2" in {
@@ -48,10 +50,10 @@ class PipeAndFilterTest
       endProbe.expectMsg(msg)
 
       speedFilterRef ! new Photo("", 60)
-      endProbe.expectNoMsg(1 second)
+      endProbe.expectNoMsg(timeout)
 
       speedFilterRef ! new Photo("123xyz", 49)
-      endProbe.expectNoMsg(1 second)
+      endProbe.expectNoMsg(timeout)
       //<end id="ch7-pipe-test2"/>
     }
   }

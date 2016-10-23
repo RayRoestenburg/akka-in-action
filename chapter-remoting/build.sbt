@@ -1,7 +1,3 @@
-import com.typesafe.sbt.SbtStartScript
-
-seq(SbtStartScript.startScriptForClassesSettings: _*)
-
 name := "goticks"
 
 version := "1.0"

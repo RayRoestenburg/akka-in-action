@@ -35,7 +35,6 @@ class Wallet(shopperId: Long, cash: BigDecimal) extends PersistentActor
         persist(Paid(items, shopperId)) { paid =>
           updateState(paid)
           sender() ! paid
-          context.system.eventStream.publish(paid)
         }
       } else {
         context.system.eventStream.publish(NotEnoughCash(cash - amountSpent))
