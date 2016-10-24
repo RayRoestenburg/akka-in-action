@@ -32,6 +32,7 @@ abstract class PersistenceSpec(system: ActorSystem) extends TestKit(system)
       watch(actor)
       system.stop(actor)
       expectTerminated(actor)
+      Thread.sleep(1000) // the actor name is not unique intermittently on travis when creating it again after killActors, this is ducktape.
     }
   }
 }
