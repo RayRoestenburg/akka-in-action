@@ -30,6 +30,6 @@ lazy val stream      = project.in(file("chapter-stream"))
 
 lazy val structure   = project.in(file("chapter-structure"))
 
-lazy val test        = project.in(file("chapter-test-driven"))
+lazy val test        = project.in(file("chapter-testdriven"))
 
 lazy val up          = project.in(file("chapter-up-and-running"))
