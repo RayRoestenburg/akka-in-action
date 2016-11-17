@@ -11,12 +11,12 @@ parallelExecution in Test := false
 fork := true
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.11"
+  val akkaVersion = "2.4.12"
   Seq(
     "com.typesafe.akka"         %%  "akka-actor"              % akkaVersion,
     "com.typesafe.akka"         %%  "akka-typed-experimental" % akkaVersion,
     "com.typesafe.akka"         %%  "akka-persistence"        % akkaVersion,
     "commons-io"                %   "commons-io"              % "2.4",
-    "org.scalatest"             %%  "scalatest"               % "2.2.4"      % "test"
+    "org.scalatest"             %%  "scalatest"               % "3.0.0"      % "test"
   )
 }

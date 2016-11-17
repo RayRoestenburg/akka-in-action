@@ -12,7 +12,7 @@ parallelExecution in Test := false
 fork := true
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.11"
+  val akkaVersion = "2.4.12"
   Seq(
     "com.typesafe.akka"         %%  "akka-actor"                          % akkaVersion,
 
@@ -25,16 +25,16 @@ libraryDependencies ++= {
     "com.typesafe.akka"         %%  "akka-cluster-tools"                  % akkaVersion,
     "com.typesafe.akka"         %%  "akka-cluster-sharding"               % akkaVersion,
 
-    "com.typesafe.akka"         %% "akka-http-core"                       % akkaVersion, 
-    "com.typesafe.akka"         %% "akka-http-experimental"               % akkaVersion, 
-    "com.typesafe.akka"         %% "akka-http-spray-json-experimental"    % akkaVersion, 
+    "com.typesafe.akka"         %% "akka-http-core"                       % "2.4.11", 
+    "com.typesafe.akka"         %% "akka-http-experimental"               % "2.4.11", 
+    "com.typesafe.akka"         %% "akka-http-spray-json-experimental"    % "2.4.11", 
 
     "com.typesafe.akka"         %%  "akka-testkit"                        % akkaVersion   % "test",
     "com.typesafe.akka"         %%  "akka-multi-node-testkit"             % akkaVersion   % "test",
 
     "commons-io"                %   "commons-io"                          % "2.4",
 
-    "org.scalatest"             %%  "scalatest"                           % "2.2.4"       % "test",
+    "org.scalatest"             %%  "scalatest"                           % "3.0.0"       % "test",
 
     "com.typesafe.akka"         %%  "akka-slf4j"                          % akkaVersion,
     "ch.qos.logback"            %   "logback-classic"                     % "1.1.2"
