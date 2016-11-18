@@ -4,6 +4,7 @@
 # sbt specific
 dist/*
 target/
+**/target/
 lib_managed/
 src_managed/
 project/boot/
@@ -14,6 +15,7 @@ project/plugins/project/
 .classpath
 *.iml
 .idea/
+**/.idea/
 .idea_modules/
 .project
 .settings/

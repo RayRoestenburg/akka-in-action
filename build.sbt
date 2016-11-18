@@ -1,3 +1,5 @@
+scalaVersion in ThisBuild := "2.12.0"
+
 name := "all"
 
 version := "1.0"

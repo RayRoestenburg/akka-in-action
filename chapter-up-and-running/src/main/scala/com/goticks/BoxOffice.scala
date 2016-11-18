@@ -2,9 +2,10 @@ package com.goticks
 
 import scala.concurrent.duration._
 import scala.concurrent.Future
-
 import akka.actor._
 import akka.util.Timeout
+
+import scala.collection.immutable.Iterable
 
 object BoxOffice {
   def props(implicit timeout: Timeout) = Props(new BoxOffice)
@@ -66,17 +67,19 @@ class BoxOffice(implicit timeout: Timeout) extends Actor {
       import akka.pattern.ask
       import akka.pattern.pipe
 
-      def getEvents = context.children.map { child =>
+      def getEvents: Iterable[Future[Option[Event]]] = context.children.map { child =>
         self.ask(GetEvent(child.path.name)).mapTo[Option[Event]]
       }
-      def convertToEvents(f: Future[Iterable[Option[Event]]]) =
+      def convertToEvents(f: Future[Iterable[Option[Event]]]): Future[Events] =
         f.map(_.flatten).map(l=> Events(l.toVector))
 
       pipe(convertToEvents(Future.sequence(getEvents))) to sender()
 
 
     case CancelEvent(event) =>
-      def notFound() = sender() ! None
+      def notFound(): Unit = {
+        sender() ! None
+      }
       def cancelEvent(child: ActorRef) = child forward TicketSeller.Cancel
       context.child(event).fold(notFound())(cancelEvent)
   }
