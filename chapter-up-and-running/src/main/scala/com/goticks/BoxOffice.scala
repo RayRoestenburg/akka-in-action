@@ -1,6 +1,5 @@
 package com.goticks
 
-import scala.concurrent.duration._
 import scala.concurrent.Future
 
 import akka.actor._

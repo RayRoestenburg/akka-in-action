@@ -23,7 +23,7 @@ class TicketSeller(event: String) extends Actor {
   def receive = {
     case Add(newTickets) => tickets = tickets ++ newTickets
     case Buy(nrOfTickets) =>
-      val entries = tickets.take(nrOfTickets).toVector
+      val entries = tickets.take(nrOfTickets)
       if(entries.size >= nrOfTickets) {
         sender() ! Tickets(event, entries)
         tickets = tickets.drop(nrOfTickets)
