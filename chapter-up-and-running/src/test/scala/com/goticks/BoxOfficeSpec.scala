@@ -1,10 +1,10 @@
 package com.goticks
 
-import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.testkit.{DefaultTimeout, ImplicitSender, TestKit}
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.testkit.{ DefaultTimeout, ImplicitSender, TestKit }
 import com.goticks.BoxOffice._
 import com.goticks.TicketSeller._
-import org.scalatest.{MustMatchers, WordSpecLike}
+import org.scalatest.{ MustMatchers, WordSpecLike }
 
 class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
     with WordSpecLike
@@ -60,7 +60,7 @@ class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
       expectMsg(None)
     }
 
-    "Cancel Ticket which event is not created " in {
+    "Cancel a ticket which event is not created " in {
       val boxOffice = system.actorOf(BoxOffice.props)
       val noneExitEventName = "noExitEvent"
 
@@ -68,7 +68,7 @@ class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
       expectMsg(None)
     }
 
-    "Cancel Ticket which event is created" in {
+    "Cancel a ticket which event is created" in {
       val boxOffice = system.actorOf(BoxOffice.props)
       val eventName = "RHCP"
       val tickets = 10
