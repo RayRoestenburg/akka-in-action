@@ -15,7 +15,7 @@ scalacOptions ++= Seq(
 )
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.12"
+  val akkaVersion = "2.4.14"
   Seq(
     "com.typesafe.akka" %%  "akka-actor"   % akkaVersion,
     "com.typesafe.akka" %%  "akka-slf4j"   % akkaVersion,
