@@ -15,7 +15,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     //<end id="stream-dependencies">
     //<start id="stream-http-dependencies">
-    "com.typesafe.akka" %% "akka-http-core"                    % akkaHttpVersion,
+    "com.typesafe.akka" %% "akka-http-core"       % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http"            % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
     //<end id="stream-http-dependencies">
