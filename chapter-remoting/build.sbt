@@ -26,4 +26,4 @@ libraryDependencies ++= {
 // Assembly settings
 mainClass in Global := Some("com.goticks.SingleNodeMain")
 
-jarName in assembly := "goticks-server.jar"
+assemblyJarName in assembly := "goticks-server.jar"
