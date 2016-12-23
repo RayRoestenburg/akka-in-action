@@ -44,4 +44,4 @@ libraryDependencies ++= {
 // Assembly settings
 mainClass in Global := Some("aia.persistence.sharded.ShardedMain")
 
-jarName in assembly := "persistence-examples.jar"
+assemblyJarName in assembly := "persistence-examples.jar"

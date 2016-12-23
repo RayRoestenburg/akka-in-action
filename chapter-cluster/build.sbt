@@ -22,4 +22,4 @@ libraryDependencies ++= {
 // Assembly settings
 mainClass in Global := Some("aia.cluster.words.Main")
 
-jarName in assembly := "words-node.jar"
+assemblyJarName in assembly := "words-node.jar"
