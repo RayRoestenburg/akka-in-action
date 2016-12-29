@@ -1,7 +1,5 @@
 package com.goticks
 
-import scala.concurrent.Future
-
 import akka.actor.{ ActorSystem, ActorRef }
 import akka.event.Logging
 

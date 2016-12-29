@@ -1,10 +1,7 @@
 package com.goticks
 
-import scala.concurrent.Future
-
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.Logging
-
 import com.typesafe.config.ConfigFactory
 
 object FrontendRemoteDeployMain extends App
