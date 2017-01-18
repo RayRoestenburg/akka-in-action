@@ -1,6 +1,5 @@
 package com.goticks
 
-import scala.concurrent.duration._
 import scala.concurrent.Future
 
 import akka.actor._
@@ -56,8 +55,7 @@ class BoxOffice(implicit timeout: Timeout) extends Actor {
       context.child(event).fold(notFound())(getEvent)
 
     case GetEvents =>
-      import akka.pattern.ask
-      import akka.pattern.pipe
+      import akka.pattern.{ ask, pipe }
 
       def getEvents = context.children.map { child =>
         self.ask(GetEvent(child.path.name)).mapTo[Option[Event]]

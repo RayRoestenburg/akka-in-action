@@ -1,6 +1,6 @@
 package com.goticks
 
-import akka.actor.{ Actor, ActorRef, Props, ActorSystem }
+import akka.actor.{ ActorRef, Props, ActorSystem }
 
 import akka.testkit.{ TestKit, ImplicitSender, DefaultTimeout }
 
