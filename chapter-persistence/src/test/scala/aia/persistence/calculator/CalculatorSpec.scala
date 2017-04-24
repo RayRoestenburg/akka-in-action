@@ -4,8 +4,7 @@ import akka.actor._
 import akka.testkit._
 import org.scalatest._
 
-class CalculatorSpec extends PersistenceSpec(ActorSystem("test"))
-    with PersistenceCleanup {
+class CalculatorSpec extends PersistenceSpec(ActorSystem("test")) {
 
   "The Calculator" should {
     "recover last known result after crash" in {
