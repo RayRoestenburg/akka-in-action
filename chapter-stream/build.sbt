@@ -7,7 +7,7 @@ version := "1.0"
 organization := "com.manning"
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.14"
+  val akkaVersion = "2.5.0"
   val akkaHttpVersion = "10.0.0"
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
