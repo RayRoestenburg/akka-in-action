@@ -27,3 +27,4 @@ atlassian-ide-plugin.xml
 
 #ActiveMQ specific
 *.data
+activemq-data/
