@@ -19,3 +19,8 @@ libraryDependencies ++= {
     "org.scalatest"     %% "scalatest"       % "2.2.0"       % "test"
   )
 }
+
+// Assembly settings
+mainClass in assembly := Some("com.goticks.Main")
+
+assemblyJarName in assembly := "goticks.jar"
