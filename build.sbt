@@ -28,6 +28,8 @@ lazy val state       = project.in(file("chapter-state"))
 
 lazy val stream      = project.in(file("chapter-stream"))
 
+lazy val `stream-integration` = project.in(file("chapter-stream-integration"))
+
 lazy val structure   = project.in(file("chapter-structure"))
 
 lazy val test        = project.in(file("chapter-testdriven"))
