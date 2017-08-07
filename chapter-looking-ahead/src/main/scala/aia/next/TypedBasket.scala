@@ -1,11 +1,7 @@
 package aia.next
 
 import akka.typed._
-import akka.typed.scaladsl.Actor._
-import akka.typed.scaladsl.AskPattern._
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import scala.concurrent.Await
+import akka.typed.scaladsl.Actor
 
 object TypedBasket {
   sealed trait Command {
@@ -21,7 +17,7 @@ object TypedBasket {
   case class Item(productId: String, number: Int, unitPrice: BigDecimal)
 
   def basketBehavior(items: Items = Items()): Behavior[Command] =
-    Stateful[Command] { (ctx, msg) =>
+    Actor.immutable[Command] { (ctx, msg) =>
       msg match {
         case GetItems(productId, replyTo) =>
           replyTo ! items
