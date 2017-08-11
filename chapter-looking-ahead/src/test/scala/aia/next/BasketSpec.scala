@@ -41,7 +41,7 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
         TypedBasket.Item("4K Display", 3, BigDecimal(2499.99))
 
       val sys: ActorSystem[TypedBasket.Command] =
-        ActorSystem("typed-basket", TypedBasket.basketBehavior())
+        ActorSystem(TypedBasket.basketBehavior(), "typed-basket")
       sys ! TypedBasket.Add(macbookPro, shopperId)
       sys ! TypedBasket.Add(displays, shopperId)
 

@@ -5,10 +5,10 @@ version := "1.0"
 organization := "manning"
 
 libraryDependencies ++= {
-  val akkaVersion = "2.5.0"
+  val akkaVersion = "2.5.4"
   val camelVersion    = "2.13.2"
   val activeMQVersion = "5.4.1"
-  val akkaHttpVersion = "10.0.0"
+  val akkaHttpVersion = "10.0.9"
   Seq(
     "org.scala-lang.modules"  %% "scala-xml" 				                 % "1.0.6",
     "com.typesafe.akka"       %% "akka-camel"                        % akkaVersion,
