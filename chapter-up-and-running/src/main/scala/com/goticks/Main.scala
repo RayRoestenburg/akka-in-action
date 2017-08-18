@@ -1,14 +1,15 @@
 package com.goticks
 
+import scala.concurrent.Future
+
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import com.typesafe.config.{Config, ConfigFactory}
 
-import scala.concurrent.Future
+import com.typesafe.config.{ Config, ConfigFactory }
 
 object Main extends App
     with RequestTimeout {
