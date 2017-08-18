@@ -1,6 +1,7 @@
 package com.goticks
 
 import akka.actor.{ Actor, Props, PoisonPill }
+
 object TicketSeller {
   def props(event: String) = Props(new TicketSeller(event))
 
@@ -13,7 +14,6 @@ object TicketSeller {
   case object Cancel
 
 }
-
 
 class TicketSeller(event: String) extends Actor {
   import TicketSeller._
@@ -34,4 +34,3 @@ class TicketSeller(event: String) extends Actor {
       self ! PoisonPill
   }
 }
-

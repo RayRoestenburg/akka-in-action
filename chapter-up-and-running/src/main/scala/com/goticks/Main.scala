@@ -1,21 +1,15 @@
 package com.goticks
 
-
 import scala.concurrent.Future
 
-import akka.actor.{ ActorSystem , Actor, Props }
+import akka.actor.ActorSystem
 import akka.event.Logging
-import akka.util.Timeout
-
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import akka.util.Timeout
 
 import com.typesafe.config.{ Config, ConfigFactory }
-
-
-
 
 object Main extends App
     with RequestTimeout {
@@ -43,9 +37,6 @@ object Main extends App
   }
 }
 
-
-
-
 trait RequestTimeout {
   import scala.concurrent.duration._
   def requestTimeout(config: Config): Timeout = {
@@ -54,5 +45,3 @@ trait RequestTimeout {
     FiniteDuration(d.length, d.unit)
   }
 }
-
-
