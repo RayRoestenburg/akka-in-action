@@ -18,12 +18,12 @@ object Main extends App
   val host = config.getString("http.host") // Gets the host and a port from the configuration
   val port = config.getInt("http.port")
 
-  implicit val system = ActorSystem() 
-  implicit val ec = system.dispatcher  //bindAndHandle requires an implicit ExecutionContext
+  implicit val system = ActorSystem()  // ActorMaterializer requires an implicit ActorSystem
+  implicit val ec = system.dispatcher  // bindingFuture.map requires an implicit ExecutionContext
 
   val api = new RestApi(system, requestTimeout(config)).routes // the RestApi provides a Route
  
-  implicit val materializer = ActorMaterializer()
+  implicit val materializer = ActorMaterializer()  // bindAndHandle requires an implicit materializer
   val bindingFuture: Future[ServerBinding] =
     Http().bindAndHandle(api, host, port) //Starts the HTTP server
  
