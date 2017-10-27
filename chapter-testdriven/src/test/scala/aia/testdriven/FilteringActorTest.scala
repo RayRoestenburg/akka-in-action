@@ -72,7 +72,7 @@ class FilteringActor(nextActor: ActorRef,
         lastMessages = lastMessages :+ msg
         nextActor ! msg
         if (lastMessages.size > bufferSize) {
-          // discard the oldest
+          // 最も古いものを破棄
           lastMessages = lastMessages.tail
         }
       }

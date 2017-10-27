@@ -3,6 +3,7 @@ package com.goticks
 import org.scalatest.MustMatchers
 import org.scalatest.WordSpec
 import scala.concurrent.{Future, Await}
+import scala.collection.immutable._
 
 class GetTicketInfoSpec extends WordSpec with MustMatchers {
 
