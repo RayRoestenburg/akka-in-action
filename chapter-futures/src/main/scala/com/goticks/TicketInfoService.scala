@@ -3,20 +3,23 @@ package com.goticks
 import scala.concurrent.Future
 import com.github.nscala_time.time.Imports._
 import scala.util.control.NonFatal
+import scala.collection.immutable._
+
 //what about timeout? or at least termination condition?
 // future -> actors scheduling time
 trait TicketInfoService extends WebServiceCalls {
   import scala.concurrent.ExecutionContext.Implicits.global
 
+  // コピー・ペーストを最小化するエラー回復関数
   type Recovery[T] = PartialFunction[Throwable,T]
 
-  // recover with None
+  // Noneで回復する
   def withNone[T]: Recovery[Option[T]] = { case NonFatal(e) => None }
 
-  // recover with empty sequence
+  // 空のSequenceで回復する
   def withEmptySeq[T]: Recovery[Seq[T]] = { case NonFatal(e) => Seq() }
 
-  // recover with the ticketInfo that was built in the previous step
+  // 前のステップのticketInfoで回復する
   def withPrevious(previous: TicketInfo): Recovery[TicketInfo] = {
     case NonFatal(e) => previous
   }
@@ -40,7 +43,7 @@ trait TicketInfoService extends WebServiceCalls {
 
       val ticketInfos = Seq(infoWithTravelAdvice, infoWithWeather)
 
-      val infoWithTravelAndWeather: Future[TicketInfo] = Future.fold(ticketInfos)(info) { (acc, elem) =>
+      val infoWithTravelAndWeather: Future[TicketInfo] = Future.foldLeft(ticketInfos)(info){ (acc, elem) =>
         val (travelAdvice, weather) = (elem.travelAdvice, elem.weather)
 
         acc.copy(travelAdvice = travelAdvice.orElse(acc.travelAdvice),

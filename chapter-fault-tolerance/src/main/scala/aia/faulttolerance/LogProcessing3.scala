@@ -12,7 +12,7 @@ package dbstrategy3 {
   object LogProcessingApp extends App {
     val sources = Vector("file:///source1/", "file:///source2/")
     val system = ActorSystem("logprocessing")
-    // create the props and dependencies
+    // propsと依存関係を生成
     val databaseUrl = "http://mydatabase"
     
     val writerProps = Props(new DbWriter(databaseUrl))
@@ -165,10 +165,10 @@ package dbstrategy3 {
 
   trait LogParsing {
     import LogProcessingProtocol._
-    // Parses log files. creates line objects from the lines in the log file.
-    // If the file is corrupt a CorruptedFileException is thrown
+    // ログファイルの解析。ログファイル内の行から行オブジェクトを作成する
+    // ファイルが破損している場合、CorruptedFileExceptionをスローする
     def parse(file: File): Vector[Line] = {
-      // implement parser here, now just return dummy value
+      // ここにパーサーを実装、今はダミー値を返す
       Vector.empty[Line]
     }
   }
@@ -184,9 +184,9 @@ package dbstrategy3 {
 
 
   object LogProcessingProtocol {
-    // represents a new log file
+    // 新しいログファイル
     case class LogFile(file: File)
-    // A line in the log file parsed by the LogProcessor Actor
+    // LogProcessorアクターによって解析されるログファイルの行
     case class Line(time: Long, message: String, messageType: String)
   }
 

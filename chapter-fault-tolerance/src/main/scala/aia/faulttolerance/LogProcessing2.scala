@@ -3,10 +3,8 @@ package aia.faulttolerance
 import java.io.File
 import java.util.UUID
 import akka.actor._
-import akka.actor.SupervisorStrategy.{ Stop, Resume, Restart, Escalate }
+import akka.actor.SupervisorStrategy.{ Stop, Resume, Restart }
 import akka.actor.OneForOneStrategy
-import scala.concurrent.duration._
-import language.postfixOps
 
 package dbstrategy2 {
 
@@ -97,7 +95,7 @@ package dbstrategy2 {
     def props(databaseUrls: Vector[String]) = 
       Props(new LogProcessor(databaseUrls))
     def name = s"log_processor_${UUID.randomUUID.toString}"
-    // represents a new log file
+    // 新しいログファイル
     case class LogFile(file: File)
   }
 
@@ -147,7 +145,7 @@ package dbstrategy2 {
     def name(databaseUrl: String) =
       s"""db-writer-${databaseUrl.split("/").last}"""
 
-    // A line in the log file parsed by the LogProcessor Actor
+    // LogProcessorアクターによって解析されるログファイルの行
     case class Line(time: Long, message: String, messageType: String)
   }
 
@@ -201,10 +199,10 @@ package dbstrategy2 {
 
   trait LogParsing {
     import DbWriter._
-    // Parses log files. creates line objects from the lines in the log file.
-    // If the file is corrupt a CorruptedFileException is thrown
+    // ログファイルの解析。ログファイル内の行から行オブジェクトを作成する
+    // ファイルが破損している場合、CorruptedFileExceptionをスローする
     def parse(file: File): Vector[Line] = {
-      // implement parser here, now just return dummy value
+      // ここにパーサーを実装、今はダミー値を返す
       Vector.empty[Line]
     }
   }

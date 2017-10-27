@@ -27,8 +27,8 @@ class EchoActorTest extends TestKit(ActorSystem("testsystem"))
       val echo = system.actorOf(Props[EchoActor], "echo1")
       val future = echo.ask("some message")
       future.onComplete {
-        case Failure(_)   => //handle failure
-        case Success(msg) => //handle success
+        case Failure(_)   => // 失敗時の制御
+        case Success(msg) => // 成功時の制御
       }
 
       Await.ready(future, timeout.duration)

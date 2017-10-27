@@ -1,6 +1,6 @@
 package com.goticks
 
-import akka.actor.{Props, ActorSystem}
+import akka.actor.ActorSystem
 
 import akka.testkit.{ImplicitSender, TestKit}
 
