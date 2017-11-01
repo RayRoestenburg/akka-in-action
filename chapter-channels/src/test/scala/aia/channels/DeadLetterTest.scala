@@ -32,7 +32,7 @@ class DeadLetterTest extends TestKit(ActorSystem("DeadLetterTest"))
     "catch deadLetter messages send to deadLetters" in {
 
       val deadLetterMonitor = TestProbe()
-      val actor = system.actorOf(Props[EchoActor], "echo")
+      val actor = system.actorOf(Props[EchoActor])
 
       system.eventStream.subscribe(
         deadLetterMonitor.ref,
@@ -56,7 +56,7 @@ class DeadLetterTest extends TestKit(ActorSystem("DeadLetterTest"))
         deadLetterMonitor.ref,
         classOf[DeadLetter])
 
-      val actor = system.actorOf(Props[EchoActor], "echo")
+      val actor = system.actorOf(Props[EchoActor])
       actor ! PoisonPill
       val msg = new Order("me", "Akka in Action", 1)
       actor ! msg

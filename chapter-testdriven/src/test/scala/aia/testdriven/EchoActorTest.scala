@@ -24,7 +24,7 @@ class EchoActorTest extends TestKit(ActorSystem("testsystem"))
       import scala.concurrent.duration._
       implicit val timeout = Timeout(3 seconds)
       implicit val ec = system.dispatcher
-      val echo = system.actorOf(Props[EchoActor], "echo1")
+      val echo = system.actorOf(Props[EchoActor])
       val future = echo.ask("some message")
       future.onComplete {
         case Failure(_)   => //handle failure
@@ -35,7 +35,7 @@ class EchoActorTest extends TestKit(ActorSystem("testsystem"))
     }
 
     "Reply with the same message it receives without ask" in {
-      val echo = system.actorOf(Props[EchoActor], "echo2")
+      val echo = system.actorOf(Props[EchoActor])
       echo ! "some message"
       expectMsg("some message")
 

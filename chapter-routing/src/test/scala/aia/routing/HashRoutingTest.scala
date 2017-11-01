@@ -26,7 +26,7 @@ class HashRoutingTest
       }
 
       val router = system.actorOf(ConsistentHashingPool(10, virtualNodesFactor = 10, hashMapping = hashMapping).
-          props(Props(new SimpleGather(endProbe.ref))), name = "routerMapping")
+          props(Props(new SimpleGather(endProbe.ref))))
 
       router ! GatherMessageNormalImpl("1", Seq("msg1"))
       endProbe.expectNoMsg(100.millis)
@@ -43,7 +43,7 @@ class HashRoutingTest
       val endProbe = TestProbe()
 
       val router = system.actorOf(ConsistentHashingPool(10, virtualNodesFactor = 10).
-        props(Props(new SimpleGather(endProbe.ref))), name = "routerMessage")
+        props(Props(new SimpleGather(endProbe.ref))))
 
       router ! GatherMessageWithHash("1", Seq("msg1"))
       endProbe.expectNoMsg(100.millis)
@@ -86,7 +86,7 @@ class HashRoutingTest
       val endProbe = TestProbe()
 
       val router = system.actorOf(ConsistentHashingPool(10, virtualNodesFactor = 10).
-        props(Props(new SimpleGather(endProbe.ref))), name = "routerMessage")
+        props(Props(new SimpleGather(endProbe.ref))))
 
       router ! GatherMessageNormalImpl("1", Seq("msg1"))
       endProbe.expectNoMsg(100.millis)
