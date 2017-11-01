@@ -4,15 +4,15 @@ version := "1.0"
 
 organization := "manning"
 
-//scalacOptions ++= Seq(
-//  "-deprecation",
-//  "-unchecked",
-//  "-Xlint",
-//  "-Ywarn-unused",
-//  "-Ywarn-dead-code",
-//  "-feature",
-//  "-language:_"
-//)
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-unchecked",
+  "-Xlint",
+  "-Ywarn-unused",
+  "-Ywarn-dead-code",
+  "-feature",
+  "-language:_"
+)
 
 enablePlugins(JavaAppPackaging)
 
