@@ -8,9 +8,10 @@ organization := "com.goticks"
 
 libraryDependencies ++= {
   val akkaVersion = "2.5.4"
-  val akkaHttpVersion = "10.0.9"
+  val akkaHttpVersion = "10.0.10"
   Seq(
-    "com.typesafe.akka" %% "akka-actor"      % akkaVersion, 
+    "com.typesafe.akka" %% "akka-actor"      % akkaVersion,
+    "com.typesafe.akka" %% "akka-stream"     % akkaVersion,
     "com.typesafe.akka" %% "akka-http-core"  % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http"       % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
