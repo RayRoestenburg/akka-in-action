@@ -6,7 +6,7 @@ organization := "manning"
 
 libraryDependencies ++= {
   val akkaVersion = "2.5.4"
-  val camelVersion    = "2.13.2"
+  val camelVersion    = "2.17.7"
   val activeMQVersion = "5.4.1"
   val akkaHttpVersion = "10.0.10"
   Seq(
