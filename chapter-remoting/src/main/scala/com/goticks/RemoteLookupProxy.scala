@@ -38,7 +38,7 @@ class RemoteLookupProxy(path: String)
 
   def active(actor: ActorRef): Receive = {
     case Terminated(actorRef) =>
-      log.info("Actor $actorRef terminated.")
+      log.info(s"Actor $actorRef terminated.")
       log.info("switching to identify state")
       context.become(identify)
       context.setReceiveTimeout(3 seconds)
