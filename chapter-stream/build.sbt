@@ -7,8 +7,8 @@ version := "1.0"
 organization := "com.manning"
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.14"
-  val akkaHttpVersion = "10.0.0"
+  val akkaVersion = "2.5.4"
+  val akkaHttpVersion = "10.0.10"
   Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     //<start id="stream-dependencies">

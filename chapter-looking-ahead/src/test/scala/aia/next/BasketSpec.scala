@@ -27,8 +27,8 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
 
     "return the items in a typesafe way" in {
       import akka.typed._
-      import akka.typed.ScalaDSL._
-      import akka.typed.AskPattern._
+      import akka.typed.scaladsl.Actor._
+      import akka.typed.scaladsl.AskPattern._
       import scala.concurrent.Future
       import scala.concurrent.duration._
       import scala.concurrent.Await
@@ -41,7 +41,7 @@ class BasketSpec extends PersistenceSpec(ActorSystem("test"))
         TypedBasket.Item("4K Display", 3, BigDecimal(2499.99))
 
       val sys: ActorSystem[TypedBasket.Command] =
-        ActorSystem("typed-basket", TypedBasket.basketBehavior)
+        ActorSystem(TypedBasket.basketBehavior(), "typed-basket")
       sys ! TypedBasket.Add(macbookPro, shopperId)
       sys ! TypedBasket.Add(displays, shopperId)
 

@@ -177,7 +177,7 @@ class PerfRoutingTest
       router ! Broadcast(PoisonPill)
 
       termProbe.watch(router)
-      termProbe.expectTerminated(router)  
+      termProbe.expectTerminated(router, 5 second)
       
       system.stop(router)
       system.stop(creator)

@@ -1,11 +1,7 @@
 package aia.next
 
 import akka.typed._
-import akka.typed.ScalaDSL._
-import akka.typed.AskPattern._
-import scala.concurrent.Future
-import scala.concurrent.duration._
-import scala.concurrent.Await
+import akka.typed.scaladsl.Actor
 
 object TypedBasket {
   sealed trait Command {
@@ -20,17 +16,15 @@ object TypedBasket {
   case class Items(list: Vector[Item]= Vector.empty[Item])
   case class Item(productId: String, number: Int, unitPrice: BigDecimal)
 
-  val basketBehavior =
-  ContextAware[Command] { ctx ⇒
-    var items = Items()
-
-    Static {
-      case GetItems(productId, replyTo) =>
-       replyTo ! items
-      case Add(item, productId) =>
-        items = Items(items.list :+ item)
-      //case GetItems =>
+  def basketBehavior(items: Items = Items()): Behavior[Command] =
+    Actor.immutable[Command] { (ctx, msg) =>
+      msg match {
+        case GetItems(productId, replyTo) =>
+          replyTo ! items
+          basketBehavior(items)
+        case Add(item, productId) =>
+          basketBehavior(Items(items.list :+ item))
+      }
     }
-  }
 }
 

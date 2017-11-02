@@ -12,12 +12,14 @@ parallelExecution in Test := false
 fork := true
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.14"
+  val akkaVersion = "2.5.4"
+  val akkaHttpVersion = "10.0.10"
   Seq(
     "com.typesafe.akka"         %%  "akka-actor"                          % akkaVersion,
+    "com.typesafe.akka"         %%  "akka-stream"                         % akkaVersion,
 
     "com.typesafe.akka"         %%  "akka-persistence"                    % akkaVersion,
-    "com.typesafe.akka"         %%  "akka-persistence-query-experimental" % akkaVersion,
+    "com.typesafe.akka"         %%  "akka-persistence-query"              % akkaVersion,
     "org.iq80.leveldb"           %  "leveldb"                             % "0.7",
     "org.fusesource.leveldbjni"  %  "leveldbjni-all"                      % "1.8",
 
@@ -25,9 +27,9 @@ libraryDependencies ++= {
     "com.typesafe.akka"         %%  "akka-cluster-tools"                  % akkaVersion,
     "com.typesafe.akka"         %%  "akka-cluster-sharding"               % akkaVersion,
 
-    "com.typesafe.akka"         %% "akka-http-core"                       % "2.4.11", 
-    "com.typesafe.akka"         %% "akka-http-experimental"               % "2.4.11", 
-    "com.typesafe.akka"         %% "akka-http-spray-json-experimental"    % "2.4.11", 
+    "com.typesafe.akka"         %% "akka-http-core"                       % akkaHttpVersion,
+    "com.typesafe.akka"         %% "akka-http"                            % akkaHttpVersion,
+    "com.typesafe.akka"         %% "akka-http-spray-json"                 % akkaHttpVersion,
 
     "com.typesafe.akka"         %%  "akka-testkit"                        % akkaVersion   % "test",
     "com.typesafe.akka"         %%  "akka-multi-node-testkit"             % akkaVersion   % "test",
