@@ -22,6 +22,7 @@ libraryDependencies ++= {
     "commons-io"              %  "commons-io"                        % "2.0.1"         % "test",
     "io.arivera.oss"          %  "embedded-rabbitmq"                 % "1.2.1"         % "test",
     "com.typesafe.akka"       %% "akka-http-testkit"                 % akkaHttpVersion % "test",
+    "com.typesafe.akka"       %% "akka-stream-testkit"               % akkaVersion     % "test",
     "com.typesafe.akka"       %% "akka-testkit"                      % akkaVersion     % "test",
     "org.scalatest"           %% "scalatest"                         % "3.0.0"         % "test"
   )
