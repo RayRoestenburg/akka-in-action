@@ -5,17 +5,17 @@ version := "1.0"
 organization := "manning"
 
 libraryDependencies ++= {
-  val akkaVersion = "2.4.19"
-  val alpakkaVersion = "0.11"
-  val akkaHttpVersion = "10.0.9"
+  val akkaVersion = "2.5.4"
+  val alpakkaVersion = "0.14"
+  val akkaHttpVersion = "10.0.10"
   Seq(
     "org.scala-lang.modules"  %% "scala-xml" 				                 % "1.0.6",
     "com.typesafe.akka"       %% "akka-actor"                        % akkaVersion,
     "com.typesafe.akka"       %% "akka-slf4j"                        % akkaVersion,
-    "com.typesafe.akka"       %% "akka-http-core"                    % akkaHttpVersion,
     "com.typesafe.akka"       %% "akka-http"                         % akkaHttpVersion,
     "com.typesafe.akka"       %% "akka-http-spray-json"              % akkaHttpVersion,
     "com.typesafe.akka"       %% "akka-http-xml"                     % akkaHttpVersion,
+    "com.typesafe.akka"       %% "akka-stream"                       % akkaVersion,
     "com.lightbend.akka"      %% "akka-stream-alpakka-file"          % alpakkaVersion,
     "com.lightbend.akka"      %% "akka-stream-alpakka-amqp"          % alpakkaVersion,
     "ch.qos.logback"          %  "logback-classic"                   % "1.1.3",
