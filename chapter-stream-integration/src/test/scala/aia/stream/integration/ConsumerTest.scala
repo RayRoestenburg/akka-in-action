@@ -71,59 +71,6 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
 
       Await.result(consumedOrder, 10.seconds) must be(msg)
     }
-    "confirm xml TCPConnection" in {
-      import Tcp._
-      implicit val executionContext = system.dispatcher
-
-      val msg = new Order("me", "Akka in Action", 10)
-      val xml = <order>
-                  <customerId>{ msg.customerId }</customerId>
-                  <productId>{ msg.productId }</productId>
-                  <number>{ msg.number }</number>
-                </order>
-
-      val xmlStr = xml.toString.replace("\n", "")
-
-      val tcpSource: Source[IncomingConnection, Future[ServerBinding]] =
-        Tcp().bind("localhost", 8887)
-
-      val (serverBindingFuture, orderProbeFuture) =
-        tcpSource.map { connection =>
-
-          val confirm = Source.single("<confirm>OK</confirm>\n")
-
-          val handleFlow =
-            Flow[ByteString]
-              .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 256, allowTruncation = true))
-              .map(_.utf8String)
-              .via(parseOrderXmlFlow)
-              .alsoToMat(TestSink.probe[Order])(Keep.right)
-              .merge(confirm)
-              .map(c => ByteString(c.toString))
-
-          connection.handleWith(handleFlow)
-        }.toMat(Sink.head)(Keep.both).run()
-
-      val responseFuture = serverBindingFuture.map { _ =>
-        // サーバーサイドのソケットがバインドされた後、
-        // クライアントサイドのソケットを作成し、リクエストを送信
-        val socket = new Socket("localhost", 8887)
-
-        val outputWriter = new PrintWriter(socket.getOutputStream)
-        val responseReader = new BufferedReader(new InputStreamReader(socket.getInputStream))
-
-        outputWriter.println(xmlStr)
-        outputWriter.flush()
-        val response = responseReader.readLine()
-        responseReader.close()
-        outputWriter.close()
-
-        response
-      }
-
-      Await.result(orderProbeFuture, 10.seconds).requestNext() must be(msg)
-      Await.result(responseFuture, 20.seconds) must be("<confirm>OK</confirm>")
-    }
     "pickup xml AMQP" in {
       val queueName = "xmlTest"
       val amqpSourceSettings =
