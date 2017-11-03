@@ -31,7 +31,7 @@ class ConsumerTest extends TestKit(ActorSystem("ConsumerTest"))
     val config = new EmbeddedRabbitMqConfig.Builder()
       .version(PredefinedVersion.V3_6_9)
       .port(8899)
-      .rabbitMqServerInitializationTimeoutInMillis(5000)
+      .rabbitMqServerInitializationTimeoutInMillis(60000)
       .build
     val mq = new EmbeddedRabbitMq(config)
     mq.start()
