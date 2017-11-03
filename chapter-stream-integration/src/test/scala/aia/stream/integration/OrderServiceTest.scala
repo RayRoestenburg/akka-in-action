@@ -54,4 +54,4 @@ class OrderServiceTest extends WordSpec
       }
     }
   }
-} 
+}
