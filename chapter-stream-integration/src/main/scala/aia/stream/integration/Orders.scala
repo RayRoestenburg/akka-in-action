@@ -40,7 +40,7 @@ object Orders {
 
   object AmqpXmlOrderSource {
     def apply(amqpSourceSettings: AmqpSourceSettings): Source[Order, NotUsed] =
-      AmqpSource(amqpSourceSettings, bufferSize = 10)
+      AmqpSource.atMostOnceSource(amqpSourceSettings, bufferSize = 10)
         .map(_.bytes.utf8String)
         .via(parseOrderXmlFlow)
   }
