@@ -38,7 +38,7 @@ object Main extends App
     log.info(s"RestApi bound to ${serverBinding.localAddress} ")
   }.onComplete {
     case Success(_) =>
-      log.info("success to bind to {}:{}", host, port)
+      log.info("Success to bind to {}:{}", host, port)
     case Failure(ex) =>
       log.error(ex, "Failed to bind to {}:{}!", host, port)
       system.terminate()
