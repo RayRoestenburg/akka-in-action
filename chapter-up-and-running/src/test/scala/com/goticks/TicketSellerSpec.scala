@@ -51,7 +51,7 @@ class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
       val secondBatchSize = 5
       val nrBatches = 18
 
-      val batches = (1 to nrBatches * secondBatchSize)
+      val batches = (1 to nrBatches)
       batches.foreach(_ => ticketingActor ! Buy(secondBatchSize))
 
       val tickets = receiveN(nrBatches)
