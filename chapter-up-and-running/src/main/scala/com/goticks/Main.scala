@@ -1,15 +1,15 @@
 package com.goticks
 
 import scala.concurrent.Future
-
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import akka.stream.Materializer
+import com.typesafe.config.{Config, ConfigFactory}
 
-import com.typesafe.config.{ Config, ConfigFactory }
+import scala.util.{Failure, Success}
 
 object Main extends App
     with RequestTimeout {
@@ -23,18 +23,23 @@ object Main extends App
 
   val api = new RestApi(system, requestTimeout(config)).routes // the RestApi provides a Route
  
-  implicit val materializer = ActorMaterializer()  // bindAndHandle requires an implicit materializer
+  implicit val materializer = Materializer.matFromSystem  // bindAndHandle requires an implicit materializer
   val bindingFuture: Future[ServerBinding] =
     Http().bindAndHandle(api, host, port) //Starts the HTTP server
  
   val log =  Logging(system.eventStream, "go-ticks")
-  bindingFuture.map { serverBinding =>
-    log.info(s"RestApi bound to ${serverBinding.localAddress} ")
-  }.onFailure { 
-    case ex: Exception =>
-      log.error(ex, "Failed to bind to {}:{}!", host, port)
-      system.terminate()
-  }
+  bindingFuture.onComplete(eachBinding => {
+    eachBinding match {
+      case Success(serverBinding) => {
+        log.info(s"RestApi bound to ${serverBinding.localAddress} ")
+      }
+      case Failure(ex) =>
+        log.error(ex, "Failed to bind to {}:{}!", host, port)
+        // on failure, terminate the system gracefully
+        system.terminate()
+    }
+
+  })
 }
 
 trait RequestTimeout {
