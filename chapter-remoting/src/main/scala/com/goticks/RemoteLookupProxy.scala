@@ -7,7 +7,7 @@ import akka.actor.Identify
 import scala.concurrent.duration._
 
 class RemoteLookupProxy(path: String)
-  extends Actor with ActorLogging {
+  extends Actor with Stash with ActorLogging {
 
   context.setReceiveTimeout(3 seconds)
   sendIdentifyRequest()
@@ -25,6 +25,7 @@ class RemoteLookupProxy(path: String)
       log.info("switching to active state")
       context.become(active(actor))
       context.watch(actor)
+      unstashAll()
 
     case ActorIdentity(`path`, None) =>
       log.error(s"Remote actor with path $path is not available.")
@@ -33,7 +34,8 @@ class RemoteLookupProxy(path: String)
       sendIdentifyRequest()
 
     case msg: Any =>
-      log.error(s"Ignoring message $msg, remote actor is not ready yet.")
+      log.warning(s"Stashing message $msg, remote actor is not ready yet.")
+      stash()
   }
 
   def active(actor: ActorRef): Receive = {
