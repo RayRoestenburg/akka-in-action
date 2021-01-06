@@ -41,7 +41,7 @@ trait RestRoutes extends BoxOfficeApi
       pathEndOrSingleSlash {
         post {
           // POST /events/:event
-          entity(as[EventDescription]) { ed =>
+          entity(as[EventDescription]) { ed => {println(s"TRACE ---->  $ed")}
             onSuccess(createEvent(event, ed.tickets)) {
               case BoxOffice.EventCreated(event) => complete(Created, event)
               case BoxOffice.EventExists =>

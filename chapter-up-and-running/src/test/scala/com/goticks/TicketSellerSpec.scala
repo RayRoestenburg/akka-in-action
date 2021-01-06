@@ -62,6 +62,8 @@ class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
           val last = ix * secondBatchSize + firstBatchSize
           val first = ix * secondBatchSize + firstBatchSize - (secondBatchSize - 1)
           bought.map(_.id) must equal((first to last).toVector)
+
+        case (_, _) =>
       }
 
       ticketingActor ! Buy(1)
