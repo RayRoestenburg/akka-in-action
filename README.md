@@ -1,6 +1,6 @@
 akka-in-action
 ==============
 
-[![Build Status](https://travis-ci.org/VitalyOlegovic/akka-in-action.svg?branch=master)](https://travis-ci.org/RayRoestenburg/akka-in-action)
+[![Build Status](https://travis-ci.org/RayRoestenburg/akka-in-action.svg?branch=master)](https://travis-ci.org/RayRoestenburg/akka-in-action)
 
 Accompanying source code for [Akka in Action](https://www.manning.com/books/akka-in-action).
