@@ -21,20 +21,21 @@ object Main extends App
   implicit val system = ActorSystem()  // ActorMaterializer requires an implicit ActorSystem
   implicit val ec = system.dispatcher  // bindingFuture.map requires an implicit ExecutionContext
 
+
   val api = new RestApi(system, requestTimeout(config)).routes // the RestApi provides a Route
- 
-  implicit val materializer = ActorMaterializer()  // bindAndHandle requires an implicit materializer
+
   val bindingFuture: Future[ServerBinding] =
-    Http().bindAndHandle(api, host, port) //Starts the HTTP server
+    Http().newServerAt(host, port).bind(api) // starts the HTTP server
+    //Http().bindAndHandle(api, host, port) //Starts the HTTP server
  
   val log =  Logging(system.eventStream, "go-ticks")
   bindingFuture.map { serverBinding =>
     log.info(s"RestApi bound to ${serverBinding.localAddress} ")
-  }.onFailure { 
+  }.recoverWith({
     case ex: Exception =>
       log.error(ex, "Failed to bind to {}:{}!", host, port)
       system.terminate()
-  }
+  })
 }
 
 trait RequestTimeout {

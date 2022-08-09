@@ -4,11 +4,12 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.testkit.{ DefaultTimeout, ImplicitSender, TestKit }
 import com.goticks.BoxOffice._
 import com.goticks.TicketSeller._
-import org.scalatest.{ MustMatchers, WordSpecLike }
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 class BoxOfficeSpec extends TestKit(ActorSystem("testBoxOffice"))
-    with WordSpecLike
-    with MustMatchers
+    with AnyWordSpecLike
+    with Matchers
     with ImplicitSender
     with DefaultTimeout
     with StopSystemAfterAll {
