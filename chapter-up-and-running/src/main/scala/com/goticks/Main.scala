@@ -26,7 +26,7 @@ object Main extends App
 
   val bindingFuture: Future[ServerBinding] =
     Http().newServerAt(host, port).bind(api) // starts the HTTP server
-    //Http().bindAndHandle(api, host, port) //Starts the HTTP server
+  
  
   val log =  Logging(system.eventStream, "go-ticks")
   bindingFuture.map { serverBinding =>
