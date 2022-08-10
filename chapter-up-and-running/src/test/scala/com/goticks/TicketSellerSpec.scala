@@ -2,11 +2,12 @@ package com.goticks
 
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import org.scalatest.{MustMatchers, WordSpecLike}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 
 class TickerSellerSpec extends TestKit(ActorSystem("testTickets"))
-                         with WordSpecLike
-                         with MustMatchers
+                         with Matchers
+                         with AnyWordSpecLike
                          with ImplicitSender
                          with StopSystemAfterAll {
   "The TicketSeller" must {
