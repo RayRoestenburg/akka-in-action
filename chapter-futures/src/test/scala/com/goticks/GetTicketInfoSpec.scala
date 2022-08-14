@@ -1,10 +1,10 @@
 package com.goticks
 
-import org.scalatest.MustMatchers
-import org.scalatest.WordSpec
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
 import scala.concurrent.{Future, Await}
 
-class GetTicketInfoSpec extends WordSpec with MustMatchers {
+class GetTicketInfoSpec extends AnyWordSpecLike with Matchers {
 
   object TicketInfoService extends TicketInfoService with MockWebServiceCalls
   import TicketInfoService._
@@ -69,7 +69,7 @@ trait MockWebServiceCalls extends WebServiceCalls {
 
   def callArtistCalendarService(artist: Artist, nearLocation: Location): Future[Event] = {
     Future {
-      Event(artist.name,Location(1d,1d), DateTime.now)
+      Event(artist.name,Location(1d,1d), DateTime.now())
     }
   }
 }
