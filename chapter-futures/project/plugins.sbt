@@ -1,1 +1,1 @@
-resolvers += Classpaths.typesafeResolver
+resolvers += Classpaths.typesafeReleases

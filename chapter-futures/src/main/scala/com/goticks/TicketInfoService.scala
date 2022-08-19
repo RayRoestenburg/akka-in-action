@@ -40,7 +40,7 @@ trait TicketInfoService extends WebServiceCalls {
 
       val ticketInfos = Seq(infoWithTravelAdvice, infoWithWeather)
 
-      val infoWithTravelAndWeather: Future[TicketInfo] = Future.fold(ticketInfos)(info) { (acc, elem) =>
+      val infoWithTravelAndWeather: Future[TicketInfo] = Future.foldLeft(ticketInfos)(info) { (acc, elem) =>
         val (travelAdvice, weather) = (elem.travelAdvice, elem.weather)
 
         acc.copy(travelAdvice = travelAdvice.orElse(acc.travelAdvice),
